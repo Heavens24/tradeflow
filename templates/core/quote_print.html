@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ quote.quote_number }} | TradeFlow
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef1f5;
+            color: #111827;
+        }
+
+        .toolbar {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #111827;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .document {
+            width: 100%;
+            max-width: 900px;
+            min-height: 1120px;
+            margin: auto;
+            padding: 55px;
+            background: white;
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 45px;
+        }
+
+        .title {
+            font-size: 34px;
+            margin: 0 0 8px;
+            letter-spacing: 1px;
+        }
+
+        .document-number {
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .business,
+        .customer-block {
+            line-height: 1.6;
+        }
+
+        .business {
+            margin-top: 25px;
+        }
+
+        .customer-block {
+            min-width: 280px;
+        }
+
+        .meta {
+            margin-top: 20px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 25px;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            text-align: left;
+            background: #f9fafb;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #6b7280;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .totals {
+            width: 350px;
+            max-width: 100%;
+            margin-left: auto;
+            margin-top: 25px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .grand-total {
+            font-size: 20px;
+            font-weight: bold;
+            border-top: 2px solid #111827;
+            margin-top: 8px;
+            padding-top: 14px;
+        }
+
+        .section {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        @media print {
+
+            @page {
+                size: A4;
+                margin: 14mm;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .toolbar {
+                display: none;
+            }
+
+            .document {
+                max-width: none;
+                min-height: auto;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .document {
+                padding: 25px;
+            }
+
+            .header {
+                flex-direction: column;
+            }
+
+            .customer-block {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="toolbar">
+
+    <a
+        href="{% url 'core:quote_detail' quote.id %}"
+        class="button secondary"
+    >
+        ← Back to Quote
+    </a>
+
+    <button
+        type="button"
+        class="button"
+        onclick="window.print()"
+    >
+        Print / Save PDF
+    </button>
+
+</div>
+
+
+<div class="document">
+
+    <div class="header">
+
+        <div>
+
+            <h1 class="title">
+                QUOTATION
+            </h1>
+
+            <div class="document-number">
+                {{ quote.quote_number }}
+            </div>
+
+            <div class="business">
+
+                <strong>
+                    {{ business.name }}
+                </strong>
+
+                {% if business.phone %}
+                    <br>
+                    {{ business.phone }}
+                {% endif %}
+
+                {% if business.email %}
+                    <br>
+                    {{ business.email }}
+                {% endif %}
+
+                {% if business.address %}
+                    <br>
+                    {{ business.address }}
+                {% endif %}
+
+                {% if business.city %}
+                    <br>
+                    {{ business.city }}
+                {% endif %}
+
+                {% if business.registration_number %}
+                    <br>
+                    CIPC:
+                    {{ business.registration_number }}
+                {% endif %}
+
+                {% if business.vat_number %}
+                    <br>
+                    VAT No:
+                    {{ business.vat_number }}
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="customer-block">
+
+            <h3>
+                Customer
+            </h3>
+
+            <strong>
+                {{ quote.customer.name }}
+            </strong>
+
+            {% if quote.customer.phone %}
+                <br>
+                {{ quote.customer.phone }}
+            {% endif %}
+
+            {% if quote.customer.email %}
+                <br>
+                {{ quote.customer.email }}
+            {% endif %}
+
+            {% if quote.customer.address %}
+                <br>
+                {{ quote.customer.address }}
+            {% endif %}
+
+            <div class="meta">
+
+                <div class="meta-row">
+                    <strong>Issue Date</strong>
+                    <span>{{ quote.issue_date }}</span>
+                </div>
+
+                <div class="meta-row">
+                    <strong>Expiry Date</strong>
+                    <span>
+                        {{ quote.expiry_date|default:"—" }}
+                    </span>
+                </div>
+
+                <div class="meta-row">
+                    <strong>Status</strong>
+                    <span>
+                        {{ quote.get_status_display }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Description</th>
+                <th class="right">Qty</th>
+                <th class="right">Unit Price</th>
+                <th class="right">Amount</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for item in quote.items.all %}
+
+                <tr>
+                    <td>
+                        {{ item.description }}
+                    </td>
+
+                    <td class="right">
+                        {{ item.quantity|floatformat:2 }}
+                    </td>
+
+                    <td class="right">
+                        R{{ item.unit_price|floatformat:2 }}
+                    </td>
+
+                    <td class="right">
+                        R{{ item.line_total|floatformat:2 }}
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+
+    <div class="totals">
+
+        <div class="total-row">
+            <span>Subtotal</span>
+
+            <strong>
+                R{{ quote.subtotal|floatformat:2 }}
+            </strong>
+        </div>
+
+        {% if quote.apply_vat %}
+
+            <div class="total-row">
+                <span>VAT (15%)</span>
+
+                <strong>
+                    R{{ quote.vat_amount|floatformat:2 }}
+                </strong>
+            </div>
+
+        {% endif %}
+
+        <div class="total-row grand-total">
+
+            <span>Total</span>
+
+            <span>
+                R{{ quote.total|floatformat:2 }}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    {% if quote.notes %}
+
+        <div class="section">
+
+            <h3>
+                Quote Notes
+            </h3>
+
+            <p>
+                {{ quote.notes|linebreaksbr }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    {% if business.default_quote_terms %}
+
+        <div class="section">
+
+            <h3>
+                Quotation Terms
+            </h3>
+
+            <p>
+                {{ business.default_quote_terms|linebreaksbr }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="footer">
+
+        {{ business.name }}
+
+        {% if business.phone %}
+            · {{ business.phone }}
+        {% endif %}
+
+        {% if business.email %}
+            · {{ business.email }}
+        {% endif %}
+
+        <br><br>
+
+        Generated with TradeFlow
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

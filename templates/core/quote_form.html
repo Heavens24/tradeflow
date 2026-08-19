@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ page_title }} | TradeFlow</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .page {
+            padding: 35px 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #374151;
+            text-decoration: none;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow:
+                0 3px 15px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        h1,
+        h2 {
+            margin-top: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 2fr 0.7fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .delete-box {
+            padding-bottom: 12px;
+        }
+
+        .error {
+            color: #b91c1c;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .button {
+            border: 0;
+            padding: 13px 20px;
+            border-radius: 8px;
+            background: #111827;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .button.ai {
+            background: #4f46e5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* =============================================
+           AI ASSISTANT
+           ============================================= */
+
+        .ai-card {
+            border: 1px solid #c7d2fe;
+            background: #eef2ff;
+        }
+
+        .ai-intro {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .ai-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .ai-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .ai-status {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .ai-status.show {
+            display: block;
+        }
+
+        .ai-status.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .ai-status.success {
+            background: #ecfdf5;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .ai-status.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .ai-warning {
+            margin-top: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 750px) {
+
+            .grid,
+            .item {
+                grid-template-columns: 1fr;
+            }
+
+            .actions,
+            .ai-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        <a
+            href="{% url 'core:quote_list' %}"
+            class="back"
+        >
+            ← Back to Quotes
+        </a>
+
+
+        <form
+            method="POST"
+            id="tradeflow-document-form"
+        >
+
+            {% csrf_token %}
+
+
+            <!-- =========================================
+                 QUOTE DETAILS
+                 ========================================= -->
+
+            <div class="card">
+
+                <h1>
+                    {{ page_title }}
+                </h1>
+
+
+                {% if form.non_field_errors %}
+
+                    {% for error in form.non_field_errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+
+                <div class="grid">
+
+                    <div class="field">
+
+                        <label>
+                            Customer
+                        </label>
+
+                        {{ form.customer }}
+
+                        {% for error in form.customer.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Status
+                        </label>
+
+                        {{ form.status }}
+
+                        {% for error in form.status.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Issue Date
+                        </label>
+
+                        {{ form.issue_date }}
+
+                        {% for error in form.issue_date.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Expiry Date
+                        </label>
+
+                        {{ form.expiry_date }}
+
+                        {% for error in form.expiry_date.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="checkbox-row">
+
+                    {{ form.apply_vat }}
+
+                    <label
+                        for="{{ form.apply_vat.id_for_label }}"
+                        style="margin: 0;"
+                    >
+                        Apply VAT at 15%
+                    </label>
+
+                </div>
+
+
+                {% for error in form.apply_vat.errors %}
+
+                    <div class="error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+
+                <div class="field">
+
+                    <label>
+                        Notes
+                    </label>
+
+                    {{ form.notes }}
+
+                    {% for error in form.notes.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 SIMPLE AI QUOTE ASSISTANT
+                 ========================================= -->
+
+            <div class="card ai-card">
+
+                <h2>
+                    Simple AI Quote Assistant
+                </h2>
+
+                <p class="ai-intro">
+                    Describe the work in plain language.
+                    TradeFlow will suggest up to four quote
+                    items, quantities, prices, VAT and notes.
+                    Nothing is saved until you review the
+                    normal quote form and click Create Quote
+                    or Save Changes.
+                </p>
+
+
+                <div class="field">
+
+                    <label for="ai-work-description">
+                        Describe the work
+                    </label>
+
+                    <textarea
+                        id="ai-work-description"
+                        class="form-control ai-textarea"
+                        placeholder="Example: Replace a 20A circuit breaker, include a call-out fee, 2 hours labour and test the circuit."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="ai-actions">
+
+                    <button
+                        type="button"
+                        class="button ai"
+                        id="ai-generate-button"
+                    >
+                        Generate AI Suggestion
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="ai-status"
+                    class="ai-status"
+                ></div>
+
+
+                <div class="ai-warning">
+
+                    AI prices are suggestions only.
+
+                    Review descriptions, quantities,
+                    prices, VAT and notes before saving
+                    the quotation.
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 QUOTE ITEMS
+                 ========================================= -->
+
+            <div class="card">
+
+                <h2>
+                    Quote Items
+                </h2>
+
+                <p>
+                    Add labour, materials, call-out fees
+                    or other services.
+                </p>
+
+
+                {{ formset.management_form }}
+
+
+                {% if formset.non_form_errors %}
+
+                    {% for error in formset.non_form_errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+
+                <div id="document-items">
+
+                    {% for item_form in formset %}
+
+                        <div class="item">
+
+                            {{ item_form.id }}
+
+
+                            <div>
+
+                                <label>
+                                    Description
+                                </label>
+
+                                {{ item_form.description }}
+
+                                {% for error in item_form.description.errors %}
+
+                                    <div class="error">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            <div>
+
+                                <label>
+                                    Quantity
+                                </label>
+
+                                {{ item_form.quantity }}
+
+                                {% for error in item_form.quantity.errors %}
+
+                                    <div class="error">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            <div>
+
+                                <label>
+                                    Unit Price (R)
+                                </label>
+
+                                {{ item_form.unit_price }}
+
+                                {% for error in item_form.unit_price.errors %}
+
+                                    <div class="error">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            {% if item_form.instance.pk %}
+
+                                <div class="delete-box">
+
+                                    <label>
+                                        Delete
+                                    </label>
+
+                                    {{ item_form.DELETE }}
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 ACTIONS
+                 ========================================= -->
+
+            <div class="actions">
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    {{ button_text }}
+                </button>
+
+                <a
+                    href="{% url 'core:quote_list' %}"
+                    class="button secondary"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================
+     AI ASSISTANT JAVASCRIPT
+     ============================================= -->
+
+<script>
+
+(function () {
+
+    const generateButton =
+        document.getElementById(
+            "ai-generate-button"
+        );
+
+    const workDescription =
+        document.getElementById(
+            "ai-work-description"
+        );
+
+    const statusBox =
+        document.getElementById(
+            "ai-status"
+        );
+
+    const form =
+        document.getElementById(
+            "tradeflow-document-form"
+        );
+
+
+    if (
+        !generateButton
+        || !workDescription
+        || !statusBox
+        || !form
+    ) {
+        return;
+    }
+
+
+    function showStatus(message, type) {
+
+        statusBox.textContent = message;
+
+        statusBox.className =
+            "ai-status show " + type;
+
+    }
+
+
+    function getCsrfToken() {
+
+        const input =
+            form.querySelector(
+                "input[name='csrfmiddlewaretoken']"
+            );
+
+        return input
+            ? input.value
+            : "";
+
+    }
+
+
+    function getItemRows() {
+
+        return Array.from(
+            document.querySelectorAll(
+                "#document-items .item"
+            )
+        );
+
+    }
+
+
+    function rowHasExistingData(row) {
+
+        const description =
+            row.querySelector(
+                "input[id$='-description']"
+            );
+
+        const quantity =
+            row.querySelector(
+                "input[id$='-quantity']"
+            );
+
+        const unitPrice =
+            row.querySelector(
+                "input[id$='-unit_price']"
+            );
+
+
+        return Boolean(
+
+            (
+                description
+                && description.value.trim()
+            )
+
+            ||
+
+            (
+                quantity
+                && quantity.value
+                && quantity.value !== "1"
+                && quantity.value !== "1.00"
+            )
+
+            ||
+
+            (
+                unitPrice
+                && unitPrice.value
+                && unitPrice.value !== "0"
+                && unitPrice.value !== "0.00"
+            )
+
+        );
+
+    }
+
+
+    function populateSuggestion(suggestion) {
+
+        const rows =
+            getItemRows();
+
+
+        if (!rows.length) {
+
+            throw new Error(
+                "No quote item rows were found."
+            );
+
+        }
+
+
+        const hasExistingData =
+            rows.some(
+                rowHasExistingData
+            );
+
+
+        if (
+            hasExistingData
+            &&
+            !window.confirm(
+                "This will replace values in the visible quote item rows with the AI suggestion. Continue?"
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        rows.forEach(
+            function (row, index) {
+
+                const description =
+                    row.querySelector(
+                        "input[id$='-description']"
+                    );
+
+                const quantity =
+                    row.querySelector(
+                        "input[id$='-quantity']"
+                    );
+
+                const unitPrice =
+                    row.querySelector(
+                        "input[id$='-unit_price']"
+                    );
+
+                const deleteBox =
+                    row.querySelector(
+                        "input[id$='-DELETE']"
+                    );
+
+
+                const item =
+                    suggestion.items[index];
+
+
+                if (item) {
+
+                    if (description) {
+
+                        description.value =
+                            item.description;
+
+                    }
+
+
+                    if (quantity) {
+
+                        quantity.value =
+                            item.quantity;
+
+                    }
+
+
+                    if (unitPrice) {
+
+                        unitPrice.value =
+                            Number(
+                                item.unit_price
+                            ).toFixed(2);
+
+                    }
+
+
+                    if (deleteBox) {
+
+                        deleteBox.checked =
+                            false;
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        const vatInput =
+            document.getElementById(
+                "{{ form.apply_vat.id_for_label }}"
+            );
+
+
+        if (vatInput) {
+
+            vatInput.checked =
+                Boolean(
+                    suggestion.apply_vat
+                );
+
+        }
+
+
+        const notesInput =
+            document.getElementById(
+                "{{ form.notes.id_for_label }}"
+            );
+
+
+        if (
+            notesInput
+            && suggestion.notes
+        ) {
+
+            notesInput.value =
+                suggestion.notes;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    generateButton.addEventListener(
+        "click",
+
+        async function () {
+
+            const description =
+                workDescription.value.trim();
+
+
+            if (!description) {
+
+                showStatus(
+                    "Describe the work first.",
+                    "error"
+                );
+
+                workDescription.focus();
+
+                return;
+
+            }
+
+
+            generateButton.disabled =
+                true;
+
+
+            generateButton.textContent =
+                "Generating...";
+
+
+            showStatus(
+                "TradeFlow AI is preparing a draft. Nothing will be saved automatically.",
+                "info"
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        "{% url 'core:ai_document_assistant' %}",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "X-CSRFToken":
+                                    getCsrfToken()
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    {
+
+                                        document_type:
+                                            "quote",
+
+                                        description:
+                                            description
+
+                                    }
+                                )
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok
+                    || !data.success
+                ) {
+
+                    throw new Error(
+                        data.error
+                        ||
+                        "The AI assistant could not generate a suggestion."
+                    );
+
+                }
+
+
+                const populated =
+                    populateSuggestion(
+                        data.suggestion
+                    );
+
+
+                if (populated) {
+
+                    showStatus(
+
+                        data.notice
+                        ||
+                        "AI suggestion added. Review everything before saving.",
+
+                        "success"
+
+                    );
+
+                } else {
+
+                    showStatus(
+                        "AI suggestion was not applied.",
+                        "info"
+                    );
+
+                }
+
+            }
+
+            catch (error) {
+
+                showStatus(
+
+                    error.message
+                    ||
+                    "Something went wrong.",
+
+                    "error"
+
+                );
+
+            }
+
+            finally {
+
+                generateButton.disabled =
+                    false;
+
+
+                generateButton.textContent =
+                    "Generate AI Suggestion";
+
+            }
+
+        }
+
+    );
+
+})();
+
+</script>
+
+</body>
+
+</html>

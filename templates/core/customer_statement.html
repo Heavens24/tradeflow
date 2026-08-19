@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ customer.name }} Statement | TradeFlow
+    </title>
+
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+           ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+
+        .page {
+            padding: 30px 20px;
+        }
+
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+
+        /* =====================================================
+           TOOLBAR
+           ===================================================== */
+
+        .toolbar {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .toolbar-left,
+        .toolbar-right {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .button {
+            display: inline-block;
+
+            padding: 11px 16px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #111827;
+            color: white;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+
+        .button.print {
+            background: #2563eb;
+            color: white;
+        }
+
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
+        .header-card {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 28px;
+
+            margin-bottom: 22px;
+
+            box-shadow:
+                0 3px 14px
+                rgba(0, 0, 0, 0.05);
+        }
+
+
+        .header-card h1 {
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+
+        .header-card h2 {
+            margin-bottom: 8px;
+        }
+
+
+        .muted {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           DATE FILTER
+           ===================================================== */
+
+        .filter-card {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 22px;
+
+            margin-bottom: 22px;
+
+            box-shadow:
+                0 2px 10px
+                rgba(0, 0, 0, 0.05);
+        }
+
+
+        .filter-header {
+            margin-bottom: 18px;
+        }
+
+
+        .filter-header h2 {
+            margin: 0 0 5px;
+
+            font-size: 18px;
+        }
+
+
+        .filter-header p {
+            margin: 0;
+
+            color: #6b7280;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+
+        .filter-form {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(180px, 1fr)
+                )
+                auto;
+
+            gap: 14px;
+
+            align-items: end;
+        }
+
+
+        .filter-field label {
+            display: block;
+
+            margin-bottom: 6px;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            color: #374151;
+        }
+
+
+        .filter-field input {
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 8px;
+
+            background: white;
+
+            color: #111827;
+
+            font-family: inherit;
+            font-size: 14px;
+
+            outline: none;
+        }
+
+
+        .filter-field input:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.08);
+        }
+
+
+        .filter-actions {
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .filter-message {
+            margin-top: 16px;
+
+            padding: 12px 14px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+        }
+
+
+        .filter-message.error {
+            background: #fef2f2;
+
+            border:
+                1px solid
+                #fecaca;
+
+            color: #991b1b;
+        }
+
+
+        .filter-message.active {
+            background: #eff6ff;
+
+            border:
+                1px solid
+                #bfdbfe;
+
+            color: #1e40af;
+        }
+
+
+        .period-label {
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           SUMMARY CARDS
+           ===================================================== */
+
+        .cards {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+                );
+
+            gap: 16px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .card {
+            background: white;
+
+            border-radius: 12px;
+
+            padding: 20px;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0, 0, 0, 0.05);
+        }
+
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+
+            font-size: 13px;
+
+            color: #6b7280;
+        }
+
+
+        .number {
+            font-size: 26px;
+
+            font-weight: bold;
+        }
+
+
+        .card-description {
+            margin-top: 7px;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            line-height: 1.4;
+        }
+
+
+        .overdue {
+            color: #b91c1c;
+        }
+
+
+        /* =====================================================
+           SECTIONS
+           ===================================================== */
+
+        .section {
+            background: white;
+
+            border-radius: 14px;
+
+            margin-bottom: 22px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 2px 10px
+                rgba(0, 0, 0, 0.05);
+        }
+
+
+        .section-header {
+            padding: 18px 20px;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+        }
+
+
+        .section-header h2 {
+            margin: 0;
+
+            font-size: 18px;
+        }
+
+
+        .section-header p {
+            margin:
+                5px 0 0;
+
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           TABLES
+           ===================================================== */
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+        }
+
+
+        th,
+        td {
+            padding: 13px 16px;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+
+            text-align: left;
+
+            white-space: nowrap;
+        }
+
+
+        th {
+            background: #f9fafb;
+
+            font-size: 12px;
+
+            color: #6b7280;
+
+            text-transform: uppercase;
+        }
+
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+
+        .right {
+            text-align: right;
+        }
+
+
+        /* =====================================================
+           STATUS
+           ===================================================== */
+
+        .status {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+
+        .status.paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+
+        .status.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+
+        .status.part_paid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+
+        .status.draft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+
+        .status.sent {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+
+        .status.cancelled {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+
+        /* =====================================================
+           EMPTY
+           ===================================================== */
+
+        .empty {
+            padding: 28px;
+
+            color: #6b7280;
+
+            text-align: center;
+        }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (max-width: 800px) {
+
+            .filter-form {
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
+
+            .filter-actions {
+                grid-column:
+                    1 / -1;
+            }
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            .toolbar {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+
+            .toolbar-left,
+            .toolbar-right {
+                width: 100%;
+            }
+
+
+            .button {
+                text-align: center;
+            }
+
+
+            .filter-form {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .filter-actions {
+                grid-column: auto;
+            }
+
+
+            .filter-actions .button {
+                flex: 1;
+            }
+
+
+            .cards {
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+    <div class="container">
+
+
+        <!-- ==================================================
+             TOOLBAR
+             ================================================== -->
+
+        <div class="toolbar">
+
+
+            <div class="toolbar-left">
+
+                <a
+                    href="{% url 'core:customer_list' %}"
+                    class="button secondary"
+                >
+                    ← Customers
+                </a>
+
+            </div>
+
+
+            <div class="toolbar-right">
+
+
+                <!-- =================================================
+                     PRINT / PDF
+
+                     IMPORTANT:
+                     Keep the generated URL and query string
+                     on the SAME LINE inside href.
+
+                     This prevents spaces from becoming %20
+                     characters inside the URL.
+                     ================================================= -->
+
+                {% if has_date_filter %}
+
+                    <a
+                        href="{% url 'core:customer_statement_print' customer.id %}?from_date={{ from_date }}&to_date={{ to_date }}"
+                        class="button print"
+                    >
+                        Print / PDF
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'core:customer_statement_print' customer.id %}"
+                        class="button print"
+                    >
+                        Print / PDF
+                    </a>
+
+                {% endif %}
+
+
+                <a
+                    href="{% url 'core:customer_edit' customer.id %}"
+                    class="button"
+                >
+                    Edit Customer
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             CUSTOMER HEADER
+             ================================================== -->
+
+        <div class="header-card">
+
+
+            <h1>
+                Customer Statement
+            </h1>
+
+
+            <h2>
+                {{ customer.name }}
+            </h2>
+
+
+            <div class="muted">
+
+
+                {% if customer.phone %}
+
+                    {{ customer.phone }}
+
+                {% endif %}
+
+
+                {% if customer.email %}
+
+                    {% if customer.phone %}
+                        ·
+                    {% endif %}
+
+                    {{ customer.email }}
+
+                {% endif %}
+
+
+                {% if customer.address %}
+
+                    <br>
+
+                    {{ customer.address }}
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ==================================================
+             STATEMENT PERIOD FILTER
+             ================================================== -->
+
+        <section class="filter-card">
+
+
+            <div class="filter-header">
+
+                <h2>
+                    Statement Period
+                </h2>
+
+                <p>
+                    Filter this customer's quotes,
+                    jobs, invoices and payments by date.
+                </p>
+
+            </div>
+
+
+            <form
+                method="GET"
+                action="{% url 'core:customer_statement' customer.id %}"
+                class="filter-form"
+            >
+
+
+                <!-- FROM DATE -->
+
+                <div class="filter-field">
+
+                    <label for="from_date">
+                        From Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="from_date"
+                        name="from_date"
+                        value="{{ from_date }}"
+                    >
+
+                </div>
+
+
+                <!-- TO DATE -->
+
+                <div class="filter-field">
+
+                    <label for="to_date">
+                        To Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="to_date"
+                        name="to_date"
+                        value="{{ to_date }}"
+                    >
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="button"
+                    >
+                        Apply Filter
+                    </button>
+
+
+                    {% if has_date_filter %}
+
+                        <a
+                            href="{% url 'core:customer_statement' customer.id %}"
+                            class="button secondary"
+                        >
+                            Clear
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+
+            </form>
+
+
+            <!-- ==============================================
+                 VALIDATION ERROR
+                 ============================================== -->
+
+            {% if date_filter_error %}
+
+                <div class="filter-message error">
+
+                    {{ date_filter_error }}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- ==============================================
+                 CURRENT PERIOD
+                 ============================================== -->
+
+            {% if has_date_filter and not date_filter_error %}
+
+                <div class="filter-message active">
+
+                    <span class="period-label">
+                        Showing statement activity:
+                    </span>
+
+
+                    {% if from_date and to_date %}
+
+                        {{ from_date }}
+                        →
+                        {{ to_date }}
+
+
+                    {% elif from_date %}
+
+                        From
+                        {{ from_date }}
+                        onward
+
+
+                    {% elif to_date %}
+
+                        Up to
+                        {{ to_date }}
+
+                    {% endif %}
+
+
+                </div>
+
+            {% endif %}
+
+
+        </section>
+
+
+        <!-- ==================================================
+             SUMMARY CARDS
+             ================================================== -->
+
+        <section class="cards">
+
+
+            <div class="card">
+
+                <h3>
+
+                    {% if has_date_filter %}
+
+                        Quoted in Period
+
+                    {% else %}
+
+                        Total Quoted
+
+                    {% endif %}
+
+                </h3>
+
+
+                <div class="number">
+
+                    R{{ total_quoted|floatformat:2 }}
+
+                </div>
+
+
+                {% if has_date_filter %}
+
+                    <div class="card-description">
+                        Quotes issued in selected period
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+
+                    {% if has_date_filter %}
+
+                        Invoiced in Period
+
+                    {% else %}
+
+                        Total Invoiced
+
+                    {% endif %}
+
+                </h3>
+
+
+                <div class="number">
+
+                    R{{ total_invoiced|floatformat:2 }}
+
+                </div>
+
+
+                {% if has_date_filter %}
+
+                    <div class="card-description">
+                        Invoices issued in selected period
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+
+                    {% if has_date_filter %}
+
+                        Paid in Period
+
+                    {% else %}
+
+                        Total Paid
+
+                    {% endif %}
+
+                </h3>
+
+
+                <div class="number">
+
+                    R{{ total_paid|floatformat:2 }}
+
+                </div>
+
+
+                {% if has_date_filter %}
+
+                    <div class="card-description">
+                        Payments received in selected period
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Current Balance
+                </h3>
+
+
+                <div class="number">
+
+                    R{{ current_balance|floatformat:2 }}
+
+                </div>
+
+
+                {% if has_date_filter %}
+
+                    <div class="card-description">
+                        Current account balance
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Overdue Balance
+                </h3>
+
+
+                <div class="number overdue">
+
+                    R{{ overdue_balance|floatformat:2 }}
+
+                </div>
+
+
+                {% if has_date_filter %}
+
+                    <div class="card-description">
+                        Current overdue balance
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ==================================================
+             INVOICES
+             ================================================== -->
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <h2>
+
+                    {% if has_date_filter %}
+
+                        Invoices in Period
+
+                    {% else %}
+
+                        Invoices
+
+                    {% endif %}
+
+                </h2>
+
+
+                {% if has_date_filter %}
+
+                    <p>
+                        Filtered using invoice issue date.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if invoices %}
+
+
+                <div class="table-wrap">
+
+
+                    <table>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Invoice
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Issue
+                                </th>
+
+                                <th>
+                                    Due
+                                </th>
+
+                                <th class="right">
+                                    Total
+                                </th>
+
+                                <th class="right">
+                                    Paid
+                                </th>
+
+                                <th class="right">
+                                    Balance
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for invoice in invoices %}
+
+
+                                <tr>
+
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'core:invoice_detail' invoice.id %}"
+                                        >
+                                            {{ invoice.invoice_number }}
+                                        </a>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span
+                                            class="status {{ invoice.status }}"
+                                        >
+                                            {{ invoice.get_status_display }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ invoice.issue_date }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ invoice.due_date|default:"—" }}
+
+                                    </td>
+
+
+                                    <td class="right">
+
+                                        R{{ invoice.total|floatformat:2 }}
+
+                                    </td>
+
+
+                                    <td class="right">
+
+                                        R{{ invoice.amount_paid|floatformat:2 }}
+
+                                    </td>
+
+
+                                    <td class="right">
+
+                                        R{{ invoice.balance_due|floatformat:2 }}
+
+                                    </td>
+
+
+                                </tr>
+
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="empty">
+
+
+                    {% if has_date_filter %}
+
+                        No invoices were issued
+                        during the selected period.
+
+                    {% else %}
+
+                        No invoices for this customer.
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+        <!-- ==================================================
+             PAYMENTS
+             ================================================== -->
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <h2>
+
+                    {% if has_date_filter %}
+
+                        Payments in Period
+
+                    {% else %}
+
+                        Payments
+
+                    {% endif %}
+
+                </h2>
+
+
+                {% if has_date_filter %}
+
+                    <p>
+                        Filtered using payment date.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if payments %}
+
+
+                <div class="table-wrap">
+
+
+                    <table>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Invoice
+                                </th>
+
+                                <th>
+                                    Method
+                                </th>
+
+                                <th>
+                                    Reference
+                                </th>
+
+                                <th class="right">
+                                    Amount
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for payment in payments %}
+
+
+                                <tr>
+
+
+                                    <td>
+
+                                        {{ payment.payment_date }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'core:invoice_detail' payment.invoice.id %}"
+                                        >
+                                            {{ payment.invoice.invoice_number }}
+                                        </a>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ payment.get_method_display }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ payment.reference|default:"—" }}
+
+                                    </td>
+
+
+                                    <td class="right">
+
+                                        R{{ payment.amount|floatformat:2 }}
+
+                                    </td>
+
+
+                                </tr>
+
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="empty">
+
+
+                    {% if has_date_filter %}
+
+                        No payments were received
+                        during the selected period.
+
+                    {% else %}
+
+                        No payments recorded for this customer.
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+        <!-- ==================================================
+             QUOTES
+             ================================================== -->
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <h2>
+
+                    {% if has_date_filter %}
+
+                        Quotes in Period
+
+                    {% else %}
+
+                        Quotes
+
+                    {% endif %}
+
+                </h2>
+
+
+                {% if has_date_filter %}
+
+                    <p>
+                        Filtered using quote issue date.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if quotes %}
+
+
+                <div class="table-wrap">
+
+
+                    <table>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Quote
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Issue
+                                </th>
+
+                                <th>
+                                    Expiry
+                                </th>
+
+                                <th class="right">
+                                    Total
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for quote in quotes %}
+
+
+                                <tr>
+
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'core:quote_detail' quote.id %}"
+                                        >
+                                            {{ quote.quote_number }}
+                                        </a>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ quote.get_status_display }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ quote.issue_date }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ quote.expiry_date|default:"—" }}
+
+                                    </td>
+
+
+                                    <td class="right">
+
+                                        R{{ quote.total|floatformat:2 }}
+
+                                    </td>
+
+
+                                </tr>
+
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="empty">
+
+
+                    {% if has_date_filter %}
+
+                        No quotations were issued
+                        during the selected period.
+
+                    {% else %}
+
+                        No quotations for this customer.
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+        <!-- ==================================================
+             JOBS
+             ================================================== -->
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <h2>
+
+                    {% if has_date_filter %}
+
+                        Jobs in Period
+
+                    {% else %}
+
+                        Jobs
+
+                    {% endif %}
+
+                </h2>
+
+
+                {% if has_date_filter %}
+
+                    <p>
+                        Filtered using job start date.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if jobs %}
+
+
+                <div class="table-wrap">
+
+
+                    <table>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Job
+                                </th>
+
+                                <th>
+                                    Title
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Start
+                                </th>
+
+                                <th>
+                                    Due
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for job in jobs %}
+
+
+                                <tr>
+
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'core:job_detail' job.id %}"
+                                        >
+                                            {{ job.job_number }}
+                                        </a>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ job.title }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ job.get_status_display }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ job.start_date|default:"—" }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ job.due_date|default:"—" }}
+
+                                    </td>
+
+
+                                </tr>
+
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="empty">
+
+
+                    {% if has_date_filter %}
+
+                        No jobs started
+                        during the selected period.
+
+                    {% else %}
+
+                        No jobs for this customer.
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>

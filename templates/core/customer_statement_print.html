@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ customer.name }} Statement | TradeFlow
+    </title>
+
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+           ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #eef1f5;
+            color: #111827;
+
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           SCREEN TOOLBAR
+           ===================================================== */
+
+        .toolbar {
+            width: 100%;
+            max-width: 900px;
+
+            margin: 0 auto 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .button {
+            display: inline-block;
+
+            padding: 11px 18px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #111827;
+            color: white;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+
+        /* =====================================================
+           DOCUMENT
+           ===================================================== */
+
+        .document {
+            width: 100%;
+            max-width: 900px;
+
+            min-height: 1120px;
+
+            margin: 0 auto;
+
+            padding: 48px 50px;
+
+            background: white;
+
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.08);
+        }
+
+
+        /* =====================================================
+           TOP HEADER
+           ===================================================== */
+
+        .document-top {
+            width: 100%;
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: flex-start;
+
+            gap: 20px;
+
+            padding-bottom: 24px;
+            margin-bottom: 28px;
+
+            border-bottom:
+                2px solid
+                #111827;
+        }
+
+        .business-column {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .statement-column {
+            flex: 0 0 350px;
+
+            width: 350px;
+            max-width: 350px;
+
+            text-align: right;
+        }
+
+        .business-name {
+            margin: 0 0 10px;
+
+            font-size: 21px;
+            font-weight: 700;
+
+            color: #111827;
+        }
+
+        .business-details {
+            color: #4b5563;
+
+            line-height: 1.6;
+
+            overflow-wrap: anywhere;
+        }
+
+        .title {
+            margin: 0;
+
+            font-size: 26px;
+            line-height: 1.1;
+
+            letter-spacing: 0.3px;
+
+            white-space: nowrap;
+
+            color: #111827;
+        }
+
+        .statement-date {
+            margin-top: 10px;
+
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           CUSTOMER
+           ===================================================== */
+
+        .customer-box {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 30px;
+
+            margin-bottom: 28px;
+        }
+
+        .customer-details {
+            flex: 1;
+        }
+
+        .section-label {
+            margin-bottom: 7px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            letter-spacing: 0.7px;
+
+            text-transform: uppercase;
+
+            color: #6b7280;
+        }
+
+        .customer-name {
+            margin-bottom: 5px;
+
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .customer-contact {
+            color: #4b5563;
+
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           FINANCIAL SUMMARY
+           ===================================================== */
+
+        .summary {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    4,
+                    minmax(0, 1fr)
+                );
+
+            gap: 12px;
+
+            margin: 0 0 32px;
+        }
+
+        .summary-card {
+            min-width: 0;
+
+            padding: 15px 14px;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 8px;
+
+            background: #f9fafb;
+        }
+
+        .summary-card.overdue-card {
+            background: #fff7f7;
+
+            border-color: #fecaca;
+        }
+
+        .summary-label {
+            margin-bottom: 7px;
+
+            color: #6b7280;
+
+            font-size: 10px;
+            line-height: 1.3;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.4px;
+        }
+
+        .summary-number {
+            font-size: 19px;
+            line-height: 1.2;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+        .summary-number.overdue {
+            color: #b91c1c;
+        }
+
+
+        /* =====================================================
+           SECTIONS
+           ===================================================== */
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section-title {
+            margin: 0 0 12px;
+
+            padding-bottom: 8px;
+
+            border-bottom:
+                1px solid
+                #d1d5db;
+
+            font-size: 17px;
+
+            color: #111827;
+        }
+
+
+        /* =====================================================
+           TABLES
+           ===================================================== */
+
+        .table-wrap {
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            table-layout: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        th,
+        td {
+            padding: 10px 8px;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+
+            text-align: left;
+
+            vertical-align: top;
+        }
+
+        th {
+            background: #f3f4f6;
+
+            color: #4b5563;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.25px;
+        }
+
+        td {
+            font-size: 12px;
+        }
+
+        .right {
+            text-align: right;
+
+            white-space: nowrap;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+
+        /* =====================================================
+           STATUS
+           ===================================================== */
+
+        .status {
+            display: inline-block;
+
+            padding: 4px 7px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            color: #374151;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+        .status.paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status.part_paid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.draft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .status.sent {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status.cancelled {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+
+        /* =====================================================
+           BALANCE MESSAGE
+           ===================================================== */
+
+        .balance-message {
+            margin-top: 25px;
+
+            padding: 14px 18px;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 8px;
+
+            background: #f9fafb;
+
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .balance-message.overdue-message {
+            background: #fff7f7;
+
+            border-color: #fecaca;
+        }
+
+        .balance-message strong {
+            display: block;
+
+            margin-bottom: 4px;
+        }
+
+
+        /* =====================================================
+           BANKING DETAILS
+           ===================================================== */
+
+        .bank-box {
+            margin-top: 30px;
+
+            padding: 18px 20px;
+
+            border:
+                1px solid
+                #dbeafe;
+
+            border-radius: 8px;
+
+            background: #f8fbff;
+
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .bank-box h2 {
+            margin: 0 0 14px;
+
+            font-size: 16px;
+        }
+
+        .bank-grid {
+            display: grid;
+
+            grid-template-columns:
+                145px 1fr;
+
+            gap: 7px 14px;
+        }
+
+        .bank-label {
+            color: #6b7280;
+
+            font-weight: 600;
+        }
+
+        .bank-value {
+            font-weight: 600;
+
+            word-break: break-word;
+        }
+
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+
+        .footer {
+            margin-top: 45px;
+
+            padding-top: 18px;
+
+            border-top:
+                1px solid
+                #d1d5db;
+
+            text-align: center;
+
+            font-size: 10px;
+            line-height: 1.6;
+
+            color: #6b7280;
+        }
+
+        .footer-business {
+            font-weight: 700;
+
+            color: #374151;
+        }
+
+        .tradeflow-mark {
+            margin-top: 7px;
+
+            font-size: 9px;
+
+            color: #9ca3af;
+        }
+
+
+        /* =====================================================
+           PRINT
+           ===================================================== */
+
+        @media print {
+
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+
+            html,
+            body {
+                width: 100%;
+
+                margin: 0;
+                padding: 0;
+
+                background: white;
+
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body {
+                font-size: 12px;
+                line-height: 1.45;
+            }
+
+            .toolbar {
+                display: none !important;
+            }
+
+            .document {
+                width: 100%;
+                max-width: none;
+
+                min-height: 0;
+
+                margin: 0;
+                padding: 0;
+
+                box-shadow: none;
+            }
+
+
+            /* ================================================
+               HEADER
+               ================================================ */
+
+            .document-top {
+                display: flex;
+
+                justify-content:
+                    space-between;
+
+                align-items:
+                    flex-start;
+
+                gap: 10px;
+
+                width: 100%;
+
+                margin-bottom: 20px;
+
+                padding-bottom: 17px;
+
+                border-bottom:
+                    2px solid
+                    #111827;
+            }
+
+            .business-column {
+                flex: 1 1 auto;
+
+                min-width: 0;
+            }
+
+            /*
+             * Keep the title wide enough so the
+             * final letters cannot be clipped.
+             */
+            .statement-column {
+                flex: 0 0 305px;
+
+                width: 305px;
+                max-width: 305px;
+
+                text-align: right;
+            }
+
+            .business-name {
+                margin-bottom: 7px;
+
+                font-size: 19px;
+
+                line-height: 1.2;
+            }
+
+            .business-details {
+                font-size: 11px;
+
+                line-height: 1.5;
+            }
+
+            .title {
+                display: block;
+
+                margin: 0;
+
+                font-size: 21px;
+
+                line-height: 1.1;
+
+                letter-spacing: 0;
+
+                white-space: nowrap;
+
+                overflow: visible;
+
+                text-overflow: clip;
+            }
+
+            .statement-date {
+                margin-top: 7px;
+
+                font-size: 11px;
+
+                white-space: nowrap;
+            }
+
+
+            /* ================================================
+               CUSTOMER
+               ================================================ */
+
+            .customer-box {
+                margin-bottom: 20px;
+            }
+
+            .section-label {
+                margin-bottom: 5px;
+
+                font-size: 9px;
+            }
+
+            .customer-name {
+                margin-bottom: 4px;
+
+                font-size: 16px;
+            }
+
+            .customer-contact {
+                font-size: 11px;
+
+                line-height: 1.5;
+            }
+
+
+            /* ================================================
+               SUMMARY
+               ================================================ */
+
+            .summary {
+                grid-template-columns:
+                    repeat(
+                        4,
+                        minmax(0, 1fr)
+                    );
+
+                gap: 8px;
+
+                margin-bottom: 23px;
+            }
+
+            .summary-card {
+                padding: 11px 10px;
+            }
+
+            .summary-label {
+                margin-bottom: 5px;
+
+                font-size: 9px;
+
+                line-height: 1.25;
+
+                letter-spacing: 0;
+            }
+
+            .summary-number {
+                font-size: 16px;
+
+                line-height: 1.2;
+            }
+
+
+            /* ================================================
+               SECTION HEADINGS
+               ================================================ */
+
+            .section {
+                margin-top: 21px;
+            }
+
+            .section-title {
+                margin-bottom: 8px;
+
+                padding-bottom: 6px;
+
+                font-size: 15px;
+            }
+
+
+            /* ================================================
+               TABLES
+               ================================================ */
+
+            table {
+                width: 100%;
+
+                border-collapse: collapse;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tr {
+                page-break-inside: avoid;
+
+                break-inside: avoid;
+            }
+
+            th,
+            td {
+                padding: 7px 5px;
+            }
+
+            th {
+                font-size: 9px;
+
+                line-height: 1.2;
+
+                letter-spacing: 0;
+            }
+
+            td {
+                font-size: 10.5px;
+
+                line-height: 1.35;
+            }
+
+            .status {
+                padding: 3px 5px;
+
+                font-size: 9px;
+
+                line-height: 1.2;
+            }
+
+
+            /* ================================================
+               BALANCE MESSAGE
+               ================================================ */
+
+            .balance-message {
+                margin-top: 18px;
+
+                padding: 11px 13px;
+
+                font-size: 10.5px;
+
+                line-height: 1.45;
+            }
+
+            .balance-message strong {
+                margin-bottom: 4px;
+
+                font-size: 11px;
+            }
+
+
+            /* ================================================
+               BANK DETAILS
+               ================================================ */
+
+            .bank-box {
+                margin-top: 20px;
+
+                padding: 13px 15px;
+            }
+
+            .bank-box h2 {
+                margin-bottom: 10px;
+
+                font-size: 14px;
+            }
+
+            .bank-grid {
+                grid-template-columns:
+                    115px 1fr;
+
+                gap: 5px 10px;
+
+                font-size: 10.5px;
+
+                line-height: 1.35;
+            }
+
+            .bank-label {
+                font-size: 10px;
+            }
+
+            .bank-value {
+                font-size: 10.5px;
+            }
+
+
+            /* ================================================
+               FOOTER
+               ================================================ */
+
+            .footer {
+                margin-top: 28px;
+
+                padding-top: 12px;
+
+                font-size: 9.5px;
+
+                line-height: 1.5;
+            }
+
+            .footer-business {
+                font-size: 10px;
+            }
+
+            .tradeflow-mark {
+                margin-top: 5px;
+
+                font-size: 8.5px;
+            }
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+
+                align-items: stretch;
+            }
+
+            .toolbar .button {
+                width: 100%;
+
+                text-align: center;
+            }
+
+            .document {
+                padding: 25px 20px;
+            }
+
+            .document-top {
+                flex-direction: column;
+            }
+
+            .statement-column {
+                width: 100%;
+
+                max-width: none;
+
+                flex-basis: auto;
+
+                text-align: left;
+            }
+
+            .title {
+                white-space: normal;
+
+                font-size: 27px;
+            }
+
+            .customer-box {
+                flex-direction: column;
+            }
+
+            .summary {
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 690px;
+            }
+
+            .bank-grid {
+                grid-template-columns: 1fr;
+
+                gap: 2px;
+            }
+
+            .bank-value {
+                margin-bottom: 7px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     TOOLBAR
+     ========================================================= -->
+
+<div class="toolbar">
+
+    <a
+        href="{% url 'core:customer_statement' customer.id %}"
+        class="button secondary"
+    >
+        ← Back to Statement
+    </a>
+
+
+    <button
+        type="button"
+        class="button"
+        onclick="window.print()"
+    >
+        Print / Save PDF
+    </button>
+
+</div>
+
+
+<!-- =========================================================
+     DOCUMENT
+     ========================================================= -->
+
+<div class="document">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="document-top">
+
+
+        <div class="business-column">
+
+            <div class="business-name">
+
+                {{ business.name }}
+
+            </div>
+
+
+            <div class="business-details">
+
+                {% if business.phone %}
+
+                    {{ business.phone }}
+
+                {% endif %}
+
+
+                {% if business.email %}
+
+                    {% if business.phone %}
+                        <br>
+                    {% endif %}
+
+                    {{ business.email }}
+
+                {% endif %}
+
+
+                {% if business.address %}
+
+                    <br>
+
+                    {{ business.address }}
+
+                {% endif %}
+
+
+                {% if business.city %}
+
+                    <br>
+
+                    {{ business.city }}
+
+                {% endif %}
+
+
+                {% if business.registration_number %}
+
+                    <br>
+
+                    CIPC:
+                    {{ business.registration_number }}
+
+                {% endif %}
+
+
+                {% if business.vat_number %}
+
+                    <br>
+
+                    VAT No:
+                    {{ business.vat_number }}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="statement-column">
+
+            <h1 class="title">
+                CUSTOMER STATEMENT
+            </h1>
+
+
+            <div class="statement-date">
+
+                Statement Date:
+
+                <strong>
+                    {{ statement_date }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         CUSTOMER
+         ===================================================== -->
+
+    <div class="customer-box">
+
+        <div class="customer-details">
+
+            <div class="section-label">
+                Customer
+            </div>
+
+
+            <div class="customer-name">
+
+                {{ customer.name }}
+
+            </div>
+
+
+            <div class="customer-contact">
+
+                {% if customer.phone %}
+
+                    {{ customer.phone }}
+
+                {% endif %}
+
+
+                {% if customer.email %}
+
+                    {% if customer.phone %}
+                        <br>
+                    {% endif %}
+
+                    {{ customer.email }}
+
+                {% endif %}
+
+
+                {% if customer.address %}
+
+                    <br>
+
+                    {{ customer.address }}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+
+    <div class="summary">
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Total Invoiced
+            </div>
+
+            <div class="summary-number">
+                R{{ total_invoiced|floatformat:2 }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Total Paid
+            </div>
+
+            <div class="summary-number">
+                R{{ total_paid|floatformat:2 }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Current Balance
+            </div>
+
+            <div class="summary-number">
+                R{{ current_balance|floatformat:2 }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card overdue-card">
+
+            <div class="summary-label">
+                Overdue Balance
+            </div>
+
+            <div class="summary-number overdue">
+                R{{ overdue_balance|floatformat:2 }}
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         INVOICES
+         ===================================================== -->
+
+    <div class="section">
+
+        <h2 class="section-title">
+            Invoices
+        </h2>
+
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Invoice
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Issue
+                        </th>
+
+                        <th>
+                            Due
+                        </th>
+
+                        <th class="right">
+                            Total
+                        </th>
+
+                        <th class="right">
+                            Paid
+                        </th>
+
+                        <th class="right">
+                            Balance
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for invoice in invoices %}
+
+                        <tr>
+
+                            <td class="nowrap">
+
+                                <strong>
+                                    {{ invoice.invoice_number }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <span
+                                    class="status {{ invoice.status }}"
+                                >
+                                    {{ invoice.get_status_display }}
+                                </span>
+
+                            </td>
+
+
+                            <td class="nowrap">
+                                {{ invoice.issue_date }}
+                            </td>
+
+
+                            <td class="nowrap">
+                                {{ invoice.due_date|default:"—" }}
+                            </td>
+
+
+                            <td class="right">
+                                R{{ invoice.total|floatformat:2 }}
+                            </td>
+
+
+                            <td class="right">
+                                R{{ invoice.amount_paid|floatformat:2 }}
+                            </td>
+
+
+                            <td class="right">
+
+                                <strong>
+                                    R{{ invoice.balance_due|floatformat:2 }}
+                                </strong>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="7"
+                                class="center"
+                            >
+                                No invoices found.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAYMENTS
+         ===================================================== -->
+
+    <div class="section">
+
+        <h2 class="section-title">
+            Payments
+        </h2>
+
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Invoice
+                        </th>
+
+                        <th>
+                            Method
+                        </th>
+
+                        <th>
+                            Reference
+                        </th>
+
+                        <th class="right">
+                            Amount
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for payment in payments %}
+
+                        <tr>
+
+                            <td class="nowrap">
+                                {{ payment.payment_date }}
+                            </td>
+
+
+                            <td class="nowrap">
+                                {{ payment.invoice.invoice_number }}
+                            </td>
+
+
+                            <td class="nowrap">
+                                {{ payment.get_method_display }}
+                            </td>
+
+
+                            <td>
+                                {{ payment.reference|default:"—" }}
+                            </td>
+
+
+                            <td class="right">
+
+                                <strong>
+                                    R{{ payment.amount|floatformat:2 }}
+                                </strong>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="center"
+                            >
+                                No payments recorded.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BALANCE NOTICE
+         ===================================================== -->
+
+    {% if overdue_balance %}
+
+        <div
+            class="
+                balance-message
+                overdue-message
+            "
+        >
+
+            <strong>
+
+                Outstanding overdue balance:
+                R{{ overdue_balance|floatformat:2 }}
+
+            </strong>
+
+            Please settle overdue amounts using
+            the banking details below where applicable.
+
+        </div>
+
+
+    {% elif current_balance %}
+
+        <div class="balance-message">
+
+            <strong>
+
+                Current balance:
+                R{{ current_balance|floatformat:2 }}
+
+            </strong>
+
+            This balance is currently outstanding.
+
+        </div>
+
+
+    {% else %}
+
+        <div class="balance-message">
+
+            <strong>
+                Account fully paid
+            </strong>
+
+            There is currently no outstanding
+            balance on this customer account.
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         BANKING DETAILS
+         ===================================================== -->
+
+    {% if business.bank_name or business.bank_account_number %}
+
+        <div class="bank-box">
+
+            <h2>
+                Banking Details
+            </h2>
+
+
+            <div class="bank-grid">
+
+
+                {% if business.bank_name %}
+
+                    <div class="bank-label">
+                        Bank
+                    </div>
+
+                    <div class="bank-value">
+                        {{ business.bank_name }}
+                    </div>
+
+                {% endif %}
+
+
+                {% if business.bank_account_name %}
+
+                    <div class="bank-label">
+                        Account Name
+                    </div>
+
+                    <div class="bank-value">
+                        {{ business.bank_account_name }}
+                    </div>
+
+                {% endif %}
+
+
+                {% if business.bank_account_number %}
+
+                    <div class="bank-label">
+                        Account Number
+                    </div>
+
+                    <div class="bank-value">
+                        {{ business.bank_account_number }}
+                    </div>
+
+                {% endif %}
+
+
+                {% if business.bank_branch_code %}
+
+                    <div class="bank-label">
+                        Branch Code
+                    </div>
+
+                    <div class="bank-value">
+                        {{ business.bank_branch_code }}
+                    </div>
+
+                {% endif %}
+
+
+                {% if business.bank_account_type %}
+
+                    <div class="bank-label">
+                        Account Type
+                    </div>
+
+                    <div class="bank-value">
+                        {{ business.bank_account_type }}
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <div class="footer">
+
+
+        <div class="footer-business">
+            {{ business.name }}
+        </div>
+
+
+        {% if business.phone %}
+
+            {{ business.phone }}
+
+        {% endif %}
+
+
+        {% if business.email %}
+
+            {% if business.phone %}
+                ·
+            {% endif %}
+
+            {{ business.email }}
+
+        {% endif %}
+
+
+        <div class="tradeflow-mark">
+            Generated with TradeFlow
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

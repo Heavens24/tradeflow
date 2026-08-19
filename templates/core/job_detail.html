@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ job.job_number }} | TradeFlow</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .page {
+            padding: 35px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 17px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #111827;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .button.success {
+            background: #15803d;
+            color: white;
+        }
+
+        .button.danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 14px;
+
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.06);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 7px;
+        }
+
+        .job-number {
+            color: #6b7280;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .status.scheduled {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status.in_progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .section {
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .details {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-weight: 600;
+        }
+
+        .quote-box {
+            padding: 16px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+        }
+
+        .invoice-box {
+            padding: 18px;
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+        }
+
+        .invoice-box .money {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .invoice-actions {
+            margin-top: 15px;
+        }
+
+        @media (max-width: 650px) {
+
+            .header,
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .toolbar-right {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .toolbar-right .button {
+                text-align: center;
+            }
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        {% if messages %}
+
+            <div class="messages">
+
+                {% for message in messages %}
+
+                    <div class="message">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="toolbar">
+
+            <a
+                href="{% url 'core:job_list' %}"
+                class="button secondary"
+            >
+                ← Jobs
+            </a>
+
+
+            <div class="toolbar-right">
+
+                {% if existing_invoice %}
+
+                    <a
+                        href="{% url 'core:invoice_detail' existing_invoice.id %}"
+                        class="button success"
+                    >
+                        View {{ existing_invoice.invoice_number }}
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'core:job_to_invoice' job.id %}"
+                        class="button success"
+                    >
+                        Create Invoice
+                    </a>
+
+                {% endif %}
+
+
+                <a
+                    href="{% url 'core:job_edit' job.id %}"
+                    class="button"
+                >
+                    Edit Job
+                </a>
+
+
+                <a
+                    href="{% url 'core:job_delete' job.id %}"
+                    class="button danger"
+                >
+                    Delete
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="header">
+
+                <div>
+
+                    <h1>
+                        {{ job.title }}
+                    </h1>
+
+                    <div class="job-number">
+                        {{ job.job_number }}
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <span
+                        class="status {{ job.status }}"
+                    >
+                        {{ job.get_status_display }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="details">
+
+                <div>
+
+                    <div class="label">
+                        Customer
+                    </div>
+
+                    <div class="value">
+                        {{ job.customer.name }}
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <div class="label">
+                        Phone
+                    </div>
+
+                    <div class="value">
+                        {{ job.customer.phone }}
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <div class="label">
+                        Start Date
+                    </div>
+
+                    <div class="value">
+                        {{ job.start_date|default:"Not scheduled" }}
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <div class="label">
+                        Due Date
+                    </div>
+
+                    <div class="value">
+                        {{ job.due_date|default:"Not specified" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {% if job.quote %}
+
+                <div class="section">
+
+                    <h3>
+                        Source Quote
+                    </h3>
+
+                    <div class="quote-box">
+
+                        <strong>
+                            {{ job.quote.quote_number }}
+                        </strong>
+
+                        <br><br>
+
+                        Quoted total:
+                        <strong>
+                            R{{ job.quote.total|floatformat:2 }}
+                        </strong>
+
+                        <br><br>
+
+                        <a
+                            href="{% url 'core:quote_detail' job.quote.id %}"
+                        >
+                            View quotation →
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="section">
+
+                <h3>
+                    Invoice
+                </h3>
+
+
+                {% if existing_invoice %}
+
+                    <div class="invoice-box">
+
+                        <strong>
+                            {{ existing_invoice.invoice_number }}
+                        </strong>
+
+                        <br>
+
+                        Status:
+                        {{ existing_invoice.get_status_display }}
+
+                        <div class="money">
+                            Total:
+                            R{{ existing_invoice.total|floatformat:2 }}
+                        </div>
+
+                        <div>
+                            Paid:
+                            R{{ existing_invoice.amount_paid|floatformat:2 }}
+                        </div>
+
+                        <div>
+                            Balance:
+                            R{{ existing_invoice.balance_due|floatformat:2 }}
+                        </div>
+
+
+                        <div class="invoice-actions">
+
+                            <a
+                                href="{% url 'core:invoice_detail' existing_invoice.id %}"
+                            >
+                                Open invoice →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="invoice-box">
+
+                        No invoice has been created for
+                        this job yet.
+
+                        <br><br>
+
+                        <a
+                            href="{% url 'core:job_to_invoice' job.id %}"
+                            class="button success"
+                        >
+                            Create Invoice
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if job.description %}
+
+                <div class="section">
+
+                    <h3>
+                        Work Description
+                    </h3>
+
+                    <p>
+                        {{ job.description|linebreaksbr }}
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if job.notes %}
+
+                <div class="section">
+
+                    <h3>
+                        Notes
+                    </h3>
+
+                    <p>
+                        {{ job.notes|linebreaksbr }}
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

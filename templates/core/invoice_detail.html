@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ invoice.invoice_number }} | TradeFlow</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+
+        .page {
+            padding: 35px 20px;
+        }
+
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+
+        .toolbar {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .toolbar-actions {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .button {
+            display: inline-block;
+
+            padding: 11px 17px;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-family: inherit;
+
+            font-size: 14px;
+        }
+
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+
+        .button.success {
+            background: #15803d;
+            color: white;
+        }
+
+
+        .button.whatsapp {
+            background: #16a34a;
+            color: white;
+        }
+
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+
+        .message {
+            padding: 14px 16px;
+
+            border-radius: 8px;
+
+            margin-bottom: 10px;
+
+            background: #ecfdf5;
+
+            border:
+                1px solid
+                #86efac;
+
+            color: #166534;
+        }
+
+
+        .invoice {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 40px;
+
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.06);
+        }
+
+
+        .header {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 30px;
+        }
+
+
+        .status {
+            display: inline-block;
+
+            padding: 6px 10px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            font-size: 12px;
+
+            font-weight: bold;
+        }
+
+
+        .status.paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+
+        .status.part_paid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+
+        .status.sent {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+
+        .status.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+
+        .status.cancelled {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 30px;
+        }
+
+
+        th,
+        td {
+            padding: 13px;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+        }
+
+
+        th {
+            background: #f9fafb;
+
+            text-align: left;
+        }
+
+
+        .right {
+            text-align: right;
+        }
+
+
+        .totals {
+            margin-left: auto;
+
+            max-width: 360px;
+
+            margin-top: 25px;
+        }
+
+
+        .row {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 20px;
+
+            padding: 8px 0;
+        }
+
+
+        .grand {
+            border-top:
+                2px solid
+                #111827;
+
+            margin-top: 8px;
+
+            padding-top: 14px;
+
+            font-size: 20px;
+
+            font-weight: bold;
+        }
+
+
+        .payment-summary {
+            margin-top: 30px;
+
+            padding: 20px;
+
+            background: #f9fafb;
+
+            border-radius: 10px;
+        }
+
+
+        .payment-summary .balance {
+            font-size: 18px;
+
+            font-weight: bold;
+        }
+
+
+        .section {
+            margin-top: 35px;
+        }
+
+
+        .delete-link {
+            color: #dc2626;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+
+        @media (max-width: 700px) {
+
+            .header,
+            .toolbar {
+                flex-direction: column;
+            }
+
+
+            .toolbar-actions {
+                flex-direction: column;
+            }
+
+
+            .toolbar-actions .button {
+                width: 100%;
+
+                text-align: center;
+            }
+
+
+            .invoice {
+                padding: 22px;
+            }
+
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <div class="container">
+
+
+        {% if messages %}
+
+
+            <div class="messages">
+
+
+                {% for message in messages %}
+
+
+                    <div class="message">
+
+                        {{ message }}
+
+                    </div>
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% endif %}
+
+
+
+        <div class="toolbar">
+
+
+            <a
+                href="{% url 'core:invoice_list' %}"
+                class="button secondary"
+            >
+                ← Invoices
+            </a>
+
+
+
+            <div class="toolbar-actions">
+
+
+                <a
+                    href="{% url 'core:invoice_print' invoice.id %}"
+                    class="button secondary"
+                >
+                    Print / PDF
+                </a>
+
+
+
+                {% if invoice.customer.phone %}
+
+
+                    <button
+                        type="button"
+                        class="button whatsapp"
+                        id="share-invoice-whatsapp"
+
+                        data-customer-name="{{ invoice.customer.name|escape }}"
+
+                        data-customer-phone="{{ invoice.customer.phone|escape }}"
+
+                        data-business-name="{{ business.name|escape }}"
+
+                        data-invoice-number="{{ invoice.invoice_number|escape }}"
+
+                        data-total="{{ invoice.total|floatformat:2 }}"
+
+                        data-paid="{{ invoice.amount_paid|floatformat:2 }}"
+
+                        data-balance="{{ invoice.balance_due|floatformat:2 }}"
+
+                        data-due="{% if invoice.due_date %}{{ invoice.due_date|date:'d M Y' }}{% endif %}"
+
+                        data-status="{{ invoice.get_status_display|escape }}"
+
+                        data-print-path="{% url 'core:invoice_print' invoice.id %}"
+                    >
+                        Share on WhatsApp
+                    </button>
+
+
+                {% endif %}
+
+
+
+                <a
+                    href="{% url 'core:invoice_edit' invoice.id %}"
+                    class="button"
+                >
+                    Edit
+                </a>
+
+
+
+                {% if invoice.balance_due > 0 and invoice.status != "cancelled" %}
+
+
+                    <a
+                        href="{% url 'core:payment_create' invoice.id %}"
+                        class="button success"
+                    >
+                        Record Payment
+                    </a>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="invoice">
+
+
+            <div class="header">
+
+
+                <div>
+
+
+                    <h1>
+                        INVOICE
+                    </h1>
+
+
+                    <h3>
+                        {{ invoice.invoice_number }}
+                    </h3>
+
+
+
+                    <strong>
+                        {{ business.name }}
+                    </strong>
+
+
+
+                    {% if business.phone %}
+
+                        <br>
+
+                        {{ business.phone }}
+
+                    {% endif %}
+
+
+
+                    {% if business.email %}
+
+                        <br>
+
+                        {{ business.email }}
+
+                    {% endif %}
+
+
+
+                    {% if business.address %}
+
+                        <br>
+
+                        {{ business.address }}
+
+                    {% endif %}
+
+
+
+                    {% if business.city %}
+
+                        <br>
+
+                        {{ business.city }}
+
+                    {% endif %}
+
+
+
+                    {% if business.registration_number %}
+
+                        <br>
+
+                        Reg:
+
+                        {{ business.registration_number }}
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+                <div>
+
+
+                    <strong>
+                        Customer
+                    </strong>
+
+
+                    <p>
+
+
+                        {{ invoice.customer.name }}
+
+
+
+                        {% if invoice.customer.phone %}
+
+                            <br>
+
+                            {{ invoice.customer.phone }}
+
+                        {% endif %}
+
+
+
+                        {% if invoice.customer.email %}
+
+                            <br>
+
+                            {{ invoice.customer.email }}
+
+                        {% endif %}
+
+
+
+                        {% if invoice.customer.address %}
+
+                            <br>
+
+                            {{ invoice.customer.address }}
+
+                        {% endif %}
+
+
+                    </p>
+
+
+
+                    <strong>
+                        Status:
+                    </strong>
+
+
+                    <span
+                        class="status {{ invoice.status }}"
+                    >
+                        {{ invoice.get_status_display }}
+                    </span>
+
+
+                    <br><br>
+
+
+
+                    <strong>
+                        Issue:
+                    </strong>
+
+
+                    {{ invoice.issue_date }}
+
+
+                    <br>
+
+
+
+                    <strong>
+                        Due:
+                    </strong>
+
+
+                    {{ invoice.due_date|default:"—" }}
+
+
+                </div>
+
+
+            </div>
+
+
+
+            {% if invoice.job %}
+
+
+                <p>
+
+
+                    <strong>
+                        Job:
+                    </strong>
+
+
+                    <a
+                        href="{% url 'core:job_detail' invoice.job.id %}"
+                    >
+                        {{ invoice.job.job_number }}
+                    </a>
+
+
+
+                    {% if invoice.quote %}
+
+
+                        · Quote
+
+
+                        <a
+                            href="{% url 'core:quote_detail' invoice.quote.id %}"
+                        >
+                            {{ invoice.quote.quote_number }}
+                        </a>
+
+
+                    {% endif %}
+
+
+                </p>
+
+
+            {% endif %}
+
+
+
+            <div class="table-wrapper">
+
+
+                <table>
+
+
+                    <thead>
+
+
+                        <tr>
+
+
+                            <th>
+                                Description
+                            </th>
+
+
+                            <th class="right">
+                                Qty
+                            </th>
+
+
+                            <th class="right">
+                                Unit Price
+                            </th>
+
+
+                            <th class="right">
+                                Total
+                            </th>
+
+
+                        </tr>
+
+
+                    </thead>
+
+
+
+                    <tbody>
+
+
+
+                        {% for item in invoice.items.all %}
+
+
+                            <tr>
+
+
+                                <td>
+                                    {{ item.description }}
+                                </td>
+
+
+                                <td class="right">
+                                    {{ item.quantity|floatformat:2 }}
+                                </td>
+
+
+                                <td class="right">
+                                    R{{ item.unit_price|floatformat:2 }}
+                                </td>
+
+
+                                <td class="right">
+                                    R{{ item.line_total|floatformat:2 }}
+                                </td>
+
+
+                            </tr>
+
+
+
+                        {% empty %}
+
+
+                            <tr>
+
+
+                                <td colspan="4">
+                                    No invoice items found.
+                                </td>
+
+
+                            </tr>
+
+
+
+                        {% endfor %}
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <div class="totals">
+
+
+                <div class="row">
+
+
+                    <span>
+                        Subtotal
+                    </span>
+
+
+                    <strong>
+                        R{{ invoice.subtotal|floatformat:2 }}
+                    </strong>
+
+
+                </div>
+
+
+
+                {% if invoice.apply_vat %}
+
+
+                    <div class="row">
+
+
+                        <span>
+                            VAT (15%)
+                        </span>
+
+
+                        <strong>
+                            R{{ invoice.vat_amount|floatformat:2 }}
+                        </strong>
+
+
+                    </div>
+
+
+                {% endif %}
+
+
+
+                <div class="row grand">
+
+
+                    <span>
+                        Total
+                    </span>
+
+
+                    <span>
+                        R{{ invoice.total|floatformat:2 }}
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="payment-summary">
+
+
+                <h3>
+                    Payment Summary
+                </h3>
+
+
+
+                <div class="row">
+
+
+                    <span>
+                        Total
+                    </span>
+
+
+                    <strong>
+                        R{{ invoice.total|floatformat:2 }}
+                    </strong>
+
+
+                </div>
+
+
+
+                <div class="row">
+
+
+                    <span>
+                        Amount Paid
+                    </span>
+
+
+                    <strong>
+                        R{{ invoice.amount_paid|floatformat:2 }}
+                    </strong>
+
+
+                </div>
+
+
+
+                <div class="row balance">
+
+
+                    <span>
+                        Balance Due
+                    </span>
+
+
+                    <strong>
+                        R{{ invoice.balance_due|floatformat:2 }}
+                    </strong>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            {% if invoice.payments.all %}
+
+
+                <div class="section">
+
+
+                    <h3>
+                        Payments
+                    </h3>
+
+
+
+                    <div class="table-wrapper">
+
+
+                        <table>
+
+
+                            <thead>
+
+
+                                <tr>
+
+                                    <th>
+                                        Date
+                                    </th>
+
+                                    <th>
+                                        Method
+                                    </th>
+
+                                    <th>
+                                        Reference
+                                    </th>
+
+                                    <th>
+                                        Amount
+                                    </th>
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+
+
+                            </thead>
+
+
+
+                            <tbody>
+
+
+
+                                {% for payment in invoice.payments.all %}
+
+
+                                    <tr>
+
+
+                                        <td>
+                                            {{ payment.payment_date }}
+                                        </td>
+
+
+                                        <td>
+                                            {{ payment.get_method_display }}
+                                        </td>
+
+
+                                        <td>
+                                            {{ payment.reference|default:"—" }}
+                                        </td>
+
+
+                                        <td>
+                                            R{{ payment.amount|floatformat:2 }}
+                                        </td>
+
+
+                                        <td>
+
+
+                                            <a
+                                                href="{% url 'core:payment_delete' payment.id %}"
+                                                class="delete-link"
+                                            >
+                                                Delete
+                                            </a>
+
+
+                                        </td>
+
+
+                                    </tr>
+
+
+
+                                {% endfor %}
+
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% endif %}
+
+
+
+            {% if invoice.notes %}
+
+
+                <div class="section">
+
+
+                    <h3>
+                        Notes
+                    </h3>
+
+
+                    <p>
+                        {{ invoice.notes|linebreaksbr }}
+                    </p>
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+    (function () {
+
+
+        const button =
+            document.getElementById(
+                "share-invoice-whatsapp"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+
+        function normaliseWhatsAppNumber(phone) {
+
+
+            let digits =
+                (phone || "").replace(
+                    /\D/g,
+                    ""
+                );
+
+
+            /*
+             * South African local number:
+             *
+             * 0712345678
+             *
+             * becomes:
+             *
+             * 27712345678
+             */
+
+            if (digits.startsWith("0")) {
+
+
+                digits =
+                    "27"
+                    + digits.slice(1);
+
+
+            }
+
+
+            return digits;
+
+
+        }
+
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+
+                const customerName =
+                    button.dataset.customerName
+                    || "Customer";
+
+
+                const customerPhone =
+                    normaliseWhatsAppNumber(
+                        button.dataset.customerPhone
+                    );
+
+
+                const businessName =
+                    button.dataset.businessName
+                    || "TradeFlow";
+
+
+                const invoiceNumber =
+                    button.dataset.invoiceNumber
+                    || "";
+
+
+                const total =
+                    button.dataset.total
+                    || "0.00";
+
+
+                const paid =
+                    button.dataset.paid
+                    || "0.00";
+
+
+                const balance =
+                    button.dataset.balance
+                    || "0.00";
+
+
+                const due =
+                    button.dataset.due
+                    || "";
+
+
+                const status =
+                    button.dataset.status
+                    || "";
+
+
+
+                const lines = [
+
+
+                    `Hello ${customerName},`,
+
+
+                    "",
+
+
+                    `Please find invoice ${invoiceNumber} from ${businessName}.`,
+
+
+                    "",
+
+
+                    `Total: R${total}`,
+
+
+                    `Amount Paid: R${paid}`,
+
+
+                    `Balance Due: R${balance}`
+
+
+                ];
+
+
+
+                if (due) {
+
+
+                    lines.push(
+                        `Due Date: ${due}`
+                    );
+
+
+                }
+
+
+
+                if (status) {
+
+
+                    lines.push(
+                        `Status: ${status}`
+                    );
+
+
+                }
+
+
+
+                /*
+                 * Do not share localhost URLs.
+                 *
+                 * After deployment this block
+                 * automatically adds the live
+                 * invoice print URL.
+                 */
+
+                const isLocal =
+                    window.location.hostname
+                        === "127.0.0.1"
+
+                    ||
+
+                    window.location.hostname
+                        === "localhost";
+
+
+
+                if (!isLocal) {
+
+
+                    const printUrl =
+                        window.location.origin
+                        + button.dataset.printPath;
+
+
+                    lines.push(
+
+                        "",
+
+                        `View invoice: ${printUrl}`
+
+                    );
+
+
+                }
+
+
+
+                lines.push(
+
+                    "",
+
+                    "Thank you,",
+
+                    businessName
+
+                );
+
+
+
+                const message =
+                    encodeURIComponent(
+                        lines.join("\n")
+                    );
+
+
+
+                const whatsappUrl =
+                    customerPhone
+
+                    ? (
+                        `https://wa.me/${customerPhone}`
+                        + `?text=${message}`
+                    )
+
+                    : (
+                        `https://wa.me/`
+                        + `?text=${message}`
+                    );
+
+
+
+                window.open(
+
+                    whatsappUrl,
+
+                    "_blank",
+
+                    "noopener,noreferrer"
+
+                );
+
+
+            }
+        );
+
+
+    })();
+
+</script>
+
+
+</body>
+
+</html>

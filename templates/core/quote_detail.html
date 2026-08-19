@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ quote.quote_number }} | TradeFlow</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .page {
+            padding: 35px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 17px;
+            background: #111827;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .button.success {
+            background: #15803d;
+            color: white;
+        }
+
+        .button.whatsapp {
+            background: #16a34a;
+            color: white;
+        }
+
+        .button.disabled {
+            background: #d1d5db;
+            color: #6b7280;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+
+        .quote {
+            background: white;
+            padding: 40px;
+            border-radius: 14px;
+
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.06);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .muted {
+            color: #6b7280;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .accepted {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .draft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .sent {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .declined {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .expired {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 13px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f9fafb;
+            text-align: left;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .totals {
+            margin-left: auto;
+            margin-top: 25px;
+            max-width: 350px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .grand-total {
+            border-top: 2px solid #111827;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 8px;
+            padding-top: 14px;
+        }
+
+        .notes {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .job-notice {
+            margin-top: 30px;
+            padding: 18px;
+            border-radius: 10px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .job-notice strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        @media (max-width: 700px) {
+
+            .header,
+            .toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .toolbar-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .toolbar-actions .button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .quote {
+                padding: 22px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        {% if messages %}
+
+            <div class="messages">
+
+                {% for message in messages %}
+
+                    <div class="message">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="toolbar">
+
+            <a
+                href="{% url 'core:quote_list' %}"
+                class="button secondary"
+            >
+                ← Quotes
+            </a>
+
+
+            <div class="toolbar-actions">
+
+                <a
+                    href="{% url 'core:quote_print' quote.id %}"
+                    class="button secondary"
+                >
+                    Print / PDF
+                </a>
+
+
+                {% if quote.customer.phone %}
+
+                    <button
+                        type="button"
+                        class="button whatsapp"
+                        id="share-quote-whatsapp"
+
+                        data-customer-name="{{ quote.customer.name|escape }}"
+                        data-customer-phone="{{ quote.customer.phone|escape }}"
+
+                        data-business-name="{{ business.name|escape }}"
+
+                        data-quote-number="{{ quote.quote_number|escape }}"
+
+                        data-total="{{ quote.total|floatformat:2 }}"
+
+                        data-expiry="{% if quote.expiry_date %}{{ quote.expiry_date|date:'d M Y' }}{% endif %}"
+
+                        data-print-path="{% url 'core:quote_print' quote.id %}"
+                    >
+                        Share on WhatsApp
+                    </button>
+
+                {% endif %}
+
+
+                <a
+                    href="{% url 'core:quote_edit' quote.id %}"
+                    class="button"
+                >
+                    Edit Quote
+                </a>
+
+
+                {% if existing_job %}
+
+                    <a
+                        href="{% url 'core:job_detail' existing_job.id %}"
+                        class="button success"
+                    >
+                        View {{ existing_job.job_number }}
+                    </a>
+
+                {% elif quote.status == "accepted" %}
+
+                    <a
+                        href="{% url 'core:quote_to_job' quote.id %}"
+                        class="button success"
+                    >
+                        Convert to Job
+                    </a>
+
+                {% else %}
+
+                    <span
+                        class="button disabled"
+                        title="Change the quote status to Accepted first."
+                    >
+                        Accept Quote Before Job
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="quote">
+
+            <div class="header">
+
+                <div>
+
+                    <h1>
+                        QUOTATION
+                    </h1>
+
+                    <p class="muted">
+                        {{ quote.quote_number }}
+                    </p>
+
+
+                    <strong>
+                        {{ business.name }}
+                    </strong>
+
+
+                    {% if business.phone %}
+                        <br>
+                        {{ business.phone }}
+                    {% endif %}
+
+
+                    {% if business.email %}
+                        <br>
+                        {{ business.email }}
+                    {% endif %}
+
+
+                    {% if business.address %}
+                        <br>
+                        {{ business.address }}
+                    {% endif %}
+
+
+                    {% if business.city %}
+                        <br>
+                        {{ business.city }}
+                    {% endif %}
+
+
+                    {% if business.registration_number %}
+
+                        <br>
+
+                        Reg:
+                        {{ business.registration_number }}
+
+                    {% endif %}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Customer
+                    </strong>
+
+                    <p>
+
+                        {{ quote.customer.name }}
+
+
+                        {% if quote.customer.phone %}
+
+                            <br>
+
+                            {{ quote.customer.phone }}
+
+                        {% endif %}
+
+
+                        {% if quote.customer.email %}
+
+                            <br>
+
+                            {{ quote.customer.email }}
+
+                        {% endif %}
+
+
+                        {% if quote.customer.address %}
+
+                            <br>
+
+                            {{ quote.customer.address }}
+
+                        {% endif %}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Issue:
+                        </strong>
+
+                        {{ quote.issue_date }}
+
+
+                        <br>
+
+
+                        <strong>
+                            Expiry:
+                        </strong>
+
+
+                        {% if quote.expiry_date %}
+
+                            {{ quote.expiry_date }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+
+                        <br><br>
+
+
+                        <strong>
+                            Status:
+                        </strong>
+
+
+                        <span
+                            class="status {{ quote.status }}"
+                        >
+                            {{ quote.get_status_display }}
+                        </span>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th class="right">
+                                Qty
+                            </th>
+
+                            <th class="right">
+                                Unit Price
+                            </th>
+
+                            <th class="right">
+                                Total
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        {% for item in quote.items.all %}
+
+                            <tr>
+
+                                <td>
+                                    {{ item.description }}
+                                </td>
+
+
+                                <td class="right">
+                                    {{ item.quantity|floatformat:2 }}
+                                </td>
+
+
+                                <td class="right">
+                                    R{{ item.unit_price|floatformat:2 }}
+                                </td>
+
+
+                                <td class="right">
+                                    R{{ item.line_total|floatformat:2 }}
+                                </td>
+
+                            </tr>
+
+
+                        {% empty %}
+
+
+                            <tr>
+
+                                <td colspan="4">
+                                    No quote items found.
+                                </td>
+
+                            </tr>
+
+
+                        {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="totals">
+
+                <div class="total-row">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+
+                    <strong>
+                        R{{ quote.subtotal|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+
+                {% if quote.apply_vat %}
+
+                    <div class="total-row">
+
+                        <span>
+                            VAT (15%)
+                        </span>
+
+
+                        <strong>
+                            R{{ quote.vat_amount|floatformat:2 }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="total-row grand-total">
+
+                    <span>
+                        Total
+                    </span>
+
+
+                    <span>
+                        R{{ quote.total|floatformat:2 }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            {% if quote.notes %}
+
+                <div class="notes">
+
+                    <strong>
+                        Notes
+                    </strong>
+
+
+                    <p>
+                        {{ quote.notes|linebreaksbr }}
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if existing_job %}
+
+                <div class="job-notice">
+
+                    <strong>
+                        Converted to Job
+                    </strong>
+
+
+                    This quotation has already been
+                    converted to
+                    {{ existing_job.job_number }}.
+
+
+                    <br><br>
+
+
+                    <a
+                        href="{% url 'core:job_detail' existing_job.id %}"
+                    >
+                        Open {{ existing_job.job_number }} →
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    (function () {
+
+        const button =
+            document.getElementById(
+                "share-quote-whatsapp"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+        function normaliseWhatsAppNumber(phone) {
+
+            let digits =
+                (phone || "").replace(
+                    /\D/g,
+                    ""
+                );
+
+
+            /*
+             * South African number:
+             *
+             * 0712345678
+             *
+             * becomes:
+             *
+             * 27712345678
+             */
+
+            if (digits.startsWith("0")) {
+
+                digits =
+                    "27"
+                    + digits.slice(1);
+
+            }
+
+
+            return digits;
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                const customerName =
+                    button.dataset.customerName
+                    || "Customer";
+
+
+                const customerPhone =
+                    normaliseWhatsAppNumber(
+                        button.dataset.customerPhone
+                    );
+
+
+                const businessName =
+                    button.dataset.businessName
+                    || "TradeFlow";
+
+
+                const quoteNumber =
+                    button.dataset.quoteNumber
+                    || "";
+
+
+                const total =
+                    button.dataset.total
+                    || "0.00";
+
+
+                const expiry =
+                    button.dataset.expiry
+                    || "";
+
+
+                const lines = [
+
+                    `Hello ${customerName},`,
+
+                    "",
+
+                    `Please find quotation ${quoteNumber} from ${businessName}.`,
+
+                    "",
+
+                    `Total: R${total}`
+
+                ];
+
+
+                if (expiry) {
+
+                    lines.push(
+                        `Expiry Date: ${expiry}`
+                    );
+
+                }
+
+
+                /*
+                 * localhost / 127.0.0.1 links must
+                 * NOT be sent to customers.
+                 *
+                 * Once TradeFlow is deployed,
+                 * this automatically adds the
+                 * live quotation URL.
+                 */
+
+                const isLocal =
+                    window.location.hostname
+                        === "127.0.0.1"
+                    ||
+                    window.location.hostname
+                        === "localhost";
+
+
+                if (!isLocal) {
+
+                    const printUrl =
+                        window.location.origin
+                        + button.dataset.printPath;
+
+
+                    lines.push(
+                        "",
+                        `View quotation: ${printUrl}`
+                    );
+
+                }
+
+
+                lines.push(
+
+                    "",
+
+                    "Please contact us if you have any questions.",
+
+                    "",
+
+                    "Thank you,",
+
+                    businessName
+
+                );
+
+
+                const message =
+                    encodeURIComponent(
+                        lines.join("\n")
+                    );
+
+
+                const whatsappUrl =
+                    customerPhone
+
+                    ? (
+                        `https://wa.me/${customerPhone}`
+                        + `?text=${message}`
+                    )
+
+                    : (
+                        `https://wa.me/`
+                        + `?text=${message}`
+                    );
+
+
+                window.open(
+                    whatsappUrl,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
+
+            }
+        );
+
+    })();
+
+</script>
+
+
+</body>
+
+</html>

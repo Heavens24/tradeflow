@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Create Account | TradeFlow
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4f6f8 0%,
+                    #e8edf3 100%
+                );
+
+            color: #1f2937;
+        }
+
+        .page {
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+
+            padding: 40px 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .brand {
+            text-align: center;
+
+            margin-bottom: 24px;
+        }
+
+        .brand-name {
+            margin: 0;
+
+            font-size: 30px;
+            font-weight: 800;
+
+            color: #111827;
+        }
+
+        .brand-subtitle {
+            margin-top: 7px;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+
+            padding: 34px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 10px 35px
+                rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin:
+                0 0 8px;
+
+            font-size: 25px;
+        }
+
+        .description {
+            margin:
+                0 0 28px;
+
+            color: #6b7280;
+
+            line-height: 1.6;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px 14px;
+
+            margin-bottom: 10px;
+
+            border-radius: 8px;
+
+            background: #eff6ff;
+
+            color: #1e40af;
+
+            font-size: 14px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 9px;
+
+            background: white;
+
+            font-family: inherit;
+            font-size: 15px;
+
+            color: #111827;
+
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.08);
+        }
+
+        .help-text {
+            margin-top: 7px;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+        }
+
+        .help-text ul {
+            margin:
+                6px 0 0;
+
+            padding-left: 20px;
+        }
+
+        .error {
+            margin-top: 7px;
+
+            color: #b91c1c;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+        .non-field-errors {
+            padding: 12px 14px;
+
+            margin-bottom: 20px;
+
+            border:
+                1px solid
+                #fecaca;
+
+            border-radius: 8px;
+
+            background: #fef2f2;
+
+            color: #991b1b;
+
+            font-size: 14px;
+        }
+
+        .button {
+            width: 100%;
+
+            border: none;
+
+            padding: 14px 18px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+        .login-link {
+            margin-top: 24px;
+
+            text-align: center;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .security-note {
+            margin-top: 22px;
+
+            padding-top: 18px;
+
+            border-top:
+                1px solid
+                #e5e7eb;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+
+            .page {
+                padding: 25px 14px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            .brand-name {
+                font-size: 27px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="auth-container">
+
+        <!-- =========================================
+             BRAND
+             ========================================= -->
+
+        <div class="brand">
+
+            <div class="brand-name">
+                TradeFlow
+            </div>
+
+            <div class="brand-subtitle">
+                Small business operating system
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             REGISTRATION CARD
+             ========================================= -->
+
+        <div class="card">
+
+            <h1>
+                Create your account
+            </h1>
+
+            <p class="description">
+                Create your TradeFlow account.
+                After registration, you will set up
+                your business profile.
+            </p>
+
+
+            <!-- =====================================
+                 DJANGO MESSAGES
+                 ===================================== -->
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for message in messages %}
+
+                        <div class="message">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =====================================
+                 NON-FIELD ERRORS
+                 ===================================== -->
+
+            {% if form.non_field_errors %}
+
+                <div class="non-field-errors">
+
+                    {% for error in form.non_field_errors %}
+
+                        <div>
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =====================================
+                 REGISTRATION FORM
+                 ===================================== -->
+
+            <form
+                method="POST"
+                action="{% url 'core:register' %}"
+            >
+
+                {% csrf_token %}
+
+
+                <!-- USERNAME -->
+
+                <div class="field">
+
+                    <label for="{{ form.username.id_for_label }}">
+                        Username
+                    </label>
+
+                    {{ form.username }}
+
+                    {% for error in form.username.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- FIRST NAME -->
+
+                <div class="field">
+
+                    <label for="{{ form.first_name.id_for_label }}">
+                        First name
+                    </label>
+
+                    {{ form.first_name }}
+
+                    {% for error in form.first_name.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- LAST NAME -->
+
+                <div class="field">
+
+                    <label for="{{ form.last_name.id_for_label }}">
+                        Last name
+                    </label>
+
+                    {{ form.last_name }}
+
+                    {% for error in form.last_name.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="field">
+
+                    <label for="{{ form.email.id_for_label }}">
+                        Email address
+                    </label>
+
+                    {{ form.email }}
+
+                    {% for error in form.email.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="field">
+
+                    <label for="{{ form.password1.id_for_label }}">
+                        Password
+                    </label>
+
+                    {{ form.password1 }}
+
+                    {% if form.password1.help_text %}
+
+                        <div class="help-text">
+                            {{ form.password1.help_text|safe }}
+                        </div>
+
+                    {% endif %}
+
+                    {% for error in form.password1.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <div class="field">
+
+                    <label for="{{ form.password2.id_for_label }}">
+                        Confirm password
+                    </label>
+
+                    {{ form.password2 }}
+
+                    {% if form.password2.help_text %}
+
+                        <div class="help-text">
+                            {{ form.password2.help_text|safe }}
+                        </div>
+
+                    {% endif %}
+
+                    {% for error in form.password2.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+
+            <!-- =====================================
+                 LOGIN LINK
+                 ===================================== -->
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="{% url 'core:login' %}">
+                    Sign in
+                </a>
+
+            </div>
+
+
+            <div class="security-note">
+
+                Your TradeFlow account keeps your
+                business customers, quotations,
+                jobs, invoices and payments
+                separate from other businesses.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

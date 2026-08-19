@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ invoice.invoice_number }} | TradeFlow
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef1f5;
+            color: #111827;
+        }
+
+        .toolbar {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #111827;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .document {
+            width: 100%;
+            max-width: 900px;
+            min-height: 1120px;
+            margin: auto;
+            padding: 55px;
+            background: white;
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 45px;
+        }
+
+        .title {
+            font-size: 34px;
+            margin: 0 0 8px;
+            letter-spacing: 1px;
+        }
+
+        .document-number {
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .business,
+        .customer {
+            line-height: 1.6;
+        }
+
+        .business {
+            margin-top: 25px;
+        }
+
+        .customer {
+            min-width: 280px;
+        }
+
+        .meta {
+            margin-top: 20px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f9fafb;
+            text-align: left;
+            color: #6b7280;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .totals {
+            width: 350px;
+            max-width: 100%;
+            margin-left: auto;
+            margin-top: 25px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 8px 0;
+        }
+
+        .grand {
+            margin-top: 8px;
+            padding-top: 14px;
+            border-top: 2px solid #111827;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .payment-box {
+            margin-top: 35px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .bank-box {
+            margin-top: 35px;
+            padding: 20px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+        }
+
+        .bank-row {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 10px;
+            padding: 4px 0;
+        }
+
+        .reference-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .paid {
+            color: #166534;
+            font-weight: bold;
+        }
+
+        .balance {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        @media print {
+
+            @page {
+                size: A4;
+                margin: 14mm;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .toolbar {
+                display: none;
+            }
+
+            .document {
+                max-width: none;
+                min-height: auto;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .document {
+                padding: 25px;
+            }
+
+            .header {
+                flex-direction: column;
+            }
+
+            .customer {
+                min-width: 0;
+            }
+
+            .bank-row {
+                grid-template-columns: 1fr;
+                gap: 2px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="toolbar">
+
+    <a
+        href="{% url 'core:invoice_detail' invoice.id %}"
+        class="button secondary"
+    >
+        ← Back to Invoice
+    </a>
+
+    <button
+        type="button"
+        class="button"
+        onclick="window.print()"
+    >
+        Print / Save PDF
+    </button>
+
+</div>
+
+
+<div class="document">
+
+    <div class="header">
+
+        <div>
+
+            <h1 class="title">
+                INVOICE
+            </h1>
+
+            <div class="document-number">
+                {{ invoice.invoice_number }}
+            </div>
+
+            <div class="business">
+
+                <strong>
+                    {{ business.name }}
+                </strong>
+
+                {% if business.phone %}
+                    <br>
+                    {{ business.phone }}
+                {% endif %}
+
+                {% if business.email %}
+                    <br>
+                    {{ business.email }}
+                {% endif %}
+
+                {% if business.address %}
+                    <br>
+                    {{ business.address }}
+                {% endif %}
+
+                {% if business.city %}
+                    <br>
+                    {{ business.city }}
+                {% endif %}
+
+                {% if business.registration_number %}
+                    <br>
+                    CIPC:
+                    {{ business.registration_number }}
+                {% endif %}
+
+                {% if business.vat_number %}
+                    <br>
+                    VAT No:
+                    {{ business.vat_number }}
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="customer">
+
+            <h3>
+                Bill To
+            </h3>
+
+            <strong>
+                {{ invoice.customer.name }}
+            </strong>
+
+            {% if invoice.customer.phone %}
+                <br>
+                {{ invoice.customer.phone }}
+            {% endif %}
+
+            {% if invoice.customer.email %}
+                <br>
+                {{ invoice.customer.email }}
+            {% endif %}
+
+            {% if invoice.customer.address %}
+                <br>
+                {{ invoice.customer.address }}
+            {% endif %}
+
+            <div class="meta">
+
+                <div class="meta-row">
+                    <strong>Issue Date</strong>
+                    <span>{{ invoice.issue_date }}</span>
+                </div>
+
+                <div class="meta-row">
+                    <strong>Due Date</strong>
+
+                    <span>
+                        {{ invoice.due_date|default:"—" }}
+                    </span>
+                </div>
+
+                <div class="meta-row">
+                    <strong>Status</strong>
+
+                    <span>
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if invoice.job %}
+
+        <p>
+            <strong>Job:</strong>
+            {{ invoice.job.job_number }}
+
+            {% if invoice.quote %}
+                · Quote {{ invoice.quote.quote_number }}
+            {% endif %}
+        </p>
+
+    {% endif %}
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Description</th>
+                <th class="right">Qty</th>
+                <th class="right">Unit Price</th>
+                <th class="right">Amount</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for item in invoice.items.all %}
+
+                <tr>
+
+                    <td>
+                        {{ item.description }}
+                    </td>
+
+                    <td class="right">
+                        {{ item.quantity|floatformat:2 }}
+                    </td>
+
+                    <td class="right">
+                        R{{ item.unit_price|floatformat:2 }}
+                    </td>
+
+                    <td class="right">
+                        R{{ item.line_total|floatformat:2 }}
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+
+    <div class="totals">
+
+        <div class="row">
+
+            <span>Subtotal</span>
+
+            <strong>
+                R{{ invoice.subtotal|floatformat:2 }}
+            </strong>
+
+        </div>
+
+        {% if invoice.apply_vat %}
+
+            <div class="row">
+
+                <span>VAT (15%)</span>
+
+                <strong>
+                    R{{ invoice.vat_amount|floatformat:2 }}
+                </strong>
+
+            </div>
+
+        {% endif %}
+
+        <div class="row grand">
+
+            <span>Total</span>
+
+            <span>
+                R{{ invoice.total|floatformat:2 }}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="payment-box">
+
+        <h3>
+            Payment Summary
+        </h3>
+
+        <div class="row">
+
+            <span>
+                Invoice Total
+            </span>
+
+            <strong>
+                R{{ invoice.total|floatformat:2 }}
+            </strong>
+
+        </div>
+
+        <div class="row">
+
+            <span>
+                Amount Paid
+            </span>
+
+            <strong class="paid">
+                R{{ invoice.amount_paid|floatformat:2 }}
+            </strong>
+
+        </div>
+
+        <div class="row balance">
+
+            <span>
+                Balance Due
+            </span>
+
+            <span>
+                R{{ invoice.balance_due|floatformat:2 }}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    {% if business.bank_name or business.bank_account_number %}
+
+        <div class="bank-box">
+
+            <h3>
+                Banking Details
+            </h3>
+
+            {% if business.bank_name %}
+
+                <div class="bank-row">
+                    <strong>Bank</strong>
+                    <span>{{ business.bank_name }}</span>
+                </div>
+
+            {% endif %}
+
+            {% if business.bank_account_name %}
+
+                <div class="bank-row">
+                    <strong>Account Name</strong>
+                    <span>
+                        {{ business.bank_account_name }}
+                    </span>
+                </div>
+
+            {% endif %}
+
+            {% if business.bank_account_number %}
+
+                <div class="bank-row">
+                    <strong>Account Number</strong>
+                    <span>
+                        {{ business.bank_account_number }}
+                    </span>
+                </div>
+
+            {% endif %}
+
+            {% if business.bank_branch_code %}
+
+                <div class="bank-row">
+                    <strong>Branch Code</strong>
+                    <span>
+                        {{ business.bank_branch_code }}
+                    </span>
+                </div>
+
+            {% endif %}
+
+            {% if business.bank_account_type %}
+
+                <div class="bank-row">
+                    <strong>Account Type</strong>
+                    <span>
+                        {{ business.bank_account_type }}
+                    </span>
+                </div>
+
+            {% endif %}
+
+            <div class="reference-box">
+                Payment Reference:
+                {{ invoice.invoice_number }}
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    {% if invoice.notes %}
+
+        <div class="section">
+
+            <h3>
+                Invoice Notes
+            </h3>
+
+            <p>
+                {{ invoice.notes|linebreaksbr }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    {% if business.default_invoice_terms %}
+
+        <div class="section">
+
+            <h3>
+                Payment Terms
+            </h3>
+
+            <p>
+                {{ business.default_invoice_terms|linebreaksbr }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="footer">
+
+        {{ business.name }}
+
+        {% if business.phone %}
+            · {{ business.phone }}
+        {% endif %}
+
+        {% if business.email %}
+            · {{ business.email }}
+        {% endif %}
+
+        <br><br>
+
+        Thank you for your business.
+
+        <br>
+
+        Generated with TradeFlow
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Sign In | TradeFlow
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4f6f8 0%,
+                    #e8edf3 100%
+                );
+
+            color: #1f2937;
+        }
+
+        .page {
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+
+            padding: 40px 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .brand {
+            text-align: center;
+
+            margin-bottom: 24px;
+        }
+
+        .brand-name {
+            margin: 0;
+
+            font-size: 30px;
+            font-weight: 800;
+
+            color: #111827;
+        }
+
+        .brand-subtitle {
+            margin-top: 7px;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+
+            padding: 34px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 10px 35px
+                rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin:
+                0 0 8px;
+
+            font-size: 25px;
+        }
+
+        .description {
+            margin:
+                0 0 28px;
+
+            color: #6b7280;
+
+            line-height: 1.6;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px 14px;
+
+            margin-bottom: 10px;
+
+            border-radius: 8px;
+
+            background: #eff6ff;
+
+            color: #1e40af;
+
+            font-size: 14px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 9px;
+
+            background: white;
+
+            font-family: inherit;
+            font-size: 15px;
+
+            color: #111827;
+
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.08);
+        }
+
+        .error-box {
+            margin-bottom: 20px;
+
+            padding: 13px 14px;
+
+            border:
+                1px solid
+                #fecaca;
+
+            border-radius: 8px;
+
+            background: #fef2f2;
+
+            color: #991b1b;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        .error {
+            margin-top: 7px;
+
+            color: #b91c1c;
+
+            font-size: 13px;
+        }
+
+        .button {
+            width: 100%;
+
+            border: none;
+
+            padding: 14px 18px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+        .register-link {
+            margin-top: 24px;
+
+            text-align: center;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 22px;
+
+            color: #9ca3af;
+
+            text-align: center;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+
+            .page {
+                padding: 25px 14px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+    <div class="auth-container">
+
+
+        <!-- =========================================
+             BRAND
+             ========================================= -->
+
+        <div class="brand">
+
+            <div class="brand-name">
+                TradeFlow
+            </div>
+
+            <div class="brand-subtitle">
+                Small business operating system
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             LOGIN CARD
+             ========================================= -->
+
+        <div class="card">
+
+
+            <h1>
+                Welcome back
+            </h1>
+
+
+            <p class="description">
+                Sign in to manage your customers,
+                quotations, jobs, invoices and payments.
+            </p>
+
+
+            <!-- =====================================
+                 MESSAGES
+                 ===================================== -->
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for message in messages %}
+
+                        <div class="message">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =====================================
+                 LOGIN ERRORS
+                 ===================================== -->
+
+            {% if form.non_field_errors %}
+
+                <div class="error-box">
+
+                    {% for error in form.non_field_errors %}
+
+                        <div>
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =====================================
+                 LOGIN FORM
+                 ===================================== -->
+
+            <form
+                method="POST"
+                action="{% url 'core:login' %}"
+            >
+
+                {% csrf_token %}
+
+
+                <!-- Preserve Django's next URL -->
+
+                {% if next %}
+
+                    <input
+                        type="hidden"
+                        name="next"
+                        value="{{ next }}"
+                    >
+
+                {% endif %}
+
+
+                <!-- USERNAME -->
+
+                <div class="field">
+
+                    <label for="{{ form.username.id_for_label }}">
+                        Username
+                    </label>
+
+
+                    <input
+                        type="text"
+                        name="username"
+                        id="{{ form.username.id_for_label }}"
+                        class="form-control"
+                        value="{{ form.username.value|default:'' }}"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                        autofocus
+                    >
+
+
+                    {% for error in form.username.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="field">
+
+                    <label for="{{ form.password.id_for_label }}">
+                        Password
+                    </label>
+
+
+                    <input
+                        type="password"
+                        name="password"
+                        id="{{ form.password.id_for_label }}"
+                        class="form-control"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+
+                    {% for error in form.password.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Sign In
+                </button>
+
+            </form>
+
+
+            <!-- =====================================
+                 REGISTER
+                 ===================================== -->
+
+            <div class="register-link">
+
+                Don't have a TradeFlow account?
+
+                <a href="{% url 'core:register' %}">
+                    Create account
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="footer">
+            TradeFlow · Small business operating system
+        </div>
+
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

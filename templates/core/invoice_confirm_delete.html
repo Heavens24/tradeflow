@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Invoice | TradeFlow</title>
+</head>
+
+<body>
+
+<h1>
+    Delete {{ invoice.invoice_number }}
+</h1>
+
+<p>
+    Customer:
+    {{ invoice.customer.name }}
+</p>
+
+<p>
+    Total:
+    R{{ invoice.total|floatformat:2 }}
+</p>
+
+<p>
+    This cannot be undone.
+</p>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <button type="submit">
+        Yes, Delete Invoice
+    </button>
+
+    <a href="{% url 'core:invoice_detail' invoice.id %}">
+        Cancel
+    </a>
+
+</form>
+
+</body>
+
+</html>

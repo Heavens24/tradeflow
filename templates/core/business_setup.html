@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Business Settings | TradeFlow
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #374151;
+        }
+
+        .card {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+
+            box-shadow:
+                0 4px 20px
+                rgba(0, 0, 0, 0.06);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .description {
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .section {
+            margin-top: 35px;
+            padding-top: 30px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .section:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .section-description {
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: #6b7280;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.5;
+        }
+
+        .form-control:focus {
+            border-color: #111827;
+        }
+
+        .error {
+            color: #b91c1c;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .form-errors {
+            margin-bottom: 25px;
+            padding: 14px;
+            border-radius: 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .button {
+            width: 100%;
+            border: 0;
+            padding: 14px 18px;
+            background: #111827;
+            color: white;
+            border-radius: 9px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            opacity: 0.92;
+        }
+
+        .optional {
+            color: #9ca3af;
+            font-weight: normal;
+            font-size: 13px;
+        }
+
+        .helper {
+            margin-top: 7px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .payment-note {
+            margin-top: 10px;
+            padding: 14px;
+            border-radius: 9px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e3a8a;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 700px) {
+
+            .page {
+                padding: 20px 12px;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        <a
+            href="{% url 'core:dashboard' %}"
+            class="back-link"
+        >
+            ← Back to dashboard
+        </a>
+
+
+        <div class="card">
+
+
+            {% if business %}
+
+                <h1>
+                    Business Settings
+                </h1>
+
+                <p class="description">
+                    Manage the information that TradeFlow
+                    uses on quotations, invoices and other
+                    customer documents.
+                </p>
+
+            {% else %}
+
+                <h1>
+                    Set up your business
+                </h1>
+
+                <p class="description">
+                    Tell TradeFlow about your business.
+                    These details will be used throughout
+                    your quotations, jobs, invoices and
+                    customer documents.
+                </p>
+
+            {% endif %}
+
+
+            {% if form.non_field_errors %}
+
+                <div class="form-errors">
+
+                    {% for error in form.non_field_errors %}
+
+                        {{ error }}
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <!-- ======================================
+                     BUSINESS INFORMATION
+                     ====================================== -->
+
+                <section class="section">
+
+                    <h2 class="section-title">
+                        Business Information
+                    </h2>
+
+                    <p class="section-description">
+                        These details identify your business
+                        on customer-facing documents.
+                    </p>
+
+
+                    <div class="grid">
+
+
+                        <div class="field full">
+
+                            <label for="{{ form.name.id_for_label }}">
+                                Business name
+                            </label>
+
+                            {{ form.name }}
+
+                            {% for error in form.name.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="{{ form.phone.id_for_label }}">
+                                Phone number
+                            </label>
+
+                            {{ form.phone }}
+
+                            {% for error in form.phone.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="{{ form.email.id_for_label }}">
+                                Email
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.email }}
+
+                            {% for error in form.email.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field full">
+
+                            <label for="{{ form.address.id_for_label }}">
+                                Business address
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.address }}
+
+                            {% for error in form.address.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="{{ form.city.id_for_label }}">
+                                City
+                            </label>
+
+                            {{ form.city }}
+
+                            {% for error in form.city.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ======================================
+                     REGISTRATION / TAX
+                     ====================================== -->
+
+                <section class="section">
+
+                    <h2 class="section-title">
+                        Registration & Tax
+                    </h2>
+
+                    <p class="section-description">
+                        Add your company registration and VAT
+                        information where applicable.
+                    </p>
+
+
+                    <div class="grid">
+
+
+                        <div class="field">
+
+                            <label
+                                for="{{ form.registration_number.id_for_label }}"
+                            >
+
+                                CIPC registration number
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.registration_number }}
+
+                            {% for error in form.registration_number.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label
+                                for="{{ form.vat_number.id_for_label }}"
+                            >
+
+                                VAT number
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.vat_number }}
+
+                            {% for error in form.vat_number.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ======================================
+                     BANKING DETAILS
+                     ====================================== -->
+
+                <section class="section">
+
+                    <h2 class="section-title">
+                        Banking Details
+                    </h2>
+
+                    <p class="section-description">
+                        These details can appear on invoices
+                        so customers know where to make EFT
+                        payments.
+                    </p>
+
+
+                    <div class="payment-note">
+
+                        Customers should use their invoice
+                        number as the payment reference,
+                        for example:
+
+                        <strong>
+                            INV-00001
+                        </strong>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="grid">
+
+
+                        <div class="field">
+
+                            <label for="{{ form.bank_name.id_for_label }}">
+
+                                Bank name
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.bank_name }}
+
+                            {% for error in form.bank_name.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label
+                                for="{{ form.bank_account_type.id_for_label }}"
+                            >
+
+                                Account type
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.bank_account_type }}
+
+                            {% for error in form.bank_account_type.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field full">
+
+                            <label
+                                for="{{ form.bank_account_name.id_for_label }}"
+                            >
+
+                                Account name
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.bank_account_name }}
+
+                            {% for error in form.bank_account_name.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label
+                                for="{{ form.bank_account_number.id_for_label }}"
+                            >
+
+                                Account number
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.bank_account_number }}
+
+                            {% for error in form.bank_account_number.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label
+                                for="{{ form.bank_branch_code.id_for_label }}"
+                            >
+
+                                Branch code
+
+                                <span class="optional">
+                                    optional
+                                </span>
+
+                            </label>
+
+                            {{ form.bank_branch_code }}
+
+                            {% for error in form.bank_branch_code.errors %}
+
+                                <div class="error">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ======================================
+                     DEFAULT TERMS
+                     ====================================== -->
+
+                <section class="section">
+
+                    <h2 class="section-title">
+                        Default Document Terms
+                    </h2>
+
+                    <p class="section-description">
+                        These terms can automatically appear
+                        on customer-facing quotations and
+                        invoices.
+                    </p>
+
+
+                    <div class="field">
+
+                        <label
+                            for="{{ form.default_quote_terms.id_for_label }}"
+                        >
+
+                            Default quotation terms
+
+                            <span class="optional">
+                                optional
+                            </span>
+
+                        </label>
+
+                        {{ form.default_quote_terms }}
+
+                        <div class="helper">
+                            Example: quotation validity,
+                            material availability, deposits
+                            or acceptance conditions.
+                        </div>
+
+                        {% for error in form.default_quote_terms.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label
+                            for="{{ form.default_invoice_terms.id_for_label }}"
+                        >
+
+                            Default invoice terms
+
+                            <span class="optional">
+                                optional
+                            </span>
+
+                        </label>
+
+                        {{ form.default_invoice_terms }}
+
+                        <div class="helper">
+                            Example: payment period,
+                            payment reference instructions
+                            or late-payment information.
+                        </div>
+
+                        {% for error in form.default_invoice_terms.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+
+                    {% if business %}
+
+                        Save Business Settings
+
+                    {% else %}
+
+                        Create Business Profile
+
+                    {% endif %}
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

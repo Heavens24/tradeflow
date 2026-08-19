@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ page_title }} | TradeFlow
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+
+        .page {
+            padding: 35px 20px;
+        }
+
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+
+        .back {
+            display: inline-block;
+
+            margin-bottom: 20px;
+
+            color: #374151;
+
+            text-decoration: none;
+        }
+
+
+        .card {
+            padding: 30px;
+
+            background: white;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 3px 15px
+                rgba(0, 0, 0, 0.05);
+        }
+
+
+        h1 {
+            margin-top: 0;
+        }
+
+
+        .quote-banner {
+            padding: 16px;
+
+            margin-bottom: 25px;
+
+            background: #eff6ff;
+
+            border:
+                1px solid
+                #bfdbfe;
+
+            border-radius: 8px;
+
+            line-height: 1.6;
+        }
+
+
+        .locked-customer {
+            padding: 14px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 8px;
+
+            background: #f9fafb;
+        }
+
+
+        .locked-customer strong {
+            display: block;
+
+            margin-bottom: 4px;
+        }
+
+
+        .locked-note {
+            margin-top: 7px;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+        }
+
+
+        .grid {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 18px;
+        }
+
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: 600;
+        }
+
+
+        .form-control {
+            width: 100%;
+
+            padding: 12px 13px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 8px;
+
+            font-family: inherit;
+
+            font-size: 15px;
+        }
+
+
+        .form-control:focus {
+            border-color: #2563eb;
+
+            outline: none;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.08);
+        }
+
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+
+        select:disabled {
+            background: #f3f4f6;
+        }
+
+
+        .help-text {
+            margin-top: 6px;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+        }
+
+
+        .error {
+            margin-top: 7px;
+
+            padding: 10px 12px;
+
+            border:
+                1px solid
+                #fecaca;
+
+            border-radius: 7px;
+
+            background: #fef2f2;
+
+            color: #991b1b;
+
+            font-size: 13px;
+        }
+
+
+        .form-errors {
+            margin-bottom: 20px;
+        }
+
+
+        .actions {
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 15px;
+        }
+
+
+        .button {
+            padding: 13px 20px;
+
+            border: 0;
+
+            border-radius: 8px;
+
+            background: #111827;
+            color: white;
+
+            font-family: inherit;
+
+            cursor: pointer;
+
+            text-decoration: none;
+        }
+
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+
+        @media (max-width: 650px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .actions {
+                flex-direction: column;
+            }
+
+
+            .button {
+                width: 100%;
+
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+    <div class="container">
+
+
+        {% if quote %}
+
+            <a
+                href="{% url 'core:quote_detail' quote.id %}"
+                class="back"
+            >
+                ← Back to {{ quote.quote_number }}
+            </a>
+
+        {% else %}
+
+            <a
+                href="{% url 'core:job_list' %}"
+                class="back"
+            >
+                ← Back to Jobs
+            </a>
+
+        {% endif %}
+
+
+        <div class="card">
+
+
+            <h1>
+                {{ page_title }}
+            </h1>
+
+
+            {% if quote %}
+
+                <div class="quote-banner">
+
+                    <strong>
+                        Source quotation:
+                        {{ quote.quote_number }}
+                    </strong>
+
+                    <br>
+
+                    Customer:
+                    {{ quote.customer.name }}
+
+                    <br>
+
+                    Quote total:
+                    R{{ quote.total|floatformat:2 }}
+
+                </div>
+
+            {% endif %}
+
+
+            {% if form.non_field_errors %}
+
+                <div class="form-errors">
+
+                    {% for error in form.non_field_errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <!-- =========================================
+                     CUSTOMER
+                     ========================================= -->
+
+                <div class="field">
+
+                    <label>
+                        Customer
+                    </label>
+
+
+                    {% if from_quote and quote %}
+
+                        <div class="locked-customer">
+
+                            <strong>
+                                {{ quote.customer.name }}
+                            </strong>
+
+
+                            {% if quote.customer.phone %}
+
+                                {{ quote.customer.phone }}
+
+                            {% endif %}
+
+
+                            {% if quote.customer.email %}
+
+                                {% if quote.customer.phone %}
+                                    ·
+                                {% endif %}
+
+                                {{ quote.customer.email }}
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="locked-note">
+
+                            Customer is locked because this
+                            job is being created from
+                            {{ quote.quote_number }}.
+
+                        </div>
+
+
+                    {% else %}
+
+                        {{ form.customer }}
+
+                    {% endif %}
+
+
+                    {% for error in form.customer.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- =========================================
+                     JOB TITLE
+                     ========================================= -->
+
+                <div class="field">
+
+                    <label for="{{ form.title.id_for_label }}">
+                        Job Title
+                    </label>
+
+                    {{ form.title }}
+
+
+                    <div class="help-text">
+
+                        Give the job a clear title such as
+                        "Replace DB Circuit Breaker" or
+                        "Motor Inspection and Repair".
+
+                    </div>
+
+
+                    {% for error in form.title.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- =========================================
+                     WORK DESCRIPTION
+                     ========================================= -->
+
+                <div class="field">
+
+                    <label for="{{ form.description.id_for_label }}">
+                        Work Description
+                    </label>
+
+                    {{ form.description }}
+
+
+                    {% if from_quote %}
+
+                        <div class="help-text">
+
+                            Work items have been copied from
+                            the source quotation. You can add
+                            extra instructions where required.
+
+                        </div>
+
+                    {% endif %}
+
+
+                    {% for error in form.description.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- =========================================
+                     STATUS / DATES
+                     ========================================= -->
+
+                <div class="grid">
+
+
+                    <div class="field">
+
+                        <label for="{{ form.status.id_for_label }}">
+                            Status
+                        </label>
+
+                        {{ form.status }}
+
+
+                        {% for error in form.status.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="{{ form.start_date.id_for_label }}">
+                            Start Date
+                        </label>
+
+                        {{ form.start_date }}
+
+
+                        {% for error in form.start_date.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="{{ form.due_date.id_for_label }}">
+                            Due Date
+                        </label>
+
+                        {{ form.due_date }}
+
+
+                        {% for error in form.due_date.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- =========================================
+                     NOTES
+                     ========================================= -->
+
+                <div class="field">
+
+                    <label for="{{ form.notes.id_for_label }}">
+                        Notes
+                    </label>
+
+                    {{ form.notes }}
+
+
+                    {% for error in form.notes.errors %}
+
+                        <div class="error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- =========================================
+                     ACTIONS
+                     ========================================= -->
+
+                <div class="actions">
+
+
+                    <button
+                        type="submit"
+                        class="button"
+                    >
+                        {{ button_text }}
+                    </button>
+
+
+                    {% if quote %}
+
+                        <a
+                            href="{% url 'core:quote_detail' quote.id %}"
+                            class="button secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    {% else %}
+
+                        <a
+                            href="{% url 'core:job_list' %}"
+                            class="button secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>

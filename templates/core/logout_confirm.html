@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sign Out | TradeFlow</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .logout-card {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 26px;
+        }
+
+        .message {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .user-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 28px;
+        }
+
+        .user-label {
+            display: block;
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .username {
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .button {
+            flex: 1;
+            border: none;
+            border-radius: 9px;
+            padding: 13px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .button-danger {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
+        .button-danger:hover {
+            background: #b91c1c;
+        }
+
+        .button-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .button-secondary:hover {
+            background: #d1d5db;
+        }
+
+        @media (max-width: 520px) {
+            .logout-card {
+                padding: 26px 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="logout-card">
+
+        <div class="brand">
+            TradeFlow
+        </div>
+
+        <div class="subtitle">
+            Small business operating system
+        </div>
+
+        <h1>
+            Sign out?
+        </h1>
+
+        <p class="message">
+            Are you sure you want to sign out of TradeFlow?
+            Your customers, quotations, jobs, invoices and
+            payments will remain safely stored.
+        </p>
+
+        {% if user.is_authenticated %}
+            <div class="user-box">
+                <span class="user-label">
+                    Signed in as
+                </span>
+
+                <span class="username">
+                    {{ user.username }}
+                </span>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="actions">
+
+                <a
+                    href="{% url 'core:dashboard' %}"
+                    class="button button-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="button button-danger"
+                >
+                    Sign Out
+                </button>
+
+            </div>
+        </form>
+
+    </div>
+
+</body>
+
+</html>

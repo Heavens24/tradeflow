@@ -1,0 +1,400 @@
+{% extends "core/base.html" %}
+
+
+{% block title %}
+    Customers | TradeFlow
+{% endblock %}
+
+
+{% block extra_css %}
+
+.topbar {
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+}
+
+.topbar h1 {
+    margin: 0;
+}
+
+.topbar p {
+    margin-bottom: 0;
+
+    color: #6b7280;
+}
+
+.search-card {
+    padding: 18px;
+
+    margin-bottom: 20px;
+
+    background: white;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.04);
+}
+
+.search-form {
+    display: flex;
+
+    gap: 10px;
+}
+
+.search-form input {
+    flex: 1;
+
+    padding: 12px 14px;
+
+    border:
+        1px solid
+        #d1d5db;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+.search-form input:focus {
+    border-color: #111827;
+}
+
+.table-card {
+    background: white;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.05);
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px;
+
+    text-align: left;
+
+    border-bottom:
+        1px solid
+        #e5e7eb;
+
+    vertical-align: middle;
+}
+
+th {
+    background: #f9fafb;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+.row-actions {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.empty {
+    padding: 40px 20px;
+
+    text-align: center;
+
+    color: #6b7280;
+}
+
+.customer-name {
+    font-weight: bold;
+}
+
+@media (max-width: 900px) {
+
+    .topbar,
+    .search-form {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .table-card {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 850px;
+    }
+
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="topbar">
+
+    <div>
+
+        <h1>
+            Customers
+        </h1>
+
+        <p>
+            Manage the customers belonging to
+            {{ business.name }}.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'core:customer_create' %}"
+        class="button"
+    >
+        + Add Customer
+    </a>
+
+</div>
+
+
+<div class="search-card">
+
+    <form
+        method="GET"
+        class="search-form"
+    >
+
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="Search name, phone, email or address"
+        >
+
+
+        <button
+            type="submit"
+            class="button"
+        >
+            Search
+        </button>
+
+
+        {% if query %}
+
+            <a
+                href="{% url 'core:customer_list' %}"
+                class="button secondary"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+
+    </form>
+
+</div>
+
+
+<div class="table-card">
+
+
+    {% if customers %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Name
+                    </th>
+
+                    <th>
+                        Phone
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Address
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for customer in customers %}
+
+                    <tr>
+
+                        <td>
+
+                            <span class="customer-name">
+                                {{ customer.name }}
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            {% if customer.phone %}
+                                {{ customer.phone }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if customer.email %}
+                                {{ customer.email }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if customer.address %}
+                                {{ customer.address }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="row-actions">
+
+
+                                <a
+                                    href="{% url 'core:customer_statement' customer.id %}"
+                                    class="button statement"
+                                >
+                                    Statement
+                                </a>
+
+
+                                <a
+                                    href="{% url 'core:customer_edit' customer.id %}"
+                                    class="button secondary"
+                                >
+                                    Edit
+                                </a>
+
+
+                                <a
+                                    href="{% url 'core:customer_delete' customer.id %}"
+                                    class="button danger"
+                                >
+                                    Delete
+                                </a>
+
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+
+    {% else %}
+
+        <div class="empty">
+
+
+            {% if query %}
+
+                No customers matched
+                "<strong>{{ query }}</strong>".
+
+                <br><br>
+
+                <a
+                    href="{% url 'core:customer_list' %}"
+                    class="button secondary"
+                >
+                    Clear Search
+                </a>
+
+
+            {% else %}
+
+                No customers have been added yet.
+
+                <br><br>
+
+                <a
+                    href="{% url 'core:customer_create' %}"
+                    class="button"
+                >
+                    Add Your First Customer
+                </a>
+
+            {% endif %}
+
+
+        </div>
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}
