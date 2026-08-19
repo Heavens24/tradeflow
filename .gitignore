@@ -47,6 +47,7 @@ db.sqlite3-journal
 
 db.sqlite3.backup
 tradeflow_data_backup.json
+tradeflow_data_backup_utf8.json
 
 
 # ---------------------------------------------------------
