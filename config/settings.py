@@ -475,7 +475,7 @@ LOGOUT_REDIRECT_URL = "/login/"
 # PASSWORD RESET
 # =========================================================
 
-# Reset links are valid for Django's standard timeout.
+# Reset links remain valid for:
 #
 # 259200 seconds = 3 days.
 PASSWORD_RESET_TIMEOUT = int(
@@ -490,104 +490,90 @@ PASSWORD_RESET_TIMEOUT = int(
 # EMAIL / PASSWORD RESET DELIVERY
 # =========================================================
 
-# Local:
+# ---------------------------------------------------------
+# LOCAL DEVELOPMENT
+# ---------------------------------------------------------
 #
 # EMAIL_PROVIDER=console
 #
-# Password-reset messages are printed in the terminal.
+# Password-reset messages are printed in the VS Code
+# terminal. This keeps local development independent of
+# external email services.
 #
 #
-# Render:
+# ---------------------------------------------------------
+# PRODUCTION / RENDER
+# ---------------------------------------------------------
 #
-# EMAIL_PROVIDER=smtp
+# EMAIL_PROVIDER=resend
 #
-# Password-reset messages are delivered through Resend.
+# Production messages are sent through the Resend HTTPS
+# API instead of SMTP.
+#
+# Render Free blocks outbound SMTP connections on the
+# standard SMTP ports, so using Resend's HTTPS API avoids
+# those restrictions completely.
+
 EMAIL_PROVIDER = os.getenv(
     "EMAIL_PROVIDER",
     "console",
 ).strip().lower()
 
 
-if EMAIL_PROVIDER == "smtp":
+if EMAIL_PROVIDER == "resend":
 
-    EMAIL_HOST_PASSWORD_VALUE = os.getenv(
-        "EMAIL_HOST_PASSWORD",
+    # Resend API secret.
+    #
+    # This value must be supplied by Render as:
+    #
+    # RESEND_API_KEY=re_...
+    #
+    # Never hard-code the actual API key here.
+
+    RESEND_API_KEY = os.getenv(
+        "RESEND_API_KEY",
         "",
     ).strip()
 
 
-    # Production should never silently start without
-    # the SMTP credential.
-    if not EMAIL_HOST_PASSWORD_VALUE and not DEBUG:
+    # Production should never silently start with
+    # the Resend provider selected but no API key.
+
+    if not RESEND_API_KEY and not DEBUG:
 
         raise RuntimeError(
-            "EMAIL_HOST_PASSWORD must be set "
-            "when EMAIL_PROVIDER=smtp in production."
+            "RESEND_API_KEY must be set "
+            "when EMAIL_PROVIDER=resend "
+            "in production."
         )
 
+
+    # Django 6.1 mailer configuration.
+    #
+    # The custom backend translates Django email messages
+    # into Resend HTTPS API requests.
 
     MAILERS = {
 
         "default": {
 
             "BACKEND": (
-                "django.core.mail.backends.smtp."
-                "EmailBackend"
+                "core.resend_backend."
+                "ResendEmailBackend"
             ),
-
-            "OPTIONS": {
-
-                # Resend SMTP by default.
-                #
-                # These remain configurable so another
-                # provider can be used in future.
-
-                "host": os.getenv(
-                    "EMAIL_HOST",
-                    "smtp.resend.com",
-                ),
-
-                "port": int(
-                    os.getenv(
-                        "EMAIL_PORT",
-                        "587",
-                    )
-                ),
-
-                "username": os.getenv(
-                    "EMAIL_HOST_USER",
-                    "resend",
-                ),
-
-                "password": (
-                    EMAIL_HOST_PASSWORD_VALUE
-                ),
-
-                # Port 587 uses STARTTLS.
-                "use_tls": env_bool(
-                    "EMAIL_USE_TLS",
-                    default=True,
-                ),
-
-                "timeout": int(
-                    os.getenv(
-                        "EMAIL_TIMEOUT",
-                        "15",
-                    )
-                ),
-
-            },
 
         },
 
     }
 
+
 else:
 
     # Local development console mailer.
     #
-    # This preserves the password-reset workflow we
-    # already tested successfully in VS Code.
+    # This preserves the password-reset workflow already
+    # tested successfully in VS Code.
+
     MAILERS = {
 
         "default": {
@@ -602,22 +588,24 @@ else:
     }
 
 
-# Sender shown to customers.
+# Sender displayed to users.
 #
-# During early Resend testing this can be:
+# During Resend testing:
 #
 # TradeFlow <onboarding@resend.dev>
 #
-# Once a TradeFlow domain is verified, change this to:
+# Once a TradeFlow domain is owned and verified,
+# this can become something such as:
 #
-# TradeFlow <no-reply@yourdomain.co.za>
+# TradeFlow <no-reply@tradeflow.co.za>
+
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     "TradeFlow <onboarding@resend.dev>",
 )
 
 
-# Django uses SERVER_EMAIL for system/admin messages.
+# Django uses SERVER_EMAIL for internal/system messages.
 SERVER_EMAIL = os.getenv(
     "SERVER_EMAIL",
     DEFAULT_FROM_EMAIL,
