@@ -4,6 +4,14 @@ from django.urls import include, path
 from django.urls import reverse_lazy
 
 
+# =========================================================
+# CUSTOM ERROR HANDLERS
+# =========================================================
+
+handler404 = "core.error_views.custom_404"
+handler500 = "core.error_views.custom_500"
+
+
 urlpatterns = [
     # =====================================================
     # DJANGO ADMIN
@@ -34,8 +42,7 @@ urlpatterns = [
     ),
 
     # Step 2:
-    # Confirmation page shown after the reset email
-    # request has been submitted.
+    # Confirmation shown after reset request submission.
     path(
         "password-reset/done/",
         auth_views.PasswordResetDoneView.as_view(
@@ -45,7 +52,7 @@ urlpatterns = [
     ),
 
     # Step 3:
-    # Secure password-reset link sent to the user's email.
+    # Secure reset link contained in the user's email.
     path(
         "reset/<uidb64>/<token>/",
         auth_views.PasswordResetConfirmView.as_view(
@@ -58,8 +65,7 @@ urlpatterns = [
     ),
 
     # Step 4:
-    # Confirmation shown after the password
-    # has successfully been changed.
+    # Password successfully changed.
     path(
         "reset/done/",
         auth_views.PasswordResetCompleteView.as_view(
@@ -72,10 +78,6 @@ urlpatterns = [
     # =====================================================
     # TRADEFLOW APPLICATION
     # =====================================================
-    # All normal TradeFlow routes remain managed by
-    # core.urls, including login, registration, dashboard,
-    # customers, quotations, jobs, invoices, payments,
-    # settings, and the rest of the application.
     path(
         "",
         include("core.urls"),

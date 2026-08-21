@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Something Went Wrong | TradeFlow</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4f6f8 0%,
+                    #e8edf3 100%
+                );
+
+            color: #1f2937;
+        }
+
+        .page {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 560px;
+
+            text-align: center;
+        }
+
+        .brand {
+            margin-bottom: 24px;
+        }
+
+        .brand-name {
+            margin: 0;
+
+            font-size: 30px;
+            font-weight: 800;
+
+            color: #111827;
+        }
+
+        .brand-subtitle {
+            margin-top: 7px;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+
+            padding: 40px 30px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 10px 35px
+                rgba(0, 0, 0, 0.08);
+        }
+
+        .code {
+            margin-bottom: 10px;
+
+            font-size: 64px;
+            font-weight: 800;
+
+            color: #111827;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+
+            font-size: 26px;
+        }
+
+        .description {
+            margin: 0 auto 28px;
+
+            max-width: 430px;
+
+            color: #6b7280;
+
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+
+            padding: 13px 20px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .footer {
+            margin-top: 22px;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            .code {
+                font-size: 52px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        <div class="brand">
+
+            <div class="brand-name">
+                TradeFlow
+            </div>
+
+            <div class="brand-subtitle">
+                Small business operating system
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="code">
+                500
+            </div>
+
+            <h1>
+                Something went wrong
+            </h1>
+
+            <p class="description">
+                TradeFlow couldn't complete this request.
+                Please try again in a moment.
+            </p>
+
+            <div class="actions">
+
+                <a
+                    href="/"
+                    class="button"
+                >
+                    Return to TradeFlow
+                </a>
+
+                <a
+                    href="/"
+                    class="button secondary"
+                >
+                    Try Again
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer">
+            TradeFlow · Small business operating system
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
