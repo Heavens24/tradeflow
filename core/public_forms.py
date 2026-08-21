@@ -1,6 +1,9 @@
 from django import forms
 
-from .models import BusinessPublicProfile
+from .models import (
+    BusinessPublicProfile,
+    QuoteRequest,
+)
 
 
 # =========================================================
@@ -34,7 +37,6 @@ class PublicBusinessProfileForm(
             "show_email_publicly",
         ]
 
-
         widgets = {
 
             "public_profile_enabled": (
@@ -45,7 +47,6 @@ class PublicBusinessProfileForm(
                 )
             ),
 
-
             "headline": forms.TextInput(
                 attrs={
                     "class": "form-control",
@@ -55,7 +56,6 @@ class PublicBusinessProfileForm(
                     ),
                 }
             ),
-
 
             "description": forms.Textarea(
                 attrs={
@@ -69,7 +69,6 @@ class PublicBusinessProfileForm(
                     ),
                 }
             ),
-
 
             "services": forms.Textarea(
                 attrs={
@@ -85,7 +84,6 @@ class PublicBusinessProfileForm(
                 }
             ),
 
-
             "whatsapp_number": (
                 forms.TextInput(
                     attrs={
@@ -97,7 +95,6 @@ class PublicBusinessProfileForm(
                 )
             ),
 
-
             "emergency_callouts": (
                 forms.CheckboxInput(
                     attrs={
@@ -106,7 +103,6 @@ class PublicBusinessProfileForm(
                 )
             ),
 
-
             "show_phone_publicly": (
                 forms.CheckboxInput(
                     attrs={
@@ -114,7 +110,6 @@ class PublicBusinessProfileForm(
                     }
                 )
             ),
-
 
             "show_email_publicly": (
                 forms.CheckboxInput(
@@ -125,3 +120,154 @@ class PublicBusinessProfileForm(
             ),
 
         }
+
+
+# =========================================================
+# PUBLIC QUOTE REQUEST FORM
+# =========================================================
+
+
+class PublicQuoteRequestForm(
+    forms.ModelForm
+):
+    """
+    Customer-facing request form.
+
+    The business is never selectable by the customer.
+    The view attaches the request to the business associated
+    with the public profile URL.
+    """
+
+    class Meta:
+        model = QuoteRequest
+
+        fields = [
+            "customer_name",
+            "phone",
+            "email",
+            "location",
+            "description",
+            "urgency",
+            "preferred_contact",
+        ]
+
+        widgets = {
+
+            "customer_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Your full name",
+                    "autocomplete": "name",
+                }
+            ),
+
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g. 0821234567",
+                    "autocomplete": "tel",
+                }
+            ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "you@example.com",
+                    "autocomplete": "email",
+                }
+            ),
+
+            "location": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": (
+                        "Suburb, area or job location"
+                    ),
+                }
+            ),
+
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 7,
+                    "placeholder": (
+                        "Describe the work you need done, "
+                        "the problem you're experiencing, "
+                        "and any useful details."
+                    ),
+                }
+            ),
+
+            "urgency": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "preferred_contact": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+        }
+
+
+    def clean_customer_name(self):
+        value = (
+            self.cleaned_data.get(
+                "customer_name",
+                "",
+            )
+            .strip()
+        )
+
+        if len(value) < 2:
+            raise forms.ValidationError(
+                "Please enter your name."
+            )
+
+        return value
+
+
+    def clean_phone(self):
+        value = (
+            self.cleaned_data.get(
+                "phone",
+                "",
+            )
+            .strip()
+        )
+
+        digits = "".join(
+            character
+            for character in value
+            if character.isdigit()
+        )
+
+        if len(digits) < 9:
+            raise forms.ValidationError(
+                "Please enter a valid phone number."
+            )
+
+        return value
+
+
+    def clean_description(self):
+        value = (
+            self.cleaned_data.get(
+                "description",
+                "",
+            )
+            .strip()
+        )
+
+        if len(value) < 10:
+            raise forms.ValidationError(
+                (
+                    "Please provide a little more "
+                    "information about the work."
+                )
+            )
+
+        return value

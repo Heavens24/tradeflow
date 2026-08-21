@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Quote Request Sent | TradeFlow
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4f6f8 0%,
+                    #e8edf3 100%
+                );
+
+            color: #1f2937;
+        }
+
+        .page {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 560px;
+
+            background: white;
+
+            padding: 38px 30px;
+
+            border-radius: 16px;
+
+            text-align: center;
+
+            box-shadow:
+                0 10px 35px
+                rgba(0, 0, 0, 0.08);
+        }
+
+        .success {
+            font-size: 46px;
+
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            margin:
+                0 0 12px;
+        }
+
+        p {
+            color: #6b7280;
+
+            line-height: 1.7;
+        }
+
+        .button {
+            display: inline-block;
+
+            margin-top: 18px;
+
+            padding: 14px 20px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="card">
+
+        <div class="success">
+            ✓
+        </div>
+
+        <h1>
+            Quote request sent
+        </h1>
+
+        <p>
+            Your request has been sent successfully to
+            <strong>{{ business.name }}</strong>.
+        </p>
+
+        <p>
+            The business can now review your job details
+            and contact you using your preferred method.
+        </p>
+
+        <a
+            href="{% url 'core:public_business_profile' profile.slug %}"
+            class="button"
+        >
+            Return to {{ business.name }}
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

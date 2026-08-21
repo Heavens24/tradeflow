@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import lead_views
 from . import public_views
 from . import views
 
@@ -35,11 +36,6 @@ urlpatterns = [
         name="logout",
     ),
 
-    # Django login_required uses /accounts/login/ by default
-    # unless LOGIN_URL is configured.
-    #
-    # Keep this alias so all existing @login_required views
-    # continue working without requiring a settings.py change.
     path(
         "accounts/login/",
         views.login_view,
@@ -60,16 +56,12 @@ urlpatterns = [
     # =====================================================
     # BUSINESS
     # =====================================================
-
-    # Existing private business setup.
     path(
         "business/setup/",
         views.business_setup,
         name="business_setup",
     ),
 
-
-    # Private public-profile settings.
     path(
         "business/public-profile/",
         public_views.public_profile_settings,
@@ -77,15 +69,57 @@ urlpatterns = [
     ),
 
 
-    # Public business mini-page.
-    #
-    # Example:
-    #
-    # /business/march24-electrical-services/
+    # =====================================================
+    # PUBLIC QUOTE REQUESTS
+    # =====================================================
+    path(
+        "business/<slug:slug>/request-quote/",
+        public_views.public_quote_request,
+        name="public_quote_request",
+    ),
+
+    path(
+        "business/<slug:slug>/request-quote/success/",
+        public_views.public_quote_request_success,
+        name="public_quote_request_success",
+    ),
+
+
+    # =====================================================
+    # PUBLIC BUSINESS MINI-PAGE
+    # =====================================================
     path(
         "business/<slug:slug>/",
         public_views.public_business_profile,
         name="public_business_profile",
+    ),
+
+
+    # =====================================================
+    # PRIVATE QUOTE REQUEST INBOX
+    # =====================================================
+    path(
+        "quote-requests/",
+        lead_views.quote_request_list,
+        name="quote_request_list",
+    ),
+
+    path(
+        "quote-requests/<int:request_id>/",
+        lead_views.quote_request_detail,
+        name="quote_request_detail",
+    ),
+
+    path(
+        "quote-requests/<int:request_id>/contacted/",
+        lead_views.quote_request_contacted,
+        name="quote_request_contacted",
+    ),
+
+    path(
+        "quote-requests/<int:request_id>/convert/",
+        lead_views.quote_request_convert,
+        name="quote_request_convert",
     ),
 
 

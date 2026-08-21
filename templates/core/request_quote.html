@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Request Quote | {{ business.name }}
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+
+            color: #1f2937;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 760px;
+
+            margin: 0 auto;
+
+            padding: 40px 20px 60px;
+        }
+
+        .brand {
+            margin-bottom: 24px;
+
+            text-align: center;
+        }
+
+        .brand-name {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .brand-subtitle {
+            margin-top: 6px;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+
+            padding: 32px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 8px 30px
+                rgba(0, 0, 0, 0.07);
+        }
+
+        h1 {
+            margin:
+                0 0 10px;
+        }
+
+        .intro {
+            margin:
+                0 0 28px;
+
+            color: #6b7280;
+
+            line-height: 1.6;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 9px;
+
+            font: inherit;
+
+            background: white;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        .error {
+            margin-top: 6px;
+
+            color: #b91c1c;
+
+            font-size: 13px;
+        }
+
+        .button {
+            display: inline-block;
+
+            border: 0;
+
+            padding: 14px 20px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            font-weight: 700;
+
+            text-decoration: none;
+
+            cursor: pointer;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+
+            color: #111827;
+        }
+
+        .actions {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 26px;
+        }
+
+        .privacy {
+            margin-top: 24px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #eff6ff;
+
+            color: #1e40af;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 24px 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="brand">
+
+        <div class="brand-name">
+            TradeFlow
+        </div>
+
+        <div class="brand-subtitle">
+            Request a quotation
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h1>
+            Request a Quote
+        </h1>
+
+        <p class="intro">
+            Send your job details directly to
+            <strong>{{ business.name }}</strong>.
+            They can review your request and prepare
+            a quotation in TradeFlow.
+        </p>
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.customer_name.id_for_label }}"
+                >
+                    Your name
+                </label>
+
+                {{ form.customer_name }}
+
+                {% for error in form.customer_name.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.phone.id_for_label }}"
+                >
+                    Phone number
+                </label>
+
+                {{ form.phone }}
+
+                {% for error in form.phone.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.email.id_for_label }}"
+                >
+                    Email address
+                </label>
+
+                {{ form.email }}
+
+                {% for error in form.email.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.location.id_for_label }}"
+                >
+                    Job location
+                </label>
+
+                {{ form.location }}
+
+                {% for error in form.location.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.description.id_for_label }}"
+                >
+                    Describe the work
+                </label>
+
+                {{ form.description }}
+
+                {% for error in form.description.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.urgency.id_for_label }}"
+                >
+                    Urgency
+                </label>
+
+                {{ form.urgency }}
+
+                {% for error in form.urgency.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.preferred_contact.id_for_label }}"
+                >
+                    Preferred contact method
+                </label>
+
+                {{ form.preferred_contact }}
+
+                {% for error in form.preferred_contact.errors %}
+                    <div class="error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            {% if form.non_field_errors %}
+
+                {% for error in form.non_field_errors %}
+
+                    <div class="error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+
+            <div class="actions">
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Send Quote Request
+                </button>
+
+                <a
+                    href="{% url 'core:public_business_profile' profile.slug %}"
+                    class="button secondary"
+                >
+                    Back to Business
+                </a>
+
+            </div>
+
+        </form>
+
+
+        <div class="privacy">
+            Your details are sent only to
+            {{ business.name }} for the purpose of
+            responding to this quote request.
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Quote Requests | TradeFlow
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+
+            color: #1f2937;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1000px;
+
+            margin: 0 auto;
+
+            padding: 38px 20px 60px;
+        }
+
+        .top {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 20px;
+
+            margin-bottom: 26px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .subtitle {
+            margin-top: 6px;
+
+            color: #6b7280;
+        }
+
+        .button {
+            display: inline-block;
+
+            padding: 12px 17px;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+
+            color: #111827;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+        }
+
+        .filter {
+            padding: 9px 13px;
+
+            border-radius: 999px;
+
+            background: white;
+
+            color: #374151;
+
+            text-decoration: none;
+
+            border:
+                1px solid
+                #e5e7eb;
+        }
+
+        .filter.active {
+            background: #111827;
+
+            color: white;
+        }
+
+        .request {
+            display: block;
+
+            margin-bottom: 14px;
+
+            padding: 20px;
+
+            background: white;
+
+            border-radius: 12px;
+
+            text-decoration: none;
+
+            color: inherit;
+
+            box-shadow:
+                0 4px 18px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .request-top {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+        }
+
+        .name {
+            font-size: 18px;
+
+            font-weight: 700;
+        }
+
+        .meta {
+            margin-top: 7px;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .status {
+            font-size: 13px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+        }
+
+        .description {
+            margin-top: 14px;
+
+            color: #4b5563;
+
+            line-height: 1.6;
+        }
+
+        .empty {
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 12px;
+
+            text-align: center;
+
+            color: #6b7280;
+        }
+
+        @media (max-width: 650px) {
+            .top,
+            .request-top {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="top">
+
+        <div>
+
+            <h1>
+                Quote Requests
+            </h1>
+
+            <div class="subtitle">
+                Customer enquiries sent to
+                {{ business.name }}
+            </div>
+
+        </div>
+
+        <a
+            href="{% url 'core:dashboard' %}"
+            class="button secondary"
+        >
+            ← Dashboard
+        </a>
+
+    </div>
+
+
+    <div class="filters">
+
+        <a
+            href="{% url 'core:quote_request_list' %}"
+            class="filter {% if not status_filter %}active{% endif %}"
+        >
+            All
+        </a>
+
+        {% for value, label in status_choices %}
+
+            <a
+                href="?status={{ value }}"
+                class="filter {% if status_filter == value %}active{% endif %}"
+            >
+                {{ label }}
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% for item in quote_requests %}
+
+        <a
+            href="{% url 'core:quote_request_detail' item.id %}"
+            class="request"
+        >
+
+            <div class="request-top">
+
+                <div>
+
+                    <div class="name">
+                        {{ item.customer_name }}
+                    </div>
+
+                    <div class="meta">
+                        {{ item.phone }}
+
+                        {% if item.location %}
+                            · {{ item.location }}
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="status">
+                    {{ item.get_status_display }}
+                </div>
+
+            </div>
+
+            <div class="description">
+                {{ item.description|truncatechars:180 }}
+            </div>
+
+            <div class="meta">
+                {{ item.get_urgency_display }}
+                · {{ item.created_at|date:"d M Y H:i" }}
+            </div>
+
+        </a>
+
+    {% empty %}
+
+        <div class="empty">
+            No quote requests found.
+        </div>
+
+    {% endfor %}
+
+</div>
+
+</body>
+
+</html>

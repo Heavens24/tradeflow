@@ -1111,3 +1111,219 @@ class BusinessPublicProfile(models.Model):
 
             if service.strip()
         ]
+
+
+# =========================================================
+# PUBLIC QUOTE REQUESTS
+# =========================================================
+
+
+class QuoteRequest(models.Model):
+    """
+    A customer enquiry submitted through a business's
+    public TradeFlow mini-page.
+
+    Quote requests are private operational records.
+
+    They are visible only to the business that received
+    them and are never exposed through the public profile.
+    """
+
+    # =====================================================
+    # STATUS
+    # =====================================================
+
+    STATUS_NEW = "new"
+    STATUS_CONTACTED = "contacted"
+    STATUS_CONVERTED = "converted"
+    STATUS_CLOSED = "closed"
+
+    STATUS_CHOICES = [
+        (
+            STATUS_NEW,
+            "New",
+        ),
+        (
+            STATUS_CONTACTED,
+            "Contacted",
+        ),
+        (
+            STATUS_CONVERTED,
+            "Converted",
+        ),
+        (
+            STATUS_CLOSED,
+            "Closed",
+        ),
+    ]
+
+
+    # =====================================================
+    # PREFERRED CONTACT METHOD
+    # =====================================================
+
+    CONTACT_WHATSAPP = "whatsapp"
+    CONTACT_PHONE = "phone"
+    CONTACT_EMAIL = "email"
+
+    CONTACT_CHOICES = [
+        (
+            CONTACT_WHATSAPP,
+            "WhatsApp",
+        ),
+        (
+            CONTACT_PHONE,
+            "Phone call",
+        ),
+        (
+            CONTACT_EMAIL,
+            "Email",
+        ),
+    ]
+
+
+    # =====================================================
+    # URGENCY
+    # =====================================================
+
+    URGENCY_NORMAL = "normal"
+    URGENCY_SOON = "soon"
+    URGENCY_URGENT = "urgent"
+
+    URGENCY_CHOICES = [
+        (
+            URGENCY_NORMAL,
+            "Normal",
+        ),
+        (
+            URGENCY_SOON,
+            "As soon as possible",
+        ),
+        (
+            URGENCY_URGENT,
+            "Emergency / urgent",
+        ),
+    ]
+
+
+    # =====================================================
+    # TARGET BUSINESS
+    # =====================================================
+
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="quote_requests",
+    )
+
+
+    # =====================================================
+    # CUSTOMER DETAILS
+    # =====================================================
+
+    customer_name = models.CharField(
+        max_length=150,
+    )
+
+    phone = models.CharField(
+        max_length=30,
+    )
+
+    email = models.EmailField(
+        blank=True,
+    )
+
+    location = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+
+    # =====================================================
+    # WORK REQUEST
+    # =====================================================
+
+    description = models.TextField()
+
+    urgency = models.CharField(
+        max_length=20,
+        choices=URGENCY_CHOICES,
+        default=URGENCY_NORMAL,
+    )
+
+    preferred_contact = models.CharField(
+        max_length=20,
+        choices=CONTACT_CHOICES,
+        default=CONTACT_WHATSAPP,
+    )
+
+
+    # =====================================================
+    # BUSINESS WORKFLOW
+    # =====================================================
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_NEW,
+    )
+
+
+    # Once the request is converted, keep permanent links
+    # to the real TradeFlow customer and quotation.
+
+    converted_customer = models.ForeignKey(
+        Customer,
+        on_delete=models.SET_NULL,
+        related_name="source_quote_requests",
+        blank=True,
+        null=True,
+    )
+
+    converted_quote = models.ForeignKey(
+        Quote,
+        on_delete=models.SET_NULL,
+        related_name="source_quote_requests",
+        blank=True,
+        null=True,
+    )
+
+
+    # =====================================================
+    # TIMESTAMPS
+    # =====================================================
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+
+    # =====================================================
+    # MODEL OPTIONS
+    # =====================================================
+
+    class Meta:
+        ordering = [
+            "-created_at",
+        ]
+
+        verbose_name = "Quote Request"
+
+        verbose_name_plural = (
+            "Quote Requests"
+        )
+
+
+    # =====================================================
+    # DISPLAY
+    # =====================================================
+
+    def __str__(self):
+        return (
+            f"{self.customer_name} → "
+            f"{self.business.name}"
+        )

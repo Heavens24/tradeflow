@@ -262,6 +262,10 @@
 
         @media (max-width: 650px) {
 
+            .topbar-inner {
+                gap: 15px;
+            }
+
             .hero {
                 padding: 28px 22px;
             }
@@ -279,6 +283,8 @@
             }
 
             .button {
+                width: 100%;
+
                 text-align: center;
             }
 
@@ -312,6 +318,10 @@
 <main class="page">
 
 
+    <!-- =====================================================
+         BUSINESS HERO
+         ===================================================== -->
+
     <section class="hero">
 
 
@@ -344,6 +354,10 @@
         {% endif %}
 
 
+        <!-- =================================================
+             BUSINESS BADGES
+             ================================================= -->
+
         <div class="badges">
 
 
@@ -368,14 +382,40 @@
         </div>
 
 
+        <!-- =================================================
+             CUSTOMER ACTIONS
+             ================================================= -->
+
         <div class="actions">
 
+
+            <!--
+                Native TradeFlow quote-request workflow.
+
+                This keeps the enquiry inside TradeFlow so the
+                business owner can receive the lead and convert
+                it into a Customer + Quote.
+            -->
+
+            <a
+                href="{% url 'core:public_quote_request' profile.slug %}"
+                class="button"
+            >
+                Request Quote
+            </a>
+
+
+            <!--
+                WhatsApp remains available as an alternative
+                contact channel when the owner configured a
+                WhatsApp number.
+            -->
 
             {% if profile.whatsapp_digits %}
 
                 <a
                     href="https://wa.me/{{ profile.whatsapp_digits }}"
-                    class="button"
+                    class="button secondary"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -384,6 +424,11 @@
 
             {% endif %}
 
+
+            <!--
+                Public phone button appears only when the owner
+                explicitly allows their phone number to be shown.
+            -->
 
             {% if profile.show_phone_publicly and business.phone %}
 
@@ -403,6 +448,10 @@
     </section>
 
 
+    <!-- =====================================================
+         ABOUT
+         ===================================================== -->
+
     {% if profile.description %}
 
         <section class="section">
@@ -419,6 +468,10 @@
 
     {% endif %}
 
+
+    <!-- =====================================================
+         SERVICES
+         ===================================================== -->
 
     {% if services %}
 
@@ -445,6 +498,10 @@
     {% endif %}
 
 
+    <!-- =====================================================
+         CONTACT INFORMATION
+         ===================================================== -->
+
     {% if profile.show_phone_publicly or profile.show_email_publicly %}
 
         <section class="section">
@@ -463,7 +520,11 @@
                     </div>
 
                     <div class="contact-value">
-                        {{ business.phone }}
+
+                        <a href="tel:{{ business.phone }}">
+                            {{ business.phone }}
+                        </a>
+
                     </div>
 
                 </div>
@@ -513,6 +574,10 @@
 
     {% endif %}
 
+
+    <!-- =====================================================
+         TRADEFLOW FOOTER
+         ===================================================== -->
 
     <div class="footer">
 

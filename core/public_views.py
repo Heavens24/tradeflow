@@ -15,6 +15,7 @@ from .models import (
 
 from .public_forms import (
     PublicBusinessProfileForm,
+    PublicQuoteRequestForm,
 )
 
 
@@ -133,12 +134,6 @@ def public_business_profile(
 ):
     """
     Public read-only business mini-page.
-
-    No authentication is required.
-
-    Only explicitly public BusinessPublicProfile information
-    and selected safe Business fields are passed to the
-    template.
     """
 
     profile = get_object_or_404(
@@ -150,21 +145,117 @@ def public_business_profile(
         public_profile_enabled=True,
     )
 
-
     business = profile.business
-
 
     context = {
         "business": business,
         "profile": profile,
-        "services": (
-            profile.service_list
-        ),
+        "services": profile.service_list,
     }
-
 
     return render(
         request,
         "core/public_business.html",
         context,
+    )
+
+
+# =========================================================
+# PUBLIC REQUEST QUOTE
+# =========================================================
+
+
+def public_quote_request(
+    request,
+    slug,
+):
+    """
+    Public customer quote-request form.
+
+    The URL determines the target business. Customers cannot
+    submit the request to another business by manipulating
+    form data.
+    """
+
+    profile = get_object_or_404(
+        BusinessPublicProfile.objects
+        .select_related(
+            "business"
+        ),
+        slug=slug,
+        public_profile_enabled=True,
+    )
+
+    business = profile.business
+
+
+    if request.method == "POST":
+
+        form = PublicQuoteRequestForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            quote_request = form.save(
+                commit=False
+            )
+
+            quote_request.business = (
+                business
+            )
+
+            quote_request.save()
+
+            return redirect(
+                "core:public_quote_request_success",
+                slug=profile.slug,
+            )
+
+    else:
+
+        form = PublicQuoteRequestForm()
+
+
+    context = {
+        "business": business,
+        "profile": profile,
+        "form": form,
+    }
+
+
+    return render(
+        request,
+        "core/request_quote.html",
+        context,
+    )
+
+
+def public_quote_request_success(
+    request,
+    slug,
+):
+    """
+    Public confirmation page shown after a successful quote
+    request.
+    """
+
+    profile = get_object_or_404(
+        BusinessPublicProfile.objects
+        .select_related(
+            "business"
+        ),
+        slug=slug,
+        public_profile_enabled=True,
+    )
+
+    return render(
+        request,
+        "core/request_quote_success.html",
+        {
+            "business": (
+                profile.business
+            ),
+            "profile": profile,
+        },
     )
