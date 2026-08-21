@@ -712,6 +712,185 @@ if not DEBUG:
 
 
 # =========================================================
+# LOGGING / ERROR REPORTING
+# =========================================================
+
+# Render captures stdout/stderr automatically, so TradeFlow
+# logs to the console rather than writing log files to disk.
+#
+# Production example:
+#
+# LOG_LEVEL=INFO
+#
+# For temporary deeper troubleshooting:
+#
+# LOG_LEVEL=DEBUG
+#
+# Avoid DEBUG logging permanently in production because it
+# can create excessive output.
+
+LOG_LEVEL = os.getenv(
+    "LOG_LEVEL",
+    "INFO",
+).strip().upper()
+
+
+LOGGING = {
+
+    "version": 1,
+
+    # Keep Django's existing built-in logging configuration
+    # active alongside TradeFlow's handlers.
+    "disable_existing_loggers": False,
+
+
+    # -----------------------------------------------------
+    # FORMATTERS
+    # -----------------------------------------------------
+
+    "formatters": {
+
+        "verbose": {
+
+            "format": (
+                "{levelname} "
+                "{asctime} "
+                "{name} "
+                "{message}"
+            ),
+
+            "style": "{",
+
+        },
+
+
+        "simple": {
+
+            "format": (
+                "{levelname}: "
+                "{message}"
+            ),
+
+            "style": "{",
+
+        },
+
+    },
+
+
+    # -----------------------------------------------------
+    # HANDLERS
+    # -----------------------------------------------------
+
+    "handlers": {
+
+        "console": {
+
+            "class": (
+                "logging.StreamHandler"
+            ),
+
+            "formatter": "verbose",
+
+        },
+
+    },
+
+
+    # -----------------------------------------------------
+    # ROOT LOGGER
+    # -----------------------------------------------------
+
+    # Any logger not configured separately will use this.
+    "root": {
+
+        "handlers": [
+            "console",
+        ],
+
+        "level": LOG_LEVEL,
+
+    },
+
+
+    # -----------------------------------------------------
+    # DJANGO + TRADEFLOW LOGGERS
+    # -----------------------------------------------------
+
+    "loggers": {
+
+        # Real request failures such as HTTP 500 errors.
+        #
+        # Django includes the traceback in its error log,
+        # which will be visible in Render → Logs.
+        "django.request": {
+
+            "handlers": [
+                "console",
+            ],
+
+            "level": "ERROR",
+
+            "propagate": False,
+
+        },
+
+
+        # Database warnings/errors.
+        #
+        # WARNING avoids logging every SQL statement.
+        "django.db.backends": {
+
+            "handlers": [
+                "console",
+            ],
+
+            "level": "WARNING",
+
+            "propagate": False,
+
+        },
+
+
+        # Security events raised by Django.
+        "django.security": {
+
+            "handlers": [
+                "console",
+            ],
+
+            "level": "WARNING",
+
+            "propagate": False,
+
+        },
+
+
+        # TradeFlow application code.
+        #
+        # Modules using:
+        #
+        # logging.getLogger(__name__)
+        #
+        # under the core package will flow here.
+        "core": {
+
+            "handlers": [
+                "console",
+            ],
+
+            "level": LOG_LEVEL,
+
+            "propagate": False,
+
+        },
+
+    },
+
+}
+
+
+# =========================================================
 # DEFAULT PRIMARY KEY
 # =========================================================
 

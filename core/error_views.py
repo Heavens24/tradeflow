@@ -1,4 +1,9 @@
+import logging
+
 from django.shortcuts import render
+
+
+logger = logging.getLogger(__name__)
 
 
 # =========================================================
@@ -8,12 +13,30 @@ from django.shortcuts import render
 
 def custom_404(request, exception):
     """
-    Display TradeFlow's custom 404 page when a requested
+    Display TradeFlow's branded 404 page when a requested
     resource cannot be found.
 
-    Django passes the exception automatically to this
-    handler.
+    Log only basic diagnostic information.
+    Do not log request bodies, passwords, tokens,
+    API keys or other sensitive information.
     """
+
+    username = "anonymous"
+
+    if (
+        hasattr(request, "user")
+        and request.user.is_authenticated
+    ):
+        username = request.user.username
+
+
+    logger.warning(
+        "404 not found: path=%s user=%s",
+        request.path,
+        username,
+    )
+
+
     return render(
         request,
         "core/404.html",
@@ -23,9 +46,30 @@ def custom_404(request, exception):
 
 def custom_500(request):
     """
-    Display TradeFlow's custom 500 page when an unexpected
+    Display TradeFlow's branded 500 page when an unexpected
     server error occurs.
+
+    Django's django.request logger records the underlying
+    server exception and traceback. This handler adds a
+    concise TradeFlow-specific event to the production log.
     """
+
+    username = "anonymous"
+
+    if (
+        hasattr(request, "user")
+        and request.user.is_authenticated
+    ):
+        username = request.user.username
+
+
+    logger.error(
+        "500 server error: path=%s user=%s",
+        request.path,
+        username,
+    )
+
+
     return render(
         request,
         "core/500.html",
