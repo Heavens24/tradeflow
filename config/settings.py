@@ -205,6 +205,15 @@ MIDDLEWARE = [
 
     "django.contrib.auth.middleware.AuthenticationMiddleware",
 
+
+    # Attach a unique request ID to every incoming request.
+    #
+    # The middleware runs after authentication so later
+    # error handlers can safely identify the signed-in user.
+
+    "core.request_id.RequestIDMiddleware",
+
+
     "django.contrib.messages.middleware.MessageMiddleware",
 
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -801,7 +810,6 @@ LOGGING = {
     # ROOT LOGGER
     # -----------------------------------------------------
 
-    # Any logger not configured separately will use this.
     "root": {
 
         "handlers": [
@@ -820,9 +828,6 @@ LOGGING = {
     "loggers": {
 
         # Real request failures such as HTTP 500 errors.
-        #
-        # Django includes the traceback in its error log,
-        # which will be visible in Render → Logs.
         "django.request": {
 
             "handlers": [
@@ -837,8 +842,6 @@ LOGGING = {
 
 
         # Database warnings/errors.
-        #
-        # WARNING avoids logging every SQL statement.
         "django.db.backends": {
 
             "handlers": [
@@ -867,12 +870,6 @@ LOGGING = {
 
 
         # TradeFlow application code.
-        #
-        # Modules using:
-        #
-        # logging.getLogger(__name__)
-        #
-        # under the core package will flow here.
         "core": {
 
             "handlers": [

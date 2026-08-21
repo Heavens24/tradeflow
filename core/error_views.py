@@ -16,7 +16,9 @@ def custom_404(request, exception):
     Display TradeFlow's branded 404 page when a requested
     resource cannot be found.
 
-    Log only basic diagnostic information.
+    The request ID allows a user-reported problem to be
+    matched with the corresponding Render log entry.
+
     Do not log request bodies, passwords, tokens,
     API keys or other sensitive information.
     """
@@ -30,8 +32,21 @@ def custom_404(request, exception):
         username = request.user.username
 
 
+    request_id = getattr(
+        request,
+        "request_id",
+        "unknown",
+    )
+
+
     logger.warning(
-        "404 not found: path=%s user=%s",
+        (
+            "404 not found: "
+            "request_id=%s "
+            "path=%s "
+            "user=%s"
+        ),
+        request_id,
         request.path,
         username,
     )
@@ -40,6 +55,9 @@ def custom_404(request, exception):
     return render(
         request,
         "core/404.html",
+        {
+            "request_id": request_id,
+        },
         status=404,
     )
 
@@ -50,8 +68,9 @@ def custom_500(request):
     server error occurs.
 
     Django's django.request logger records the underlying
-    server exception and traceback. This handler adds a
-    concise TradeFlow-specific event to the production log.
+    exception and traceback. This handler adds the same
+    request reference so the incident can be located
+    quickly in Render logs.
     """
 
     username = "anonymous"
@@ -63,8 +82,21 @@ def custom_500(request):
         username = request.user.username
 
 
+    request_id = getattr(
+        request,
+        "request_id",
+        "unknown",
+    )
+
+
     logger.error(
-        "500 server error: path=%s user=%s",
+        (
+            "500 server error: "
+            "request_id=%s "
+            "path=%s "
+            "user=%s"
+        ),
+        request_id,
         request.path,
         username,
     )
@@ -73,5 +105,8 @@ def custom_500(request):
     return render(
         request,
         "core/500.html",
+        {
+            "request_id": request_id,
+        },
         status=500,
     )

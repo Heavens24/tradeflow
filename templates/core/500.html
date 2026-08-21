@@ -142,6 +142,17 @@
             color: #111827;
         }
 
+        .reference {
+            margin:
+                24px 0 0;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            word-break: break-all;
+        }
+
         .footer {
             margin-top: 22px;
 
@@ -226,6 +237,16 @@
                 </a>
 
             </div>
+
+
+            {% if request_id %}
+
+                <p class="reference">
+                    Reference:
+                    {{ request_id }}
+                </p>
+
+            {% endif %}
 
         </div>
 
