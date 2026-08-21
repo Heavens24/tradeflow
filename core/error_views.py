@@ -31,3 +31,23 @@ def custom_500(request):
         "core/500.html",
         status=500,
     )
+
+
+# =========================================================
+# TEMPORARY 500 TEST
+# =========================================================
+
+
+def test_500(request):
+    """
+    Temporary production test endpoint.
+
+    This deliberately raises an exception so Django can
+    render TradeFlow's custom 500 page when DEBUG=False.
+
+    Remove this function after the production 500 test
+    passes.
+    """
+    raise RuntimeError(
+        "TradeFlow temporary 500 test"
+    )
