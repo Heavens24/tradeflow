@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import public_views
 from . import views
 
 
@@ -45,6 +46,7 @@ urlpatterns = [
         name="login_legacy",
     ),
 
+
     # =====================================================
     # DASHBOARD
     # =====================================================
@@ -54,14 +56,38 @@ urlpatterns = [
         name="dashboard",
     ),
 
+
     # =====================================================
     # BUSINESS
     # =====================================================
+
+    # Existing private business setup.
     path(
         "business/setup/",
         views.business_setup,
         name="business_setup",
     ),
+
+
+    # Private public-profile settings.
+    path(
+        "business/public-profile/",
+        public_views.public_profile_settings,
+        name="public_profile_settings",
+    ),
+
+
+    # Public business mini-page.
+    #
+    # Example:
+    #
+    # /business/march24-electrical-services/
+    path(
+        "business/<slug:slug>/",
+        public_views.public_business_profile,
+        name="public_business_profile",
+    ),
+
 
     # =====================================================
     # SIMPLE AI ASSISTANT
@@ -71,6 +97,7 @@ urlpatterns = [
         views.ai_document_assistant,
         name="ai_document_assistant",
     ),
+
 
     # =====================================================
     # CUSTOMERS
@@ -110,6 +137,7 @@ urlpatterns = [
         views.customer_delete,
         name="customer_delete",
     ),
+
 
     # =====================================================
     # QUOTES
@@ -156,6 +184,7 @@ urlpatterns = [
         name="quote_to_job",
     ),
 
+
     # =====================================================
     # JOBS
     # =====================================================
@@ -195,6 +224,7 @@ urlpatterns = [
         name="job_to_invoice",
     ),
 
+
     # =====================================================
     # INVOICES
     # =====================================================
@@ -233,6 +263,7 @@ urlpatterns = [
         views.invoice_delete,
         name="invoice_delete",
     ),
+
 
     # =====================================================
     # PAYMENTS

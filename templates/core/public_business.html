@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="{{ profile.headline|default:business.name }}"
+    >
+
+    <title>
+        {{ business.name }} | TradeFlow
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+
+            color: #1f2937;
+        }
+
+        .topbar {
+            background: white;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+        }
+
+        .topbar-inner {
+            width: 100%;
+            max-width: 1000px;
+
+            margin: 0 auto;
+
+            padding: 16px 20px;
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tradeflow {
+            font-size: 22px;
+
+            font-weight: 800;
+        }
+
+        .powered {
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 900px;
+
+            margin: 0 auto;
+
+            padding: 45px 20px 60px;
+        }
+
+        .hero {
+            background: white;
+
+            border-radius: 18px;
+
+            padding: 40px;
+
+            box-shadow:
+                0 10px 35px
+                rgba(0, 0, 0, 0.07);
+
+            margin-bottom: 25px;
+        }
+
+        .location {
+            color: #6b7280;
+
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin:
+                0 0 12px;
+
+            font-size: 36px;
+        }
+
+        .headline {
+            color: #4b5563;
+
+            font-size: 19px;
+
+            line-height: 1.5;
+
+            margin-bottom: 22px;
+        }
+
+        .badges {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 25px;
+        }
+
+        .badge {
+            display: inline-block;
+
+            padding: 7px 11px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+        .verified {
+            background: #ecfdf5;
+
+            color: #047857;
+        }
+
+        .emergency {
+            background: #fff7ed;
+
+            color: #c2410c;
+        }
+
+        .actions {
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+
+            padding: 14px 20px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: 700;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+
+            color: #111827;
+        }
+
+        .section {
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 30px;
+
+            margin-bottom: 20px;
+
+            box-shadow:
+                0 7px 25px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        .section p {
+            color: #4b5563;
+
+            line-height: 1.7;
+
+            white-space: pre-line;
+        }
+
+        .services {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(220px, 1fr)
+                );
+
+            gap: 12px;
+        }
+
+        .service {
+            padding: 14px 16px;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 10px;
+
+            background: #f9fafb;
+        }
+
+        .contact-row {
+            margin-bottom: 12px;
+        }
+
+        .contact-label {
+            color: #6b7280;
+
+            font-size: 13px;
+
+            margin-bottom: 3px;
+        }
+
+        .contact-value {
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+
+            color: #9ca3af;
+
+            font-size: 13px;
+
+            margin-top: 35px;
+        }
+
+        @media (max-width: 650px) {
+
+            .hero {
+                padding: 28px 22px;
+            }
+
+            h1 {
+                font-size: 29px;
+            }
+
+            .section {
+                padding: 24px 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .button {
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+    <div class="topbar-inner">
+
+        <div class="tradeflow">
+            TradeFlow
+        </div>
+
+        <div class="powered">
+            Small business operating system
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="page">
+
+
+    <section class="hero">
+
+
+        <div class="location">
+
+            {% if business.city %}
+
+                {{ business.city }}
+
+            {% else %}
+
+                South Africa
+
+            {% endif %}
+
+        </div>
+
+
+        <h1>
+            {{ business.name }}
+        </h1>
+
+
+        {% if profile.headline %}
+
+            <div class="headline">
+                {{ profile.headline }}
+            </div>
+
+        {% endif %}
+
+
+        <div class="badges">
+
+
+            {% if profile.is_verified %}
+
+                <span class="badge verified">
+                    ✓ Verified business
+                </span>
+
+            {% endif %}
+
+
+            {% if profile.emergency_callouts %}
+
+                <span class="badge emergency">
+                    Emergency call-outs
+                </span>
+
+            {% endif %}
+
+
+        </div>
+
+
+        <div class="actions">
+
+
+            {% if profile.whatsapp_digits %}
+
+                <a
+                    href="https://wa.me/{{ profile.whatsapp_digits }}"
+                    class="button"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Request Quote on WhatsApp
+                </a>
+
+            {% endif %}
+
+
+            {% if profile.show_phone_publicly and business.phone %}
+
+                <a
+                    href="tel:{{ business.phone }}"
+                    class="button secondary"
+                >
+                    Call {{ business.phone }}
+                </a>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </section>
+
+
+    {% if profile.description %}
+
+        <section class="section">
+
+            <h2>
+                About
+            </h2>
+
+            <p>
+                {{ profile.description }}
+            </p>
+
+        </section>
+
+    {% endif %}
+
+
+    {% if services %}
+
+        <section class="section">
+
+            <h2>
+                Services
+            </h2>
+
+            <div class="services">
+
+                {% for service in services %}
+
+                    <div class="service">
+                        {{ service }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    {% if profile.show_phone_publicly or profile.show_email_publicly %}
+
+        <section class="section">
+
+            <h2>
+                Contact
+            </h2>
+
+
+            {% if profile.show_phone_publicly and business.phone %}
+
+                <div class="contact-row">
+
+                    <div class="contact-label">
+                        Phone
+                    </div>
+
+                    <div class="contact-value">
+                        {{ business.phone }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if profile.show_email_publicly and business.email %}
+
+                <div class="contact-row">
+
+                    <div class="contact-label">
+                        Email
+                    </div>
+
+                    <div class="contact-value">
+
+                        <a href="mailto:{{ business.email }}">
+                            {{ business.email }}
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if business.city %}
+
+                <div class="contact-row">
+
+                    <div class="contact-label">
+                        Location
+                    </div>
+
+                    <div class="contact-value">
+                        {{ business.city }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        </section>
+
+    {% endif %}
+
+
+    <div class="footer">
+
+        {{ business.name }}
+        · Powered by TradeFlow
+
+    </div>
+
+
+</main>
+
+
+</body>
+
+</html>
