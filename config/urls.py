@@ -3,8 +3,6 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from django.urls import reverse_lazy
 
-from core.error_views import test_500
-
 
 # =========================================================
 # CUSTOM ERROR HANDLERS
@@ -75,21 +73,6 @@ urlpatterns = [
             template_name="core/password_reset_complete.html",
         ),
         name="password_reset_complete",
-    ),
-
-
-    # =====================================================
-    # TEMPORARY 500 TEST
-    # =====================================================
-    #
-    # This route exists only so we can verify the branded
-    # production 500 page on Render.
-    #
-    # Remove this route immediately after the test passes.
-    path(
-        "500-test/",
-        test_500,
-        name="test_500",
     ),
 
 
