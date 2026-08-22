@@ -427,6 +427,18 @@
             </a>
 
 
+            <!-- QUOTE REQUESTS -->
+
+            <a
+                href="{% url 'core:quote_request_list' %}"
+                {% if request.resolver_match.url_name == 'quote_request_list' or request.resolver_match.url_name == 'quote_request_detail' %}
+                    class="active"
+                {% endif %}
+            >
+                Quote Requests
+            </a>
+
+
             <!-- QUOTES -->
 
             <a
@@ -479,7 +491,7 @@
 
             <a
                 href="{% url 'core:business_setup' %}"
-                {% if request.resolver_match.url_name == 'business_setup' %}
+                {% if request.resolver_match.url_name == 'business_setup' or request.resolver_match.url_name == 'public_profile_settings' %}
                     class="active"
                 {% endif %}
             >
