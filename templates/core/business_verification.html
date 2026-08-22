@@ -1,0 +1,566 @@
+{% extends "core/base.html" %}
+
+
+{% block title %}
+    Business Verification | TradeFlow
+{% endblock %}
+
+
+{% block extra_css %}
+
+.verification-page {
+    max-width: 850px;
+}
+
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+
+.page-header h1 {
+    margin:
+        0 0 8px;
+}
+
+
+.page-header p {
+    margin: 0;
+
+    color: #6b7280;
+
+    line-height: 1.6;
+}
+
+
+.status-card {
+    margin-bottom: 22px;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.status-label {
+    margin-bottom: 6px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+
+.status-value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+.status-not-submitted {
+    color: #6b7280;
+}
+
+
+.status-pending {
+    color: #b45309;
+}
+
+
+.status-verified {
+    color: #047857;
+}
+
+
+.status-rejected {
+    color: #b91c1c;
+}
+
+
+.review-note {
+    margin-top: 14px;
+
+    padding: 14px;
+
+    border-radius: 8px;
+
+    background: #fff7ed;
+
+    color: #9a3412;
+
+    line-height: 1.6;
+}
+
+
+.form-card {
+    padding: 26px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.form-card h2 {
+    margin-top: 0;
+}
+
+
+.field {
+    margin-bottom: 20px;
+}
+
+
+.field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-weight: 600;
+}
+
+
+.form-control {
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border:
+        1px solid
+        #d1d5db;
+
+    border-radius: 8px;
+
+    background: white;
+
+    font: inherit;
+}
+
+
+textarea.form-control {
+    resize: vertical;
+}
+
+
+.errorlist {
+    margin:
+        7px 0 0;
+
+    padding-left: 18px;
+
+    color: #b91c1c;
+}
+
+
+.info-box {
+    margin-bottom: 22px;
+
+    padding: 16px;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #1e40af;
+
+    line-height: 1.6;
+}
+
+
+.success-box {
+    margin-bottom: 22px;
+
+    padding: 18px;
+
+    border-radius: 10px;
+
+    background: #ecfdf5;
+
+    color: #065f46;
+
+    line-height: 1.6;
+}
+
+
+.pending-box {
+    margin-bottom: 22px;
+
+    padding: 18px;
+
+    border-radius: 10px;
+
+    background: #fffbeb;
+
+    color: #92400e;
+
+    line-height: 1.6;
+}
+
+
+.actions {
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-top: 22px;
+}
+
+
+@media (max-width: 650px) {
+
+    .form-card {
+        padding: 20px;
+    }
+
+
+    .actions {
+        flex-direction: column;
+    }
+
+
+    .actions .button {
+        width: 100%;
+    }
+
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="verification-page">
+
+
+    <div class="page-header">
+
+        <h1>
+            Business Verification
+        </h1>
+
+        <p>
+            Submit your business information for review by
+            TradeFlow. Verification helps customers identify
+            businesses whose details have been reviewed by
+            the platform.
+        </p>
+
+    </div>
+
+
+    <div class="status-card">
+
+        <div class="status-label">
+            Current verification status
+        </div>
+
+
+        {% if verification.status == "verified" %}
+
+            <div class="status-value status-verified">
+                ✓ Verified Business
+            </div>
+
+        {% elif verification.status == "pending" %}
+
+            <div class="status-value status-pending">
+                Pending Review
+            </div>
+
+        {% elif verification.status == "rejected" %}
+
+            <div class="status-value status-rejected">
+                Needs Information
+            </div>
+
+        {% else %}
+
+            <div class="status-value status-not-submitted">
+                Not Submitted
+            </div>
+
+        {% endif %}
+
+
+        {% if verification.submitted_at %}
+
+            <div
+                style="
+                    margin-top: 10px;
+                    color: #6b7280;
+                    font-size: 13px;
+                "
+            >
+                Submitted:
+                {{ verification.submitted_at|date:"d M Y H:i" }}
+            </div>
+
+        {% endif %}
+
+
+        {% if verification.admin_notes %}
+
+            <div class="review-note">
+
+                <strong>
+                    TradeFlow review note:
+                </strong>
+
+                <br>
+
+                {{ verification.admin_notes|linebreaksbr }}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    {% if verification.status == "verified" %}
+
+        <div class="success-box">
+
+            <strong>
+                Your business is verified.
+            </strong>
+
+            <br><br>
+
+            Your TradeFlow public profile and marketplace
+            listing can now display the Verified Business
+            badge.
+
+        </div>
+
+
+        <div class="actions">
+
+            <a
+                href="{% url 'core:public_profile_settings' %}"
+                class="button secondary"
+            >
+                Public Profile Settings
+            </a>
+
+            {% if business.public_profile.public_profile_enabled %}
+
+                <a
+                    href="{% url 'core:public_business_profile' business.public_profile.slug %}"
+                    class="button"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    View Public Page
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+    {% elif verification.status == "pending" %}
+
+        <div class="pending-box">
+
+            <strong>
+                Your application is being reviewed.
+            </strong>
+
+            <br><br>
+
+            You cannot edit the verification application
+            while it is pending. TradeFlow will update the
+            status once the review has been completed.
+
+        </div>
+
+
+    {% else %}
+
+        {% if verification.status == "rejected" %}
+
+            <div class="info-box">
+
+                You can update the information below and
+                resubmit the verification application.
+
+            </div>
+
+        {% else %}
+
+            <div class="info-box">
+
+                Verification does not expose your banking,
+                customer, quote, invoice or payment records.
+                Only the information required to review your
+                business identity is submitted to TradeFlow.
+
+            </div>
+
+        {% endif %}
+
+
+        <form
+            method="POST"
+            class="form-card"
+        >
+
+            {% csrf_token %}
+
+
+            <h2>
+                Verification information
+            </h2>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.legal_business_name.id_for_label }}"
+                >
+                    Legal business name
+                </label>
+
+                {{ form.legal_business_name }}
+
+                {{ form.legal_business_name.errors }}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.registration_type.id_for_label }}"
+                >
+                    Registration type
+                </label>
+
+                {{ form.registration_type }}
+
+                {{ form.registration_type.errors }}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.registration_number.id_for_label }}"
+                >
+                    Registration number
+                </label>
+
+                {{ form.registration_number }}
+
+                {{ form.registration_number.errors }}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.contact_name.id_for_label }}"
+                >
+                    Contact person
+                </label>
+
+                {{ form.contact_name }}
+
+                {{ form.contact_name.errors }}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.contact_email.id_for_label }}"
+                >
+                    Contact email
+                </label>
+
+                {{ form.contact_email }}
+
+                {{ form.contact_email.errors }}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.contact_phone.id_for_label }}"
+                >
+                    Contact phone
+                </label>
+
+                {{ form.contact_phone }}
+
+                {{ form.contact_phone.errors }}
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.supporting_information.id_for_label }}"
+                >
+                    Supporting information
+                </label>
+
+                {{ form.supporting_information }}
+
+                {{ form.supporting_information.errors }}
+
+            </div>
+
+
+            <div class="actions">
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    {% if verification.status == "rejected" %}
+                        Resubmit Verification
+                    {% else %}
+                        Submit for Verification
+                    {% endif %}
+                </button>
+
+
+                <a
+                    href="{% url 'core:dashboard' %}"
+                    class="button secondary"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}

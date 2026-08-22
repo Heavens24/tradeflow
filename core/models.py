@@ -956,7 +956,7 @@ class BusinessPublicProfile(models.Model):
     # owner's public profile form.
     #
     # TradeFlow administrators control verification through
-    # Django Admin or a future moderation workflow.
+    # the verification workflow.
 
     is_verified = models.BooleanField(
         default=False,
@@ -1174,6 +1174,256 @@ class BusinessPublicProfile(models.Model):
 
 
 # =========================================================
+# BUSINESS VERIFICATION
+# =========================================================
+
+
+class BusinessVerification(models.Model):
+    """
+    Verification application submitted by a TradeFlow
+    business owner and reviewed by TradeFlow platform staff.
+
+    Business owners can provide verification information,
+    but they cannot approve or verify themselves.
+
+    The authoritative public verified badge remains
+    BusinessPublicProfile.is_verified and is synchronized
+    from this model whenever verification status changes.
+    """
+
+    # =====================================================
+    # STATUS
+    # =====================================================
+
+    STATUS_NOT_SUBMITTED = "not_submitted"
+    STATUS_PENDING = "pending"
+    STATUS_VERIFIED = "verified"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (
+            STATUS_NOT_SUBMITTED,
+            "Not submitted",
+        ),
+        (
+            STATUS_PENDING,
+            "Pending review",
+        ),
+        (
+            STATUS_VERIFIED,
+            "Verified",
+        ),
+        (
+            STATUS_REJECTED,
+            "Rejected / needs information",
+        ),
+    ]
+
+
+    # =====================================================
+    # REGISTRATION TYPE
+    # =====================================================
+
+    TYPE_SOLE_PROPRIETOR = "sole_proprietor"
+    TYPE_PRIVATE_COMPANY = "private_company"
+    TYPE_CLOSE_CORPORATION = "close_corporation"
+    TYPE_PARTNERSHIP = "partnership"
+    TYPE_NON_PROFIT = "non_profit"
+    TYPE_OTHER = "other"
+
+    REGISTRATION_TYPE_CHOICES = [
+        (
+            TYPE_SOLE_PROPRIETOR,
+            "Sole proprietor",
+        ),
+        (
+            TYPE_PRIVATE_COMPANY,
+            "Private company (Pty) Ltd",
+        ),
+        (
+            TYPE_CLOSE_CORPORATION,
+            "Close corporation (CC)",
+        ),
+        (
+            TYPE_PARTNERSHIP,
+            "Partnership",
+        ),
+        (
+            TYPE_NON_PROFIT,
+            "Non-profit organisation",
+        ),
+        (
+            TYPE_OTHER,
+            "Other",
+        ),
+    ]
+
+
+    # =====================================================
+    # BUSINESS
+    # =====================================================
+
+    business = models.OneToOneField(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="verification",
+    )
+
+
+    # =====================================================
+    # APPLICATION INFORMATION
+    # =====================================================
+
+    legal_business_name = models.CharField(
+        max_length=200,
+        blank=True,
+    )
+
+    registration_type = models.CharField(
+        max_length=30,
+        choices=REGISTRATION_TYPE_CHOICES,
+        default=TYPE_PRIVATE_COMPANY,
+    )
+
+    registration_number = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    contact_name = models.CharField(
+        max_length=150,
+        blank=True,
+    )
+
+    contact_email = models.EmailField(
+        blank=True,
+    )
+
+    contact_phone = models.CharField(
+        max_length=30,
+        blank=True,
+    )
+
+    supporting_information = models.TextField(
+        blank=True,
+        help_text=(
+            "Provide any information that can help TradeFlow "
+            "confirm the business identity and registration."
+        ),
+    )
+
+
+    # =====================================================
+    # REVIEW
+    # =====================================================
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default=STATUS_NOT_SUBMITTED,
+    )
+
+    admin_notes = models.TextField(
+        blank=True,
+    )
+
+    submitted_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    reviewed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_business_verifications",
+        blank=True,
+        null=True,
+    )
+
+
+    # =====================================================
+    # TIMESTAMPS
+    # =====================================================
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+
+    # =====================================================
+    # MODEL OPTIONS
+    # =====================================================
+
+    class Meta:
+        ordering = [
+            "-submitted_at",
+            "-updated_at",
+        ]
+
+        verbose_name = (
+            "Business Verification"
+        )
+
+        verbose_name_plural = (
+            "Business Verifications"
+        )
+
+
+    # =====================================================
+    # DISPLAY
+    # =====================================================
+
+    def __str__(self):
+        return (
+            f"{self.business.name} "
+            f"verification "
+            f"({self.get_status_display()})"
+        )
+
+
+    # =====================================================
+    # PUBLIC BADGE SYNCHRONIZATION
+    # =====================================================
+
+    def sync_public_profile_verification(self):
+        """
+        Keep the public marketplace badge synchronized with
+        the authoritative verification application status.
+        """
+
+        BusinessPublicProfile.objects.filter(
+            business=self.business
+        ).update(
+            is_verified=(
+                self.status
+                == self.STATUS_VERIFIED
+            )
+        )
+
+
+    def save(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().save(
+            *args,
+            **kwargs,
+        )
+
+        self.sync_public_profile_verification()
+
+
+# =========================================================
 # PUBLIC QUOTE REQUESTS
 # =========================================================
 
@@ -1371,7 +1621,9 @@ class QuoteRequest(models.Model):
             "-created_at",
         ]
 
-        verbose_name = "Quote Request"
+        verbose_name = (
+            "Quote Request"
+        )
 
         verbose_name_plural = (
             "Quote Requests"

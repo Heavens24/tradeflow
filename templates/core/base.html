@@ -535,6 +535,18 @@
             </a>
 
 
+            <!-- VERIFICATION -->
+
+            <a
+                href="{% url 'core:business_verification' %}"
+                {% if request.resolver_match.url_name == 'business_verification' %}
+                    class="active"
+                {% endif %}
+            >
+                Verification
+            </a>
+
+
             <!-- SETTINGS -->
 
             <a

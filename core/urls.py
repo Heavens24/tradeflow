@@ -2,6 +2,7 @@ from django.urls import path
 
 from . import lead_views
 from . import public_views
+from . import verification_views
 from . import views
 
 
@@ -76,6 +77,12 @@ urlpatterns = [
         "business/public-profile/",
         public_views.public_profile_settings,
         name="public_profile_settings",
+    ),
+
+    path(
+        "business/verification/",
+        verification_views.business_verification,
+        name="business_verification",
     ),
 
 
