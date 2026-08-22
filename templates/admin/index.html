@@ -1,0 +1,460 @@
+{% extends "admin/base_site.html" %}
+
+{% load i18n %}
+{% load tradeflow_admin %}
+
+
+{% block content %}
+
+
+{% tradeflow_admin_stats as stats %}
+
+
+<div class="tf-admin-dashboard">
+
+
+    <!-- =====================================================
+         PAGE INTRODUCTION
+         ===================================================== -->
+
+    <section class="tf-admin-welcome">
+
+        <div>
+
+            <div class="tf-admin-eyebrow">
+                TRADEFLOW PLATFORM
+            </div>
+
+            <h1>
+                Admin Console
+            </h1>
+
+            <p>
+                Review businesses, manage marketplace trust
+                and oversee TradeFlow platform activity.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PLATFORM OVERVIEW
+         ===================================================== -->
+
+    <section class="tf-admin-section">
+
+
+        <div class="tf-admin-section-heading">
+
+            <div>
+
+                <h2>
+                    Platform Overview
+                </h2>
+
+                <p>
+                    Current TradeFlow activity at a glance.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="tf-stat-grid">
+
+
+            <a
+                href="{% url 'admin:core_businessverification_changelist' %}?status__exact=pending"
+                class="tf-stat-card tf-stat-card-warning"
+            >
+
+                <span class="tf-stat-label">
+                    Pending Verification
+                </span>
+
+                <strong class="tf-stat-number">
+                    {{ stats.pending_verifications }}
+                </strong>
+
+                <span class="tf-stat-detail">
+                    Waiting for review
+                </span>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_businessverification_changelist' %}?status__exact=verified"
+                class="tf-stat-card tf-stat-card-success"
+            >
+
+                <span class="tf-stat-label">
+                    Verified Businesses
+                </span>
+
+                <strong class="tf-stat-number">
+                    {{ stats.verified_businesses }}
+                </strong>
+
+                <span class="tf-stat-detail">
+                    Approved marketplace businesses
+                </span>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_business_changelist' %}"
+                class="tf-stat-card"
+            >
+
+                <span class="tf-stat-label">
+                    Businesses
+                </span>
+
+                <strong class="tf-stat-number">
+                    {{ stats.businesses }}
+                </strong>
+
+                <span class="tf-stat-detail">
+                    Registered TradeFlow businesses
+                </span>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_quoterequest_changelist' %}?status__exact=new"
+                class="tf-stat-card"
+            >
+
+                <span class="tf-stat-label">
+                    New Leads
+                </span>
+
+                <strong class="tf-stat-number">
+                    {{ stats.new_quote_requests }}
+                </strong>
+
+                <span class="tf-stat-detail">
+                    New quote requests
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         VERIFICATION OPERATIONS
+         ===================================================== -->
+
+    <section class="tf-admin-section">
+
+
+        <div class="tf-admin-section-heading">
+
+            <div>
+
+                <h2>
+                    Business Verification
+                </h2>
+
+                <p>
+                    Review business identity and marketplace
+                    verification applications.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="tf-admin-action-grid">
+
+
+            <a
+                href="{% url 'admin:core_businessverification_changelist' %}?status__exact=pending"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    ⏳
+                </div>
+
+                <div>
+
+                    <strong>
+                        Pending Applications
+                    </strong>
+
+                    <span>
+                        {{ stats.pending_verifications }}
+                        waiting for review
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_businessverification_changelist' %}?status__exact=verified"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Verified Businesses
+                    </strong>
+
+                    <span>
+                        {{ stats.verified_businesses }}
+                        approved
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_businessverification_changelist' %}?status__exact=rejected"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <strong>
+                        Needs Information
+                    </strong>
+
+                    <span>
+                        {{ stats.rejected_verifications }}
+                        applications
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MARKETPLACE OPERATIONS
+         ===================================================== -->
+
+    <section class="tf-admin-section">
+
+
+        <div class="tf-admin-section-heading">
+
+            <div>
+
+                <h2>
+                    Marketplace
+                </h2>
+
+                <p>
+                    Manage businesses and public marketplace
+                    activity.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="tf-admin-action-grid">
+
+
+            <a
+                href="{% url 'admin:core_business_changelist' %}"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    B
+                </div>
+
+                <div>
+
+                    <strong>
+                        Businesses
+                    </strong>
+
+                    <span>
+                        {{ stats.businesses }}
+                        registered
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_businesspublicprofile_changelist' %}"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    P
+                </div>
+
+                <div>
+
+                    <strong>
+                        Public Profiles
+                    </strong>
+
+                    <span>
+                        {{ stats.published_profiles }}
+                        currently published
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <a
+                href="{% url 'admin:core_quoterequest_changelist' %}"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    Q
+                </div>
+
+                <div>
+
+                    <strong>
+                        Quote Requests
+                    </strong>
+
+                    <span>
+                        {{ stats.total_quote_requests }}
+                        total enquiries
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BUSINESS OPERATIONS
+         ===================================================== -->
+
+    <section class="tf-admin-section">
+
+
+        <div class="tf-admin-section-heading">
+
+            <div>
+
+                <h2>
+                    Business Operations
+                </h2>
+
+                <p>
+                    Access operational records when platform
+                    support or investigation is required.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="tf-admin-link-grid">
+
+
+            <a href="{% url 'admin:core_customer_changelist' %}">
+                Customers
+            </a>
+
+
+            <a href="{% url 'admin:core_quote_changelist' %}">
+                Quotes
+            </a>
+
+
+            <a href="{% url 'admin:core_job_changelist' %}">
+                Jobs
+            </a>
+
+
+            <a href="{% url 'admin:core_invoice_changelist' %}">
+                Invoices
+            </a>
+
+
+            <a href="{% url 'admin:core_payment_changelist' %}">
+                Payments
+            </a>
+
+
+            <a href="{% url 'admin:auth_user_changelist' %}">
+                User Accounts
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+{% endblock %}

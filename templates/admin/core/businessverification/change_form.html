@@ -1,0 +1,280 @@
+{% extends "admin/change_form.html" %}
+
+{% load i18n admin_urls %}
+
+
+{% block content_title %}
+
+    {% if original %}
+
+        <div class="tf-review-hero">
+
+            <div class="tf-review-hero-main">
+
+                <div class="tf-review-eyebrow">
+                    BUSINESS VERIFICATION
+                </div>
+
+                <h1>
+                    {{ original.business.name }}
+                </h1>
+
+                <div class="tf-review-meta">
+
+                    {% if original.business.public_profile %}
+
+                        <span>
+                            {{ original.business.public_profile.get_trade_category_display }}
+                        </span>
+
+                    {% endif %}
+
+                    {% if original.business.city %}
+
+                        <span class="tf-meta-divider">
+                            •
+                        </span>
+
+                        <span>
+                            {{ original.business.city }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+                <p>
+                    Review the submitted business identity,
+                    registration details and marketplace
+                    verification status.
+                </p>
+
+            </div>
+
+
+            <div class="tf-review-status">
+
+                {% if original.status == "verified" %}
+
+                    <span
+                        class="
+                            tf-status
+                            tf-status-success
+                            tf-status-large
+                        "
+                    >
+                        ✓ Verified Business
+                    </span>
+
+                {% elif original.status == "pending" %}
+
+                    <span
+                        class="
+                            tf-status
+                            tf-status-warning
+                            tf-status-large
+                        "
+                    >
+                        Pending Review
+                    </span>
+
+                {% elif original.status == "rejected" %}
+
+                    <span
+                        class="
+                            tf-status
+                            tf-status-danger
+                            tf-status-large
+                        "
+                    >
+                        Needs Information
+                    </span>
+
+                {% else %}
+
+                    <span
+                        class="
+                            tf-status
+                            tf-status-muted
+                            tf-status-large
+                        "
+                    >
+                        Not Submitted
+                    </span>
+
+                {% endif %}
+
+
+                {% if original.submitted_at %}
+
+                    <div class="tf-review-status-time">
+
+                        Submitted
+
+                        <strong>
+                            {{ original.submitted_at|date:"d M Y, H:i" }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="tf-review-guide">
+
+            <div class="tf-review-guide-icon">
+                i
+            </div>
+
+            <div>
+
+                <strong>
+                    Verification review
+                </strong>
+
+                <span>
+                    Business-submitted information is
+                    read-only. Add internal review notes,
+                    then approve the business or request
+                    further information.
+                </span>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        {{ block.super }}
+
+    {% endif %}
+
+{% endblock %}
+
+
+{% block object-tools-items %}
+
+    {% if original %}
+
+        <li>
+
+            <a
+                href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}"
+                class="historylink tf-history-link"
+            >
+                Review History
+            </a>
+
+        </li>
+
+    {% endif %}
+
+{% endblock %}
+
+
+{% block submit_buttons_top %}
+{% endblock %}
+
+
+{% block submit_buttons_bottom %}
+
+    {% if original %}
+
+        <div class="tf-review-action-panel">
+
+
+            <div class="tf-review-action-copy">
+
+                <strong>
+                    Review decision
+                </strong>
+
+                <span>
+                    Record internal notes before changing the
+                    business verification status.
+                </span>
+
+            </div>
+
+
+            <div class="tf-review-actions">
+
+
+                {% if original.status != "verified" %}
+
+                    <button
+                        type="submit"
+                        name="_approve_verification"
+                        class="
+                            tf-admin-button
+                            tf-admin-button-success
+                        "
+                    >
+                        <span class="tf-button-symbol">
+                            ✓
+                        </span>
+
+                        Approve Business
+                    </button>
+
+                {% endif %}
+
+
+                {% if original.status != "rejected" %}
+
+                    <button
+                        type="submit"
+                        name="_reject_verification"
+                        class="
+                            tf-admin-button
+                            tf-admin-button-danger
+                        "
+                    >
+                        <span class="tf-button-symbol">
+                            !
+                        </span>
+
+                        Reject / Needs Information
+                    </button>
+
+                {% endif %}
+
+
+                <button
+                    type="submit"
+                    name="_continue"
+                    class="
+                        tf-admin-button
+                        tf-admin-button-secondary
+                    "
+                >
+                    Save Review Notes
+                </button>
+
+
+                <a
+                    href="{% url 'admin:core_businessverification_changelist' %}"
+                    class="
+                        tf-admin-button
+                        tf-admin-button-ghost
+                    "
+                >
+                    ← Back to Verification Queue
+                </a>
+
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        {{ block.super }}
+
+    {% endif %}
+
+{% endblock %}

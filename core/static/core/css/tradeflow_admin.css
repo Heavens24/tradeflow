@@ -1,0 +1,1952 @@
+/* =========================================================
+   TRADEFLOW ADMIN
+   FINAL OPERATIONS CONSOLE
+   ========================================================= */
+
+
+/* =========================================================
+   VARIABLES
+   ========================================================= */
+
+:root {
+    --tf-shell: #0b1120;
+    --tf-shell-soft: #111827;
+
+    --tf-panel: #172033;
+    --tf-panel-soft: #1e293b;
+    --tf-panel-hover: #263449;
+
+    --tf-surface: #ffffff;
+    --tf-surface-soft: #f8fafc;
+
+    --tf-page: #e7edf4;
+
+    --tf-border: #d5deea;
+    --tf-border-dark: #2d3b52;
+
+    --tf-text: #172033;
+    --tf-muted: #64748b;
+
+    --tf-text-light: #f8fafc;
+    --tf-text-soft: #cbd5e1;
+    --tf-muted-dark: #94a3b8;
+
+    --tf-green: #047857;
+    --tf-green-bg: #d1fae5;
+
+    --tf-yellow: #92400e;
+    --tf-yellow-bg: #fef3c7;
+
+    --tf-red: #991b1b;
+    --tf-red-bg: #fee2e2;
+
+    --tf-blue: #1d4ed8;
+    --tf-blue-bg: #dbeafe;
+
+    --tf-shadow:
+        0 18px 45px
+        rgba(2, 6, 23, 0.18);
+
+    --tf-shadow-soft:
+        0 8px 24px
+        rgba(2, 6, 23, 0.09);
+}
+
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+html {
+    background: var(--tf-shell);
+}
+
+
+body {
+    background: var(--tf-page);
+
+    color: var(--tf-text);
+}
+
+
+#container {
+    min-height: 100vh;
+
+    background: var(--tf-page);
+}
+
+
+#content {
+    width: 100%;
+
+    max-width: 1450px;
+
+    margin: 0 auto;
+
+    padding: 28px 32px 40px;
+}
+
+
+#content-main {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   REMOVE STOCK DJANGO VISUAL CLUTTER
+   ========================================================= */
+
+/*
+The normal Django navigation sidebar duplicates the links
+already available in the custom TradeFlow Admin Console.
+
+Hide it so platform administration feels like one coherent
+product rather than a developer backend.
+*/
+
+#nav-sidebar,
+#toggle-nav-sidebar {
+    display: none !important;
+}
+
+
+.main.shifted > #nav-sidebar + .content {
+    max-width: none;
+}
+
+
+.main > .content {
+    max-width: none;
+}
+
+
+#content-related {
+    display: none;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+#header {
+    min-height: 76px;
+
+    padding: 14px 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0b1120 0%,
+            #111827 100%
+        );
+
+    border-bottom:
+        1px solid
+        #253249;
+
+    color: white;
+
+    box-shadow:
+        0 8px 30px
+        rgba(2, 6, 23, 0.20);
+}
+
+
+#branding {
+    flex: 1;
+}
+
+
+.tf-admin-brand {
+    min-width: 220px;
+}
+
+
+.tf-admin-brand-link {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: white !important;
+
+    text-decoration: none;
+}
+
+
+.tf-admin-brand-name {
+    font-size: 25px;
+
+    font-weight: 900;
+
+    letter-spacing: -0.5px;
+}
+
+
+.tf-admin-brand-label {
+    padding: 4px 8px;
+
+    border:
+        1px solid
+        #41516d;
+
+    border-radius: 999px;
+
+    background: #1e293b;
+
+    color: #cbd5e1;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+.tf-admin-brand-subtitle {
+    margin-top: 4px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   HEADER LINKS
+   ========================================================= */
+
+.tf-admin-global-links {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-right: 16px;
+}
+
+
+.tf-admin-global-links a {
+    padding: 8px 12px;
+
+    border:
+        1px solid
+        #334155;
+
+    border-radius: 8px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.03
+        );
+
+    color: #cbd5e1 !important;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.tf-admin-global-links a:hover {
+    background: #1e293b;
+
+    border-color: #475569;
+
+    color: white !important;
+}
+
+
+/* =========================================================
+   USER TOOLS
+   ========================================================= */
+
+#user-tools {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+#user-tools a {
+    color: #e2e8f0 !important;
+}
+
+
+#user-tools a:hover {
+    color: white !important;
+}
+
+
+/* =========================================================
+   BREADCRUMBS
+   ========================================================= */
+
+div.breadcrumbs {
+    padding: 10px 32px;
+
+    background: #111827;
+
+    border-bottom:
+        1px solid
+        #273449;
+
+    color: #7f8ca3;
+
+    font-size: 11px;
+}
+
+
+div.breadcrumbs a {
+    color: #aebbd0;
+}
+
+
+div.breadcrumbs a:hover {
+    color: white;
+}
+
+
+/* =========================================================
+   ADMIN HOME
+   ========================================================= */
+
+.tf-admin-dashboard {
+    max-width: 1260px;
+
+    margin: 0 auto;
+}
+
+
+.tf-admin-welcome {
+    position: relative;
+
+    overflow: hidden;
+
+    margin-bottom: 28px;
+
+    padding: 32px;
+
+    border:
+        1px solid
+        #273449;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827 0%,
+            #172033 65%,
+            #1e293b 100%
+        );
+
+    color: white;
+
+    box-shadow: var(--tf-shadow);
+}
+
+
+.tf-admin-welcome::after {
+    content: "";
+
+    position: absolute;
+
+    width: 240px;
+    height: 240px;
+
+    right: -70px;
+    top: -90px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(
+            96,
+            165,
+            250,
+            0.07
+        );
+}
+
+
+.tf-admin-eyebrow,
+.tf-review-eyebrow {
+    margin-bottom: 9px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.8px;
+}
+
+
+.tf-admin-welcome h1 {
+    margin:
+        0 0 10px;
+
+    color: white;
+
+    font-size: 36px;
+
+    font-weight: 900;
+
+    letter-spacing: -0.9px;
+}
+
+
+.tf-admin-welcome p {
+    margin: 0;
+
+    max-width: 700px;
+
+    color: #cbd5e1;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   ADMIN SECTIONS
+   ========================================================= */
+
+.tf-admin-section {
+    margin-bottom: 30px;
+}
+
+
+.tf-admin-section-heading {
+    margin-bottom: 14px;
+}
+
+
+.tf-admin-section-heading h2 {
+    margin:
+        0 0 4px;
+
+    color: #172033;
+
+    font-size: 20px;
+
+    font-weight: 850;
+
+    letter-spacing: -0.3px;
+}
+
+
+.tf-admin-section-heading p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   STAT CARDS
+   ========================================================= */
+
+.tf-stat-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap: 15px;
+}
+
+
+.tf-stat-card {
+    min-height: 150px;
+
+    padding: 21px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    border:
+        1px solid
+        #d9e1eb;
+
+    border-radius: 14px;
+
+    background: white;
+
+    color: var(--tf-text) !important;
+
+    text-decoration: none;
+
+    box-shadow: var(--tf-shadow-soft);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.tf-stat-card:hover {
+    transform: translateY(-3px);
+
+    border-color: #b9c5d5;
+
+    box-shadow:
+        0 16px 35px
+        rgba(2, 6, 23, 0.13);
+}
+
+
+.tf-stat-card-warning {
+    border-top:
+        4px solid
+        #f59e0b;
+}
+
+
+.tf-stat-card-success {
+    border-top:
+        4px solid
+        #10b981;
+}
+
+
+.tf-stat-label {
+    color: #64748b;
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+
+.tf-stat-number {
+    margin:
+        12px 0 7px;
+
+    color: #0f172a;
+
+    font-size: 36px;
+
+    font-weight: 900;
+
+    line-height: 1;
+}
+
+
+.tf-stat-detail {
+    margin-top: auto;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   ACTION CARDS
+   ========================================================= */
+
+.tf-admin-action-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
+
+    gap: 13px;
+}
+
+
+.tf-admin-action-card {
+    min-height: 96px;
+
+    padding: 17px;
+
+    display: grid;
+
+    grid-template-columns:
+        44px 1fr auto;
+
+    align-items: center;
+
+    gap: 14px;
+
+    border:
+        1px solid
+        #d9e1eb;
+
+    border-radius: 13px;
+
+    background: white;
+
+    color: #172033 !important;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 5px 16px
+        rgba(2, 6, 23, 0.05);
+
+    transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.tf-admin-action-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #aebccd;
+
+    box-shadow:
+        0 10px 25px
+        rgba(2, 6, 23, 0.09);
+}
+
+
+.tf-admin-action-icon {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #eef2f7;
+
+    color: #111827;
+
+    font-size: 15px;
+
+    font-weight: 900;
+}
+
+
+.tf-admin-action-card strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #172033;
+
+    font-size: 14px;
+}
+
+
+.tf-admin-action-card span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.tf-admin-action-arrow {
+    color: #94a3b8;
+
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   OPERATION LINKS
+   ========================================================= */
+
+.tf-admin-link-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
+
+    gap: 10px;
+}
+
+
+.tf-admin-link-grid a {
+    padding: 14px 16px;
+
+    border:
+        1px solid
+        #d9e1eb;
+
+    border-radius: 10px;
+
+    background: white;
+
+    color: #172033 !important;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 4px 12px
+        rgba(2, 6, 23, 0.04);
+}
+
+
+.tf-admin-link-grid a:hover {
+    border-color: #aebccd;
+
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.tf-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 5px 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+}
+
+
+.tf-status-success {
+    background: var(--tf-green-bg);
+
+    color: var(--tf-green);
+}
+
+
+.tf-status-warning {
+    background: var(--tf-yellow-bg);
+
+    color: var(--tf-yellow);
+}
+
+
+.tf-status-danger {
+    background: var(--tf-red-bg);
+
+    color: var(--tf-red);
+}
+
+
+.tf-status-muted {
+    background: #e2e8f0;
+
+    color: #475569;
+}
+
+
+.tf-status-large {
+    padding: 9px 14px;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   VERIFICATION QUEUE
+   ========================================================= */
+
+#changelist {
+    border-radius: 14px;
+}
+
+
+#changelist-form .results {
+    border-radius: 12px;
+
+    overflow-x: auto;
+
+    background: white;
+
+    box-shadow: var(--tf-shadow-soft);
+}
+
+
+#changelist table {
+    border-collapse: collapse;
+
+    background: white;
+}
+
+
+#changelist table thead th {
+    padding:
+        13px 10px;
+
+    background: #111827;
+
+    border-bottom:
+        1px solid
+        #263449;
+
+    color: #dbe4f0;
+}
+
+
+#changelist table thead th a {
+    color: #eef2f7 !important;
+}
+
+
+#changelist table tbody td,
+#changelist table tbody th {
+    padding:
+        13px 10px;
+
+    border-bottom:
+        1px solid
+        #e6ebf2;
+
+    vertical-align: middle;
+}
+
+
+#changelist table tbody tr:hover {
+    background: #f8fafc;
+}
+
+
+.tf-review-link {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 72px;
+
+    padding: 7px 12px;
+
+    border-radius: 8px;
+
+    background: #172033;
+
+    color: white !important;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 4px 12px
+        rgba(15, 23, 42, 0.18);
+}
+
+
+.tf-review-link:hover {
+    background: #25334a;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+#changelist-filter {
+    border:
+        1px solid
+        #d9e1eb;
+
+    border-radius: 12px;
+
+    background: white;
+
+    box-shadow: var(--tf-shadow-soft);
+}
+
+
+#changelist-filter h2 {
+    background: #111827;
+
+    color: white;
+}
+
+
+#toolbar {
+    margin-bottom: 15px;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        #d9e1eb;
+
+    border-radius: 10px;
+
+    background: white;
+}
+
+
+/* =========================================================
+   VERIFICATION REVIEW HERO
+   ========================================================= */
+
+.tf-review-hero {
+    margin-bottom: 18px;
+
+    padding: 28px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 28px;
+
+    border:
+        1px solid
+        #2d3b52;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827 0%,
+            #172033 55%,
+            #1e293b 100%
+        );
+
+    color: white;
+
+    box-shadow: var(--tf-shadow);
+}
+
+
+.tf-review-hero-main {
+    min-width: 0;
+}
+
+
+.tf-review-hero h1 {
+    margin:
+        0 0 6px;
+
+    color: white;
+
+    font-size: 32px;
+
+    font-weight: 900;
+
+    letter-spacing: -0.7px;
+}
+
+
+.tf-review-meta {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 12px;
+
+    color: #cbd5e1;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.tf-meta-divider {
+    color: #64748b;
+}
+
+
+.tf-review-hero p {
+    margin: 0;
+
+    max-width: 700px;
+
+    color: #aebbd0;
+
+    font-size: 13px;
+
+    line-height: 1.65;
+}
+
+
+.tf-review-status {
+    min-width: 190px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.tf-review-status-time {
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    text-align: right;
+}
+
+
+.tf-review-status-time strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #dbe4f0;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   REVIEW GUIDE
+   ========================================================= */
+
+.tf-review-guide {
+    margin-bottom: 18px;
+
+    padding: 15px 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    border:
+        1px solid
+        #c5d1df;
+
+    border-radius: 11px;
+
+    background: #edf3f9;
+
+    color: #334155;
+}
+
+
+.tf-review-guide-icon {
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #172033;
+
+    color: white;
+
+    font-weight: 900;
+}
+
+
+.tf-review-guide strong {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #172033;
+
+    font-size: 12px;
+}
+
+
+.tf-review-guide span {
+    color: #64748b;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   REVIEW FORM
+   ========================================================= */
+
+.change-form #content {
+    max-width: 1200px;
+}
+
+
+.change-form #content-main {
+    background: transparent;
+}
+
+
+.change-form fieldset.module {
+    margin-bottom: 16px;
+
+    padding:
+        0 0 8px;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        #cfd8e5;
+
+    border-radius: 12px;
+
+    background: white;
+
+    box-shadow:
+        0 7px 20px
+        rgba(2, 6, 23, 0.06);
+}
+
+
+.change-form fieldset.module h2 {
+    margin: 0;
+
+    padding:
+        14px 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #172033 0%,
+            #1e293b 100%
+        );
+
+    color: #f8fafc;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.6px;
+
+    text-transform: uppercase;
+}
+
+
+.change-form .form-row {
+    min-height: 55px;
+
+    padding:
+        14px 18px !important;
+
+    border-bottom:
+        1px solid
+        #edf1f5;
+}
+
+
+.change-form .form-row:last-child {
+    border-bottom: 0;
+}
+
+
+.change-form .form-row label {
+    color: #475569;
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+
+.change-form .readonly {
+    color: #172033;
+
+    font-size: 13px;
+
+    font-weight: 650;
+
+    line-height: 1.6;
+}
+
+
+.change-form .readonly a {
+    color: #1d4ed8;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   MAKE ADMIN NOTES STAND OUT
+   ========================================================= */
+
+.change-form .field-admin_notes {
+    margin:
+        8px 12px 10px;
+
+    padding:
+        18px !important;
+
+    border:
+        1px solid
+        #c5d1df !important;
+
+    border-radius: 10px;
+
+    background: #f8fafc;
+}
+
+
+.change-form .field-admin_notes label {
+    color: #172033;
+
+    font-size: 13px;
+
+    font-weight: 900;
+}
+
+
+.change-form .field-admin_notes textarea {
+    width: 100%;
+
+    min-height: 125px;
+
+    margin-top: 8px;
+
+    padding: 12px !important;
+
+    border:
+        1px solid
+        #bcc8d8 !important;
+
+    border-radius:
+        8px !important;
+
+    background: white !important;
+
+    color: #172033 !important;
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+    border:
+        1px solid
+        #cbd5e1 !important;
+
+    border-radius:
+        8px !important;
+
+    background: #ffffff !important;
+
+    color: #172033 !important;
+
+    box-shadow: none !important;
+}
+
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color:
+        #64748b !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            100,
+            116,
+            139,
+            0.14
+        ) !important;
+
+    outline: none;
+}
+
+
+/* =========================================================
+   REVIEW DECISION PANEL
+   ========================================================= */
+
+.tf-review-action-panel {
+    margin-top: 20px;
+
+    padding: 20px;
+
+    border:
+        1px solid
+        #2d3b52;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827 0%,
+            #172033 100%
+        );
+
+    box-shadow: var(--tf-shadow);
+}
+
+
+.tf-review-action-copy {
+    margin-bottom: 17px;
+}
+
+
+.tf-review-action-copy strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: white;
+
+    font-size: 13px;
+}
+
+
+.tf-review-action-copy span {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.tf-review-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.tf-admin-button {
+    min-height: 42px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 10px 17px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    font-weight: 850;
+
+    line-height: 1.2;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.12s ease,
+        background 0.12s ease;
+}
+
+
+.tf-admin-button:hover {
+    transform: translateY(-1px);
+}
+
+
+.tf-admin-button-success {
+    background: #059669;
+
+    color: white !important;
+}
+
+
+.tf-admin-button-success:hover {
+    background: #047857;
+}
+
+
+.tf-admin-button-danger {
+    background: #dc2626;
+
+    color: white !important;
+}
+
+
+.tf-admin-button-danger:hover {
+    background: #b91c1c;
+}
+
+
+.tf-admin-button-secondary {
+    background: #e2e8f0;
+
+    color: #172033 !important;
+}
+
+
+.tf-admin-button-secondary:hover {
+    background: #cbd5e1;
+}
+
+
+.tf-admin-button-ghost {
+    border:
+        1px solid
+        #46566f;
+
+    background: transparent;
+
+    color: #dbe4f0 !important;
+}
+
+
+.tf-admin-button-ghost:hover {
+    background: #1e293b;
+}
+
+
+/* =========================================================
+   OBJECT TOOLS
+   ========================================================= */
+
+.object-tools {
+    margin-bottom: 12px;
+}
+
+
+.object-tools a {
+    border-radius: 8px;
+
+    background: #172033 !important;
+
+    color: white !important;
+
+    font-weight: 700;
+}
+
+
+.object-tools a:hover {
+    background: #25334a !important;
+}
+
+
+/* =========================================================
+   DEFAULT DJANGO SUBMIT ROW
+   ========================================================= */
+
+.submit-row {
+    border:
+        1px solid
+        #cfd8e5;
+
+    border-radius: 10px;
+
+    background: white;
+}
+
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+.messagelist li {
+    margin-bottom: 10px;
+
+    border-radius: 9px;
+
+    box-shadow:
+        0 5px 14px
+        rgba(2, 6, 23, 0.05);
+}
+
+
+/* =========================================================
+   DARK THEME
+   ========================================================= */
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] #container {
+    background: #0f172a;
+}
+
+
+html[data-theme="dark"] #content {
+    color: #e2e8f0;
+}
+
+
+html[data-theme="dark"]
+.tf-admin-section-heading h2 {
+    color: #f8fafc;
+}
+
+
+html[data-theme="dark"]
+.tf-admin-section-heading p {
+    color: #94a3b8;
+}
+
+
+html[data-theme="dark"]
+.tf-stat-card,
+html[data-theme="dark"]
+.tf-admin-action-card,
+html[data-theme="dark"]
+.tf-admin-link-grid a,
+html[data-theme="dark"]
+.change-form fieldset.module,
+html[data-theme="dark"]
+#changelist-form .results,
+html[data-theme="dark"]
+#changelist-filter,
+html[data-theme="dark"]
+#toolbar {
+    background: #172033;
+
+    border-color: #2d3b52;
+
+    color: #e2e8f0 !important;
+}
+
+
+html[data-theme="dark"]
+.tf-stat-number,
+html[data-theme="dark"]
+.tf-admin-action-card strong,
+html[data-theme="dark"]
+.tf-admin-link-grid a,
+html[data-theme="dark"]
+.change-form .readonly {
+    color: #f8fafc !important;
+}
+
+
+html[data-theme="dark"]
+.change-form .form-row {
+    border-color: #2d3b52;
+}
+
+
+html[data-theme="dark"]
+.change-form .field-admin_notes {
+    border-color: #334155 !important;
+
+    background: #111827;
+}
+
+
+html[data-theme="dark"]
+.change-form .field-admin_notes label {
+    color: #f8fafc;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .tf-stat-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+
+
+    .tf-admin-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .tf-review-hero {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .tf-review-status {
+        align-items: flex-start;
+
+        min-width: 0;
+    }
+
+
+    .tf-review-status-time {
+        text-align: left;
+    }
+
+}
+
+
+@media (max-width: 760px) {
+
+    #header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        padding:
+            14px 18px;
+    }
+
+
+    .tf-admin-global-links {
+        margin-right: 0;
+
+        flex-wrap: wrap;
+    }
+
+
+    #content {
+        padding: 18px;
+    }
+
+
+    div.breadcrumbs {
+        padding:
+            10px 18px;
+    }
+
+
+    .tf-admin-welcome {
+        padding: 24px;
+    }
+
+
+    .tf-admin-welcome h1 {
+        font-size: 29px;
+    }
+
+
+    .tf-stat-grid,
+    .tf-admin-link-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .tf-review-hero {
+        padding: 22px;
+    }
+
+
+    .tf-review-hero h1 {
+        font-size: 27px;
+    }
+
+
+    .tf-review-guide {
+        align-items: flex-start;
+    }
+
+
+    .tf-review-action-panel {
+        padding: 16px;
+    }
+
+
+    .tf-review-actions {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .tf-admin-button {
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
+   FINAL VERIFICATION MICRO-POLISH
+   ========================================================= */
+
+
+/* Remove Django's duplicate object-title heading on the
+   custom verification review page. */
+
+.change-form #content > h1 {
+    display: none;
+}
+
+
+/* Keep the object tools small and secondary. */
+
+.change-form .object-tools {
+    margin:
+        0 0 14px;
+
+    display: flex;
+
+    justify-content: flex-end;
+}
+
+
+.tf-history-link {
+    padding:
+        7px 11px !important;
+
+    border:
+        1px solid
+        #c7d1df !important;
+
+    border-radius:
+        8px !important;
+
+    background:
+        #f8fafc !important;
+
+    color:
+        #475569 !important;
+
+    font-size:
+        11px !important;
+
+    font-weight:
+        800 !important;
+
+    box-shadow:
+        none !important;
+}
+
+
+.tf-history-link:hover {
+    background:
+        #e9eef5 !important;
+
+    color:
+        #172033 !important;
+}
+
+
+/* Give each verification section a little more breathing
+   room without making the page tall or wasteful. */
+
+.change-form fieldset.module {
+    margin-bottom:
+        18px;
+}
+
+
+.change-form fieldset.module h2 {
+    padding:
+        15px 18px;
+}
+
+
+.change-form .form-row {
+    padding:
+        15px 18px !important;
+}
+
+
+/* Make review notes feel like the admin's workspace. */
+
+.change-form .field-admin_notes {
+    margin:
+        12px 14px 14px;
+
+    padding:
+        20px !important;
+
+    border:
+        1px solid
+        #b9c6d6 !important;
+
+    border-radius:
+        11px;
+
+    background:
+        #f3f6fa;
+}
+
+
+.change-form .field-admin_notes textarea {
+    min-height:
+        145px;
+}
+
+
+/* Stronger spacing and hierarchy between decisions. */
+
+.tf-review-actions {
+    gap:
+        12px 14px;
+}
+
+
+.tf-admin-button {
+    min-width:
+        150px;
+}
+
+
+.tf-admin-button-danger {
+    margin-right:
+        6px;
+}
+
+
+.tf-admin-button-ghost {
+    margin-left:
+        auto;
+}
+
+
+/* Slightly neater changelist headers. */
+
+#changelist table thead th {
+    white-space:
+        nowrap;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+
+#changelist table tbody td,
+#changelist table tbody th {
+    font-size:
+        12px;
+}
+
+
+/* Stop the action checkbox column from visually competing
+   with the business details. */
+
+#changelist .action-checkbox-column,
+#changelist .action-checkbox {
+    width:
+        34px;
+
+    text-align:
+        center;
+}
+
+
+/* Clean action toolbar. */
+
+.actions {
+    padding:
+        10px 12px !important;
+
+    border:
+        1px solid
+        #d5deea;
+
+    border-radius:
+        9px;
+
+    background:
+        #f8fafc;
+}
+
+
+/* Mobile decision controls remain full-width. */
+
+@media (max-width: 760px) {
+
+    .tf-admin-button {
+        min-width:
+            0;
+    }
+
+
+    .tf-admin-button-danger {
+        margin-right:
+            0;
+    }
+
+
+    .tf-admin-button-ghost {
+        margin-left:
+            0;
+    }
+
+}

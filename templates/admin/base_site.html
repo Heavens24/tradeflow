@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+
+{% block title %}
+
+    {% if subtitle %}
+
+        {{ subtitle }} |
+
+    {% endif %}
+
+    {{ title }} | TradeFlow Admin
+
+{% endblock %}
+
+
+{% block extrastyle %}
+
+    {{ block.super }}
+
+    <link
+        rel="stylesheet"
+        href="{% static 'core/css/tradeflow_admin.css' %}"
+    >
+
+{% endblock %}
+
+
+{% block branding %}
+
+    <div class="tf-admin-brand">
+
+        <a
+            href="{% url 'admin:index' %}"
+            class="tf-admin-brand-link"
+        >
+
+            <span class="tf-admin-brand-name">
+                TradeFlow
+            </span>
+
+            <span class="tf-admin-brand-label">
+                Admin
+            </span>
+
+        </a>
+
+        <div class="tf-admin-brand-subtitle">
+            Platform Operations
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block nav-global %}
+
+    <div class="tf-admin-global-links">
+
+        <a
+            href="{% url 'admin:index' %}"
+        >
+            Admin Console
+        </a>
+
+        <a
+            href="{% url 'admin:core_businessverification_changelist' %}"
+        >
+            Verification
+        </a>
+
+        <a
+            href="{% url 'core:marketplace' %}"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Marketplace
+        </a>
+
+        <a
+            href="{% url 'core:home' %}"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            TradeFlow
+        </a>
+
+    </div>
+
+{% endblock %}

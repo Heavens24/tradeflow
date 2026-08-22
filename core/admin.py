@@ -1,5 +1,8 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html
 
 from .models import (
     Business,
@@ -14,6 +17,17 @@ from .models import (
     QuoteItem,
     QuoteRequest,
 )
+
+
+# =========================================================
+# TRADEFLOW ADMIN BRANDING
+# =========================================================
+
+
+admin.site.site_header = "TradeFlow Admin"
+admin.site.site_title = "TradeFlow Admin"
+admin.site.index_title = "Platform Operations"
+admin.site.site_url = "/"
 
 
 # =========================================================
@@ -41,6 +55,15 @@ class BusinessAdmin(admin.ModelAdmin):
         "registration_number",
     )
 
+    list_filter = (
+        "city",
+        "created_at",
+    )
+
+    ordering = (
+        "name",
+    )
+
 
 # =========================================================
 # PUBLIC BUSINESS PROFILE
@@ -54,16 +77,19 @@ class BusinessPublicProfileAdmin(
     """
     Public marketplace profile.
 
-    Verification should be controlled through the dedicated
-    BusinessVerification workflow rather than directly
-    editing is_verified here.
+    Verification is controlled only through the dedicated
+    BusinessVerification workflow.
+
+    Business owners cannot make themselves verified.
     """
 
     list_display = (
         "business",
-        "trade_category",
-        "public_profile_enabled",
-        "is_verified",
+        "trade_category_display",
+        "city_display",
+        "publication_badge",
+        "verification_badge",
+        "emergency_callouts",
         "updated_at",
     )
 
@@ -87,6 +113,117 @@ class BusinessPublicProfileAdmin(
         "updated_at",
     )
 
+    ordering = (
+        "business__name",
+    )
+
+
+    # =====================================================
+    # TRADE DISPLAY
+    # =====================================================
+
+    @admin.display(
+        description="Trade",
+        ordering="trade_category",
+    )
+    def trade_category_display(
+        self,
+        obj,
+    ):
+        return (
+            obj.get_trade_category_display()
+        )
+
+
+    # =====================================================
+    # CITY DISPLAY
+    # =====================================================
+
+    @admin.display(
+        description="City",
+        ordering="business__city",
+    )
+    def city_display(
+        self,
+        obj,
+    ):
+        return (
+            obj.business.city
+            or "—"
+        )
+
+
+    # =====================================================
+    # PUBLICATION BADGE
+    # =====================================================
+
+    @admin.display(
+        description="Published",
+        ordering="public_profile_enabled",
+    )
+    def publication_badge(
+        self,
+        obj,
+    ):
+
+        if obj.public_profile_enabled:
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-success">'
+                    '{}'
+                    '</span>'
+                ),
+                "Published",
+            )
+
+        return format_html(
+            (
+                '<span class="tf-status '
+                'tf-status-muted">'
+                '{}'
+                '</span>'
+            ),
+            "Hidden",
+        )
+
+
+    # =====================================================
+    # VERIFICATION BADGE
+    # =====================================================
+
+    @admin.display(
+        description="Verification",
+        ordering="is_verified",
+    )
+    def verification_badge(
+        self,
+        obj,
+    ):
+
+        if obj.is_verified:
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-success">'
+                    '{}'
+                    '</span>'
+                ),
+                "✓ Verified",
+            )
+
+        return format_html(
+            (
+                '<span class="tf-status '
+                'tf-status-muted">'
+                '{}'
+                '</span>'
+            ),
+            "Not verified",
+        )
+
 
 # =========================================================
 # BUSINESS VERIFICATION
@@ -100,20 +237,43 @@ class BusinessVerificationAdmin(
     """
     TradeFlow platform verification review area.
 
-    Only staff with Django Admin access can approve or reject
-    verification applications.
+    Business-submitted identity information becomes
+    read-only in admin.
+
+    Administrators review the information, write internal
+    notes and approve or reject the application.
+
+    Approval automatically synchronizes the public
+    BusinessPublicProfile verification badge through the
+    BusinessVerification model.
     """
+
+    # =====================================================
+    # CUSTOM REVIEW TEMPLATE
+    # =====================================================
+
+    change_form_template = (
+        "admin/core/businessverification/"
+        "change_form.html"
+    )
+
+
+    # =====================================================
+    # LIST PAGE
+    # =====================================================
 
     list_display = (
         "business",
-        "legal_business_name",
-        "registration_type",
+        "trade_display",
+        "city_display",
+        "registration_type_display",
         "registration_number",
-        "status",
+        "status_badge",
         "submitted_at",
-        "reviewed_at",
         "reviewed_by",
+        "review_application",
     )
+
 
     list_filter = (
         "status",
@@ -122,8 +282,10 @@ class BusinessVerificationAdmin(
         "reviewed_at",
     )
 
+
     search_fields = (
         "business__name",
+        "business__city",
         "legal_business_name",
         "registration_number",
         "contact_name",
@@ -131,8 +293,30 @@ class BusinessVerificationAdmin(
         "contact_phone",
     )
 
+
+    ordering = (
+        "status",
+        "-submitted_at",
+    )
+
+
+    list_per_page = 25
+
+
+    # =====================================================
+    # READ-ONLY BUSINESS APPLICATION DATA
+    # =====================================================
+
     readonly_fields = (
         "business",
+        "legal_business_name",
+        "registration_type",
+        "registration_number",
+        "contact_name",
+        "contact_email",
+        "contact_phone",
+        "supporting_information",
+        "status",
         "submitted_at",
         "reviewed_at",
         "reviewed_by",
@@ -140,34 +324,43 @@ class BusinessVerificationAdmin(
         "updated_at",
     )
 
+
+    # =====================================================
+    # BULK ACTIONS
+    # =====================================================
+
     actions = (
         "approve_verification",
         "reject_verification",
     )
 
 
+    # =====================================================
+    # REVIEW FORM LAYOUT
+    # =====================================================
+
     fieldsets = (
 
         (
-            "Business",
+            "Business identity",
             {
                 "fields": (
                     "business",
                     "legal_business_name",
                     "registration_type",
                     "registration_number",
-                )
+                ),
             },
         ),
 
         (
-            "Contact",
+            "Contact information",
             {
                 "fields": (
                     "contact_name",
                     "contact_email",
                     "contact_phone",
-                )
+                ),
             },
         ),
 
@@ -176,7 +369,7 @@ class BusinessVerificationAdmin(
             {
                 "fields": (
                     "supporting_information",
-                )
+                ),
             },
         ),
 
@@ -189,22 +382,227 @@ class BusinessVerificationAdmin(
                     "submitted_at",
                     "reviewed_at",
                     "reviewed_by",
-                )
+                ),
             },
         ),
 
         (
-            "System timestamps",
+            "System information",
             {
+                "classes": (
+                    "collapse",
+                ),
                 "fields": (
                     "created_at",
                     "updated_at",
-                )
+                ),
             },
         ),
 
     )
 
+
+    # =====================================================
+    # PREVENT MANUAL APPLICATION CREATION
+    # =====================================================
+
+    def has_add_permission(
+        self,
+        request,
+    ):
+        """
+        Verification applications originate from business
+        owners.
+
+        Platform administrators review applications but do
+        not create them manually.
+        """
+
+        return False
+
+
+    # =====================================================
+    # TRADE
+    # =====================================================
+
+    @admin.display(
+        description="Trade",
+    )
+    def trade_display(
+        self,
+        obj,
+    ):
+
+        try:
+
+            profile = (
+                obj.business.public_profile
+            )
+
+        except (
+            BusinessPublicProfile
+            .DoesNotExist
+        ):
+
+            return "—"
+
+
+        return (
+            profile
+            .get_trade_category_display()
+        )
+
+
+    # =====================================================
+    # CITY
+    # =====================================================
+
+    @admin.display(
+        description="City",
+        ordering="business__city",
+    )
+    def city_display(
+        self,
+        obj,
+    ):
+
+        return (
+            obj.business.city
+            or "—"
+        )
+
+
+    # =====================================================
+    # REGISTRATION TYPE
+    # =====================================================
+
+    @admin.display(
+        description="Registration type",
+        ordering="registration_type",
+    )
+    def registration_type_display(
+        self,
+        obj,
+    ):
+
+        return (
+            obj
+            .get_registration_type_display()
+        )
+
+
+    # =====================================================
+    # STATUS BADGE
+    # =====================================================
+
+    @admin.display(
+        description="Status",
+        ordering="status",
+    )
+    def status_badge(
+        self,
+        obj,
+    ):
+
+        if (
+            obj.status
+            == BusinessVerification
+            .STATUS_VERIFIED
+        ):
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-success">'
+                    '{}'
+                    '</span>'
+                ),
+                "✓ Verified",
+            )
+
+
+        if (
+            obj.status
+            == BusinessVerification
+            .STATUS_PENDING
+        ):
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-warning">'
+                    '{}'
+                    '</span>'
+                ),
+                "Pending Review",
+            )
+
+
+        if (
+            obj.status
+            == BusinessVerification
+            .STATUS_REJECTED
+        ):
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-danger">'
+                    '{}'
+                    '</span>'
+                ),
+                "Needs Information",
+            )
+
+
+        return format_html(
+            (
+                '<span class="tf-status '
+                'tf-status-muted">'
+                '{}'
+                '</span>'
+            ),
+            "Not Submitted",
+        )
+
+
+    # =====================================================
+    # REVIEW LINK
+    # =====================================================
+
+    @admin.display(
+        description="Review",
+    )
+    def review_application(
+        self,
+        obj,
+    ):
+
+        url = reverse(
+            (
+                "admin:"
+                "core_businessverification_change"
+            ),
+            args=[
+                obj.pk,
+            ],
+        )
+
+
+        return format_html(
+            (
+                '<a class="tf-review-link" '
+                'href="{}">'
+                'Review'
+                '</a>'
+            ),
+            url,
+        )
+
+
+    # =====================================================
+    # NORMAL ADMIN SAVE
+    # =====================================================
 
     def save_model(
         self,
@@ -214,31 +612,12 @@ class BusinessVerificationAdmin(
         change,
     ):
         """
-        Record who performed the verification review when an
-        administrator manually changes status.
+        Standard admin saves are used mainly for admin_notes.
+
+        Application identity data and review status remain
+        protected through readonly_fields and the dedicated
+        approval/rejection workflow.
         """
-
-        if obj.status in (
-            BusinessVerification.STATUS_VERIFIED,
-            BusinessVerification.STATUS_REJECTED,
-        ):
-
-            obj.reviewed_by = (
-                request.user
-            )
-
-            obj.reviewed_at = (
-                timezone.now()
-            )
-
-        elif (
-            obj.status
-            == BusinessVerification.STATUS_PENDING
-        ):
-
-            obj.reviewed_by = None
-            obj.reviewed_at = None
-
 
         super().save_model(
             request,
@@ -248,9 +627,121 @@ class BusinessVerificationAdmin(
         )
 
 
+    # =====================================================
+    # DIRECT APPROVE / REJECT BUTTONS
+    # =====================================================
+
+    def response_change(
+        self,
+        request,
+        obj,
+    ):
+        """
+        Handle the custom Approve Business and Reject /
+        Needs Information buttons from the verification
+        review page.
+
+        Django saves admin_notes before this method runs,
+        so review notes are preserved.
+        """
+
+        # -------------------------------------------------
+        # APPROVE
+        # -------------------------------------------------
+
+        if (
+            "_approve_verification"
+            in request.POST
+        ):
+
+            obj.status = (
+                BusinessVerification
+                .STATUS_VERIFIED
+            )
+
+            obj.reviewed_by = (
+                request.user
+            )
+
+            obj.reviewed_at = (
+                timezone.now()
+            )
+
+            obj.save()
+
+
+            self.message_user(
+                request,
+                (
+                    f"{obj.business.name} "
+                    f"has been verified "
+                    f"successfully."
+                ),
+                level=messages.SUCCESS,
+            )
+
+
+            return HttpResponseRedirect(
+                request.path
+            )
+
+
+        # -------------------------------------------------
+        # REJECT / NEEDS INFORMATION
+        # -------------------------------------------------
+
+        if (
+            "_reject_verification"
+            in request.POST
+        ):
+
+            obj.status = (
+                BusinessVerification
+                .STATUS_REJECTED
+            )
+
+            obj.reviewed_by = (
+                request.user
+            )
+
+            obj.reviewed_at = (
+                timezone.now()
+            )
+
+            obj.save()
+
+
+            self.message_user(
+                request,
+                (
+                    f"{obj.business.name}'s "
+                    f"verification application "
+                    f"has been marked as needing "
+                    f"more information."
+                ),
+                level=messages.WARNING,
+            )
+
+
+            return HttpResponseRedirect(
+                request.path
+            )
+
+
+        return super().response_change(
+            request,
+            obj,
+        )
+
+
+    # =====================================================
+    # BULK APPROVE
+    # =====================================================
+
     @admin.action(
         description=(
-            "Approve selected business verification(s)"
+            "Approve selected business "
+            "verification(s)"
         )
     )
     def approve_verification(
@@ -261,10 +752,12 @@ class BusinessVerificationAdmin(
 
         count = 0
 
+
         for verification in queryset:
 
             verification.status = (
-                BusinessVerification.STATUS_VERIFIED
+                BusinessVerification
+                .STATUS_VERIFIED
             )
 
             verification.reviewed_by = (
@@ -286,12 +779,18 @@ class BusinessVerificationAdmin(
                 f"{count} business verification "
                 f"application(s) approved."
             ),
+            level=messages.SUCCESS,
         )
 
 
+    # =====================================================
+    # BULK REJECT
+    # =====================================================
+
     @admin.action(
         description=(
-            "Reject selected business verification(s)"
+            "Reject selected business "
+            "verification(s)"
         )
     )
     def reject_verification(
@@ -302,10 +801,12 @@ class BusinessVerificationAdmin(
 
         count = 0
 
+
         for verification in queryset:
 
             verification.status = (
-                BusinessVerification.STATUS_REJECTED
+                BusinessVerification
+                .STATUS_REJECTED
             )
 
             verification.reviewed_by = (
@@ -327,6 +828,7 @@ class BusinessVerificationAdmin(
                 f"{count} business verification "
                 f"application(s) rejected."
             ),
+            level=messages.WARNING,
         )
 
 
@@ -345,13 +847,26 @@ class CustomerAdmin(admin.ModelAdmin):
         "created_at",
     )
 
+    search_fields = (
+        "name",
+        "business__name",
+        "phone",
+        "email",
+    )
+
+    list_filter = (
+        "created_at",
+    )
+
 
 # =========================================================
-# QUOTE ITEMS
+# QUOTE ITEM INLINE
 # =========================================================
 
 
-class QuoteItemInline(admin.TabularInline):
+class QuoteItemInline(
+    admin.TabularInline
+):
     model = QuoteItem
     extra = 0
 
@@ -378,13 +893,26 @@ class QuoteAdmin(admin.ModelAdmin):
         "apply_vat",
     )
 
+    search_fields = (
+        "quote_number",
+        "business__name",
+        "customer__name",
+    )
+
     inlines = [
         QuoteItemInline,
     ]
 
 
+# =========================================================
+# QUOTE ITEM
+# =========================================================
+
+
 @admin.register(QuoteItem)
-class QuoteItemAdmin(admin.ModelAdmin):
+class QuoteItemAdmin(
+    admin.ModelAdmin
+):
     list_display = (
         "quote",
         "description",
@@ -415,18 +943,34 @@ class JobAdmin(admin.ModelAdmin):
         "status",
     )
 
+    search_fields = (
+        "job_number",
+        "business__name",
+        "customer__name",
+        "title",
+    )
+
 
 # =========================================================
-# INVOICE ITEMS / PAYMENTS
+# INVOICE ITEM INLINE
 # =========================================================
 
 
-class InvoiceItemInline(admin.TabularInline):
+class InvoiceItemInline(
+    admin.TabularInline
+):
     model = InvoiceItem
     extra = 0
 
 
-class PaymentInline(admin.TabularInline):
+# =========================================================
+# PAYMENT INLINE
+# =========================================================
+
+
+class PaymentInline(
+    admin.TabularInline
+):
     model = Payment
     extra = 0
 
@@ -454,14 +998,27 @@ class InvoiceAdmin(admin.ModelAdmin):
         "apply_vat",
     )
 
+    search_fields = (
+        "invoice_number",
+        "business__name",
+        "customer__name",
+    )
+
     inlines = [
         InvoiceItemInline,
         PaymentInline,
     ]
 
 
+# =========================================================
+# INVOICE ITEM
+# =========================================================
+
+
 @admin.register(InvoiceItem)
-class InvoiceItemAdmin(admin.ModelAdmin):
+class InvoiceItemAdmin(
+    admin.ModelAdmin
+):
     list_display = (
         "invoice",
         "description",
@@ -490,6 +1047,11 @@ class PaymentAdmin(admin.ModelAdmin):
         "payment_date",
     )
 
+    search_fields = (
+        "invoice__invoice_number",
+        "reference",
+    )
+
 
 # =========================================================
 # QUOTE REQUEST
@@ -497,7 +1059,9 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 @admin.register(QuoteRequest)
-class QuoteRequestAdmin(admin.ModelAdmin):
+class QuoteRequestAdmin(
+    admin.ModelAdmin
+):
     list_display = (
         "customer_name",
         "business",
