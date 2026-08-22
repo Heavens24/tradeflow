@@ -49,6 +49,7 @@ from .models import (
     Job,
     Payment,
     Quote,
+    QuoteRequest,
 )
 
 
@@ -324,6 +325,7 @@ def dashboard(request):
 
     customer_count = 0
     quote_count = 0
+    new_quote_requests_count = 0
     active_job_count = 0
 
     overdue_invoice_count = 0
@@ -339,6 +341,11 @@ def dashboard(request):
 
         quote_count = Quote.objects.filter(
             business=business
+        ).count()
+
+        new_quote_requests_count = QuoteRequest.objects.filter(
+            business=business,
+            status="new",
         ).count()
 
         active_job_count = (
@@ -424,6 +431,7 @@ def dashboard(request):
         "business": business,
         "customer_count": customer_count,
         "quote_count": quote_count,
+        "new_quote_requests_count": new_quote_requests_count,
         "active_job_count": active_job_count,
         "overdue_invoice_count": overdue_invoice_count,
         "overdue_amount": overdue_amount,

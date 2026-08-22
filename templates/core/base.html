@@ -1,3 +1,5 @@
+{% load tradeflow_tags %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -142,6 +144,33 @@
         .nav a.active {
             background: #1f2937;
             color: white;
+        }
+
+
+        .nav-link-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+
+        .nav-badge {
+            min-width: 24px;
+
+            padding: 2px 7px;
+
+            border-radius: 999px;
+
+            background: #dc2626;
+            color: white;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            line-height: 1.5;
+
+            text-align: center;
         }
 
 
@@ -380,6 +409,8 @@
 
     <aside class="sidebar">
 
+        {% new_quote_request_count request.user as nav_new_quote_requests_count %}
+
 
         <!-- =================================================
              BRAND
@@ -435,7 +466,24 @@
                     class="active"
                 {% endif %}
             >
-                Quote Requests
+                <span class="nav-link-row">
+
+                    <span>
+                        Quote Requests
+                    </span>
+
+                    {% if nav_new_quote_requests_count %}
+
+                        <span
+                            class="nav-badge"
+                            title="{{ nav_new_quote_requests_count }} new quote request{{ nav_new_quote_requests_count|pluralize }}"
+                        >
+                            {{ nav_new_quote_requests_count }}
+                        </span>
+
+                    {% endif %}
+
+                </span>
             </a>
 
 

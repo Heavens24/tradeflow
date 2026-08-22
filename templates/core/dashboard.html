@@ -426,6 +426,52 @@
 
 
     <!-- =====================================================
+         NEW QUOTE REQUESTS
+         ===================================================== -->
+
+    {% if business %}
+
+        <a
+            href="{% url 'core:quote_request_list' %}?status=new"
+            class="card-link"
+        >
+
+            <div class="card">
+
+                <h3>
+                    New Quote Requests
+                </h3>
+
+                <div class="number">
+                    {{ new_quote_requests_count|default:0 }}
+                </div>
+
+                <div class="subtext">
+                    Customer enquiries waiting for review
+                </div>
+
+            </div>
+
+        </a>
+
+    {% else %}
+
+        <div class="card">
+
+            <h3>
+                New Quote Requests
+            </h3>
+
+            <div class="number">
+                0
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- =====================================================
          QUOTES
          ===================================================== -->
 
@@ -719,10 +765,15 @@
                  ============================================= -->
 
             <a
-                href="{% url 'core:quote_request_list' %}"
+                href="{% url 'core:quote_request_list' %}?status=new"
                 class="button secondary"
             >
                 Quote Requests
+
+                {% if new_quote_requests_count %}
+                    ({{ new_quote_requests_count }} new)
+                {% endif %}
+
             </a>
 
 
