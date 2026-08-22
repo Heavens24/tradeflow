@@ -21,6 +21,9 @@ class PublicBusinessProfileForm(
     Private Business fields such as banking information,
     VAT details, registration information and customer data
     are not part of this form.
+
+    Verification is deliberately excluded. Only TradeFlow
+    administrators may control verification status.
     """
 
     class Meta:
@@ -28,6 +31,7 @@ class PublicBusinessProfileForm(
 
         fields = [
             "public_profile_enabled",
+            "trade_category",
             "headline",
             "description",
             "services",
@@ -43,6 +47,14 @@ class PublicBusinessProfileForm(
                 forms.CheckboxInput(
                     attrs={
                         "class": "checkbox",
+                    }
+                )
+            ),
+
+            "trade_category": (
+                forms.Select(
+                    attrs={
+                        "class": "form-control",
                     }
                 )
             ),

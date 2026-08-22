@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Find local service businesses on the TradeFlow marketplace."
+    >
+
+    <title>
+        Marketplace | TradeFlow
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .topbar {
+            background: white;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+        }
+
+        .topbar-inner {
+            width: 100%;
+            max-width: 1180px;
+
+            margin: 0 auto;
+
+            padding: 18px 20px;
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+
+            color: #111827;
+
+            text-decoration: none;
+        }
+
+        .tagline {
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+
+            margin: 0 auto;
+
+            padding: 45px 20px 70px;
+        }
+
+        .hero {
+            margin-bottom: 30px;
+
+            text-align: center;
+        }
+
+        .hero h1 {
+            margin:
+                0 0 12px;
+
+            font-size: 38px;
+        }
+
+        .hero p {
+            max-width: 680px;
+
+            margin:
+                0 auto;
+
+            color: #6b7280;
+
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        .filters {
+            margin-bottom: 28px;
+
+            padding: 22px;
+
+            background: white;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 7px 24px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-grid {
+            display: grid;
+
+            grid-template-columns:
+                2fr 1fr 1fr;
+
+            gap: 12px;
+        }
+
+        .form-control {
+            width: 100%;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 8px;
+
+            background: white;
+
+            font: inherit;
+        }
+
+        .checks {
+            display: flex;
+
+            gap: 20px;
+
+            flex-wrap: wrap;
+
+            margin-top: 16px;
+        }
+
+        .check {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+        .filter-actions {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 18px;
+        }
+
+        .button {
+            display: inline-block;
+
+            border: 0;
+
+            padding: 12px 17px;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            font: inherit;
+            font-weight: 700;
+
+            text-decoration: none;
+
+            cursor: pointer;
+        }
+
+        .button.secondary {
+            background: #e5e7eb;
+
+            color: #111827;
+        }
+
+        .results-header {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 16px;
+        }
+
+        .results-header h2 {
+            margin: 0;
+        }
+
+        .results-count {
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .business-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(290px, 1fr)
+                );
+
+            gap: 18px;
+        }
+
+        .business-card {
+            display: flex;
+            flex-direction: column;
+
+            min-height: 100%;
+
+            padding: 24px;
+
+            background: white;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 7px 24px
+                rgba(0, 0, 0, 0.05);
+        }
+
+        .business-card h3 {
+            margin:
+                0 0 8px;
+
+            font-size: 22px;
+        }
+
+        .location {
+            color: #6b7280;
+
+            margin-bottom: 13px;
+        }
+
+        .badges {
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+
+            padding: 6px 9px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge.verified {
+            background: #ecfdf5;
+
+            color: #047857;
+        }
+
+        .badge.emergency {
+            background: #fff7ed;
+
+            color: #c2410c;
+        }
+
+        .headline {
+            margin-bottom: 17px;
+
+            color: #4b5563;
+
+            line-height: 1.6;
+        }
+
+        .services {
+            margin-bottom: 20px;
+        }
+
+        .service {
+            margin-bottom: 6px;
+
+            color: #4b5563;
+
+            font-size: 14px;
+        }
+
+        .card-actions {
+            display: flex;
+
+            gap: 9px;
+
+            flex-wrap: wrap;
+
+            margin-top: auto;
+        }
+
+        .empty {
+            padding: 45px 25px;
+
+            background: white;
+
+            border-radius: 16px;
+
+            text-align: center;
+
+            color: #6b7280;
+        }
+
+        .footer {
+            margin-top: 45px;
+
+            text-align: center;
+
+            color: #9ca3af;
+
+            font-size: 13px;
+        }
+
+        @media (max-width: 760px) {
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .topbar-inner {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .business-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+    <div class="topbar-inner">
+
+        <a
+            href="{% url 'core:marketplace' %}"
+            class="brand"
+        >
+            TradeFlow Marketplace
+        </a>
+
+        <div class="tagline">
+            Find trusted local service businesses
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="page">
+
+
+    <section class="hero">
+
+        <h1>
+            Find the right local business
+        </h1>
+
+        <p>
+            Search TradeFlow businesses by service,
+            trade and location, then request a quote
+            directly from the business.
+        </p>
+
+    </section>
+
+
+    <section class="filters">
+
+        <form method="GET">
+
+            <div class="filter-grid">
+
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Search electricians, DB board repairs, plumbing..."
+                >
+
+
+                <select
+                    name="trade"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        All trades
+                    </option>
+
+                    {% for value, label in trade_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if trade_category == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <select
+                    name="city"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        All locations
+                    </option>
+
+                    {% for city_name in city_choices %}
+
+                        <option
+                            value="{{ city_name }}"
+                            {% if city == city_name %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ city_name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+            </div>
+
+
+            <div class="checks">
+
+
+                <label class="check">
+
+                    <input
+                        type="checkbox"
+                        name="emergency"
+                        value="1"
+                        {% if emergency_only %}
+                            checked
+                        {% endif %}
+                    >
+
+                    Emergency call-outs
+
+                </label>
+
+
+                <label class="check">
+
+                    <input
+                        type="checkbox"
+                        name="verified"
+                        value="1"
+                        {% if verified_only %}
+                            checked
+                        {% endif %}
+                    >
+
+                    Verified businesses only
+
+                </label>
+
+
+            </div>
+
+
+            <div class="filter-actions">
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Search Marketplace
+                </button>
+
+                <a
+                    href="{% url 'core:marketplace' %}"
+                    class="button secondary"
+                >
+                    Clear Filters
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <div class="results-header">
+
+        <h2>
+            Businesses
+        </h2>
+
+        <div class="results-count">
+            {{ profiles|length }}
+            result{{ profiles|length|pluralize }}
+        </div>
+
+    </div>
+
+
+    {% if profiles %}
+
+        <section class="business-grid">
+
+
+            {% for profile in profiles %}
+
+                <article class="business-card">
+
+
+                    <h3>
+                        {{ profile.business.name }}
+                    </h3>
+
+
+                    <div class="location">
+
+                        {{ profile.get_trade_category_display }}
+
+                        {% if profile.business.city %}
+
+                            · {{ profile.business.city }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="badges">
+
+
+                        {% if profile.is_verified %}
+
+                            <span class="badge verified">
+                                ✓ Verified Business
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if profile.emergency_callouts %}
+
+                            <span class="badge emergency">
+                                Emergency call-outs
+                            </span>
+
+                        {% endif %}
+
+
+                    </div>
+
+
+                    {% if profile.headline %}
+
+                        <div class="headline">
+                            {{ profile.headline }}
+                        </div>
+
+                    {% endif %}
+
+
+                    {% if profile.service_list %}
+
+                        <div class="services">
+
+                            {% for service in profile.service_list|slice:":3" %}
+
+                                <div class="service">
+                                    • {{ service }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="card-actions">
+
+                        <a
+                            href="{% url 'core:public_business_profile' profile.slug %}"
+                            class="button secondary"
+                        >
+                            View Business
+                        </a>
+
+                        <a
+                            href="{% url 'core:public_quote_request' profile.slug %}"
+                            class="button"
+                        >
+                            Request Quote
+                        </a>
+
+                    </div>
+
+
+                </article>
+
+            {% endfor %}
+
+
+        </section>
+
+    {% else %}
+
+        <div class="empty">
+
+            <h2>
+                No businesses found
+            </h2>
+
+            <p>
+                Try changing your search or filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="footer">
+        TradeFlow · Local business marketplace
+    </div>
+
+
+</main>
+
+
+</body>
+
+</html>

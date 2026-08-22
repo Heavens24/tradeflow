@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import (
     login_required,
 )
+from django.db.models import Q
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -35,6 +36,166 @@ def get_user_business(user):
 
 
 # =========================================================
+# PUBLIC MARKETPLACE
+# =========================================================
+
+
+def marketplace(request):
+    """
+    Public TradeFlow marketplace directory.
+
+    Only businesses that have deliberately published their
+    public TradeFlow profile are eligible to appear.
+
+    Private operational information is never queried or
+    exposed here.
+    """
+
+    query = request.GET.get(
+        "q",
+        "",
+    ).strip()
+
+    trade_category = request.GET.get(
+        "trade",
+        "",
+    ).strip()
+
+    city = request.GET.get(
+        "city",
+        "",
+    ).strip()
+
+    emergency_only = (
+        request.GET.get(
+            "emergency",
+            "",
+        )
+        == "1"
+    )
+
+    verified_only = (
+        request.GET.get(
+            "verified",
+            "",
+        )
+        == "1"
+    )
+
+
+    profiles = (
+        BusinessPublicProfile.objects
+        .filter(
+            public_profile_enabled=True
+        )
+        .select_related(
+            "business"
+        )
+    )
+
+
+    # =====================================================
+    # TEXT SEARCH
+    # =====================================================
+
+    if query:
+
+        profiles = profiles.filter(
+            Q(
+                business__name__icontains=query
+            )
+            | Q(
+                business__city__icontains=query
+            )
+            | Q(
+                headline__icontains=query
+            )
+            | Q(
+                description__icontains=query
+            )
+            | Q(
+                services__icontains=query
+            )
+        )
+
+
+    # =====================================================
+    # STRUCTURED FILTERS
+    # =====================================================
+
+    if trade_category:
+
+        profiles = profiles.filter(
+            trade_category=trade_category
+        )
+
+
+    if city:
+
+        profiles = profiles.filter(
+            business__city__iexact=city
+        )
+
+
+    if emergency_only:
+
+        profiles = profiles.filter(
+            emergency_callouts=True
+        )
+
+
+    if verified_only:
+
+        profiles = profiles.filter(
+            is_verified=True
+        )
+
+
+    # =====================================================
+    # FILTER OPTIONS
+    # =====================================================
+
+    city_choices = (
+        BusinessPublicProfile.objects
+        .filter(
+            public_profile_enabled=True
+        )
+        .exclude(
+            business__city=""
+        )
+        .values_list(
+            "business__city",
+            flat=True,
+        )
+        .distinct()
+        .order_by(
+            "business__city"
+        )
+    )
+
+
+    context = {
+        "profiles": profiles,
+        "query": query,
+        "trade_category": trade_category,
+        "city": city,
+        "emergency_only": emergency_only,
+        "verified_only": verified_only,
+        "trade_choices": (
+            BusinessPublicProfile.TRADE_CHOICES
+        ),
+        "city_choices": city_choices,
+    }
+
+
+    return render(
+        request,
+        "core/marketplace.html",
+        context,
+    )
+
+
+# =========================================================
 # OWNER PUBLIC PROFILE SETTINGS
 # =========================================================
 
@@ -43,9 +204,12 @@ def get_user_business(user):
 def public_profile_settings(request):
     """
     Allow a TradeFlow business owner to configure their
-    public mini-page.
+    public mini-page and marketplace listing.
 
     This page is private and requires authentication.
+
+    Verification status is intentionally not controlled by
+    this form.
     """
 
     business = get_user_business(

@@ -114,6 +114,8 @@
             border-radius: 8px;
 
             font: inherit;
+
+            background: white;
         }
 
         textarea.form-control {
@@ -198,6 +200,48 @@
             background: #ecfdf5;
 
             color: #065f46;
+        }
+
+        .marketplace-note {
+            margin-bottom: 24px;
+
+            padding: 16px;
+
+            border-radius: 10px;
+
+            background: #f0fdf4;
+
+            color: #166534;
+
+            line-height: 1.6;
+
+            font-size: 14px;
+        }
+
+        .verification {
+            margin-bottom: 24px;
+
+            padding: 16px;
+
+            border-radius: 10px;
+
+            background: #f9fafb;
+
+            border:
+                1px solid
+                #e5e7eb;
+        }
+
+        .verified {
+            color: #047857;
+
+            font-weight: 700;
+        }
+
+        .unverified {
+            color: #6b7280;
+
+            font-weight: 600;
         }
 
         .privacy-note {
@@ -291,6 +335,44 @@
         </p>
 
 
+        <div class="marketplace-note">
+
+            <strong>
+                Marketplace listing
+            </strong>
+
+            <br>
+
+            When your public profile is published,
+            your business can appear in the TradeFlow
+            public marketplace directory.
+
+        </div>
+
+
+        <div class="verification">
+
+            <strong>
+                Verification status:
+            </strong>
+
+            {% if profile.is_verified %}
+
+                <span class="verified">
+                    ✓ Verified Business
+                </span>
+
+            {% else %}
+
+                <span class="unverified">
+                    Not yet verified
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
         <div class="public-url">
 
             <strong>
@@ -331,6 +413,21 @@
                 >
                     Publish my business profile
                 </label>
+
+            </div>
+
+
+            <div class="field">
+
+                <label
+                    for="{{ form.trade_category.id_for_label }}"
+                >
+                    Primary trade category
+                </label>
+
+                {{ form.trade_category }}
+
+                {{ form.trade_category.errors }}
 
             </div>
 
@@ -453,6 +550,16 @@
                         rel="noopener"
                     >
                         View Public Page
+                    </a>
+
+
+                    <a
+                        href="{% url 'core:marketplace' %}"
+                        class="button secondary"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        View Marketplace
                     </a>
 
                 {% endif %}

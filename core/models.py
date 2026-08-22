@@ -846,6 +846,66 @@ class BusinessPublicProfile(models.Model):
 
 
     # =====================================================
+    # MARKETPLACE TRADE CATEGORY
+    # =====================================================
+
+    TRADE_ELECTRICAL = "electrical"
+    TRADE_PLUMBING = "plumbing"
+    TRADE_MECHANICAL = "mechanical"
+    TRADE_WELDING = "welding"
+    TRADE_HVAC = "hvac"
+    TRADE_CARPENTRY = "carpentry"
+    TRADE_BUILDING = "building"
+    TRADE_AUTOMOTIVE = "automotive"
+    TRADE_OTHER = "other"
+
+    TRADE_CHOICES = [
+        (
+            TRADE_ELECTRICAL,
+            "Electrical",
+        ),
+        (
+            TRADE_PLUMBING,
+            "Plumbing",
+        ),
+        (
+            TRADE_MECHANICAL,
+            "Mechanical / Millwright",
+        ),
+        (
+            TRADE_WELDING,
+            "Welding / Fabrication",
+        ),
+        (
+            TRADE_HVAC,
+            "Refrigeration / HVAC",
+        ),
+        (
+            TRADE_CARPENTRY,
+            "Carpentry",
+        ),
+        (
+            TRADE_BUILDING,
+            "Building / Construction",
+        ),
+        (
+            TRADE_AUTOMOTIVE,
+            "Automotive",
+        ),
+        (
+            TRADE_OTHER,
+            "Other",
+        ),
+    ]
+
+    trade_category = models.CharField(
+        max_length=30,
+        choices=TRADE_CHOICES,
+        default=TRADE_OTHER,
+    )
+
+
+    # =====================================================
     # PUBLIC BUSINESS CONTENT
     # =====================================================
 
@@ -895,8 +955,8 @@ class BusinessPublicProfile(models.Model):
     # This field must not be included in the business
     # owner's public profile form.
     #
-    # TradeFlow can later control this through admin or a
-    # dedicated verification workflow.
+    # TradeFlow administrators control verification through
+    # Django Admin or a future moderation workflow.
 
     is_verified = models.BooleanField(
         default=False,
