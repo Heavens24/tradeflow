@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,145 +10,384 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>{{ job.job_number }} | TradeFlow</title>
+    <title>
+        {{ job.job_number }} | TradeFlow
+    </title>
+
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
+
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
             background: #f4f6f8;
+
             color: #1f2937;
         }
+
 
         .page {
             padding: 35px 20px;
         }
 
+
         .container {
             max-width: 900px;
+
             margin: auto;
         }
 
+
+        /* =================================================
+           TOOLBAR
+           ================================================= */
+
         .toolbar {
             display: flex;
+
             justify-content: space-between;
-            gap: 10px;
+            align-items: center;
+
+            gap: 12px;
+
             margin-bottom: 20px;
         }
 
+
         .toolbar-right {
             display: flex;
+
+            align-items: center;
+
             gap: 10px;
+
             flex-wrap: wrap;
         }
 
+
         .button {
-            display: inline-block;
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            min-height: 42px;
+
             padding: 11px 17px;
-            border-radius: 8px;
-            text-decoration: none;
-            background: #111827;
-            color: white;
+
             border: none;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            text-decoration: none;
+
             cursor: pointer;
         }
+
 
         .button:hover {
             opacity: 0.92;
         }
 
+
         .button.secondary {
             background: #e5e7eb;
+
             color: #111827;
         }
 
+
         .button.success {
             background: #15803d;
+
             color: white;
         }
 
-        .button.danger {
-            background: #dc2626;
+
+        .button.warning {
+            background: #d97706;
+
             color: white;
         }
+
+
+        .button.danger {
+            background: #dc2626;
+
+            color: white;
+        }
+
+
+        .button.disabled {
+            background: #d1d5db;
+
+            color: #6b7280;
+
+            cursor: default;
+
+            pointer-events: none;
+        }
+
+
+        form.inline-form {
+            margin: 0;
+        }
+
+
+        /* =================================================
+           MESSAGES
+           ================================================= */
 
         .messages {
             margin-bottom: 20px;
         }
 
+
         .message {
-            padding: 14px 16px;
-            border-radius: 8px;
             margin-bottom: 10px;
+
+            padding: 14px 16px;
+
+            border:
+                1px solid
+                #86efac;
+
+            border-radius: 8px;
+
             background: #ecfdf5;
-            border: 1px solid #86efac;
+
             color: #166534;
         }
 
+
+        /* =================================================
+           MAIN CARD
+           ================================================= */
+
         .card {
-            background: white;
             padding: 35px;
+
             border-radius: 14px;
+
+            background: white;
 
             box-shadow:
                 0 4px 20px
                 rgba(0, 0, 0, 0.06);
         }
 
+
         .header {
             display: flex;
+
             justify-content: space-between;
+            align-items: flex-start;
+
             gap: 30px;
+
             margin-bottom: 30px;
         }
 
+
         h1 {
             margin-top: 0;
+
             margin-bottom: 7px;
         }
+
 
         .job-number {
             color: #6b7280;
         }
 
+
+        /* =================================================
+           STATUS
+           ================================================= */
+
         .status {
             display: inline-block;
+
             padding: 7px 12px;
+
             border-radius: 999px;
+
             background: #f3f4f6;
-            font-weight: bold;
+
             font-size: 13px;
+
+            font-weight: bold;
         }
+
 
         .status.scheduled {
             background: #dbeafe;
+
             color: #1d4ed8;
         }
 
+
         .status.in_progress {
             background: #fef3c7;
+
             color: #92400e;
         }
 
+
         .status.completed {
             background: #dcfce7;
+
             color: #166534;
         }
 
+
         .status.cancelled {
             background: #fee2e2;
+
             color: #991b1b;
         }
 
-        .section {
-            padding-top: 20px;
-            margin-top: 20px;
-            border-top: 1px solid #e5e7eb;
+
+        /* =================================================
+           WORKFLOW
+           ================================================= */
+
+        .workflow {
+            margin-bottom: 28px;
+
+            padding: 20px;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 12px;
+
+            background: #f9fafb;
         }
+
+
+        .workflow-title {
+            margin-bottom: 16px;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            color: #374151;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.5px;
+        }
+
+
+        .workflow-steps {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0, 1fr)
+                );
+
+            gap: 10px;
+        }
+
+
+        .workflow-step {
+            padding: 14px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 9px;
+
+            background: white;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            text-align: center;
+        }
+
+
+        .workflow-step.active {
+            border-color: #f59e0b;
+
+            background: #fffbeb;
+
+            color: #92400e;
+        }
+
+
+        .workflow-step.done {
+            border-color: #86efac;
+
+            background: #ecfdf5;
+
+            color: #166534;
+        }
+
+
+        .workflow-step.current-scheduled {
+            border-color: #93c5fd;
+
+            background: #eff6ff;
+
+            color: #1d4ed8;
+        }
+
+
+        .workflow-action {
+            margin-top: 18px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .workflow-note {
+            color: #6b7280;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =================================================
+           DETAILS
+           ================================================= */
 
         .details {
             display: grid;
@@ -158,72 +398,165 @@
             gap: 20px;
         }
 
+
         .label {
-            color: #6b7280;
-            font-size: 13px;
             margin-bottom: 5px;
+
+            color: #6b7280;
+
+            font-size: 13px;
         }
+
 
         .value {
             font-weight: 600;
         }
 
+
+        /* =================================================
+           SECTIONS
+           ================================================= */
+
+        .section {
+            margin-top: 20px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid
+                #e5e7eb;
+        }
+
+
+        /* =================================================
+           SOURCE QUOTE
+           ================================================= */
+
         .quote-box {
             padding: 16px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
+
+            border:
+                1px solid
+                #bfdbfe;
+
             border-radius: 8px;
+
+            background: #eff6ff;
         }
+
+
+        /* =================================================
+           INVOICE
+           ================================================= */
 
         .invoice-box {
             padding: 18px;
-            background: #ecfdf5;
-            border: 1px solid #86efac;
+
+            border:
+                1px solid
+                #86efac;
+
             border-radius: 8px;
+
+            background: #ecfdf5;
         }
 
-        .invoice-box .money {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 8px;
+
+        .invoice-box.pending {
+            border-color: #d1d5db;
+
+            background: #f9fafb;
+
+            color: #4b5563;
         }
+
+
+        .invoice-box.ready {
+            border-color: #86efac;
+
+            background: #ecfdf5;
+        }
+
+
+        .invoice-box .money {
+            margin-top: 8px;
+
+            font-size: 18px;
+
+            font-weight: bold;
+        }
+
 
         .invoice-actions {
             margin-top: 15px;
         }
 
+
+        /* =================================================
+           MOBILE
+           ================================================= */
+
         @media (max-width: 650px) {
 
             .header,
             .toolbar {
+                align-items: stretch;
+
                 flex-direction: column;
             }
 
+
             .toolbar-right {
+                width: 100%;
+
                 flex-direction: column;
+            }
+
+
+            .toolbar-right .button,
+            .toolbar-right form,
+            .toolbar-right form .button {
                 width: 100%;
             }
 
-            .toolbar-right .button {
-                text-align: center;
-            }
 
-            .details {
+            .details,
+            .workflow-steps {
                 grid-template-columns: 1fr;
             }
+
+
+            .workflow-action {
+                align-items: stretch;
+
+                flex-direction: column;
+            }
+
+
+            .workflow-action .button,
+            .workflow-action form,
+            .workflow-action form .button {
+                width: 100%;
+            }
+
 
             .card {
                 padding: 22px;
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
 <div class="page">
 
     <div class="container">
+
 
         {% if messages %}
 
@@ -242,7 +575,12 @@
         {% endif %}
 
 
+        <!-- =================================================
+             TOOLBAR
+             ================================================= -->
+
         <div class="toolbar">
+
 
             <a
                 href="{% url 'core:job_list' %}"
@@ -254,6 +592,7 @@
 
             <div class="toolbar-right">
 
+
                 {% if existing_invoice %}
 
                     <a
@@ -263,7 +602,8 @@
                         View {{ existing_invoice.invoice_number }}
                     </a>
 
-                {% else %}
+
+                {% elif job.status == "completed" %}
 
                     <a
                         href="{% url 'core:job_to_invoice' job.id %}"
@@ -271,6 +611,16 @@
                     >
                         Create Invoice
                     </a>
+
+
+                {% else %}
+
+                    <span
+                        class="button disabled"
+                        title="Complete the job before creating an invoice."
+                    >
+                        Complete Job Before Invoice
+                    </span>
 
                 {% endif %}
 
@@ -296,6 +646,11 @@
 
 
         <div class="card">
+
+
+            <!-- =================================================
+                 HEADER
+                 ================================================= -->
 
             <div class="header">
 
@@ -325,7 +680,174 @@
             </div>
 
 
+            <!-- =================================================
+                 JOB WORKFLOW
+                 ================================================= -->
+
+            {% if job.status != "cancelled" %}
+
+                <div class="workflow">
+
+                    <div class="workflow-title">
+                        Job Workflow
+                    </div>
+
+
+                    <div class="workflow-steps">
+
+
+                        <div
+                            class="
+                                workflow-step
+
+                                {% if job.status == 'scheduled' %}
+                                    current-scheduled
+                                {% elif job.status == 'in_progress' or job.status == 'completed' %}
+                                    done
+                                {% endif %}
+                            "
+                        >
+                            1. Scheduled
+                        </div>
+
+
+                        <div
+                            class="
+                                workflow-step
+
+                                {% if job.status == 'in_progress' %}
+                                    active
+                                {% elif job.status == 'completed' %}
+                                    done
+                                {% endif %}
+                            "
+                        >
+                            2. In Progress
+                        </div>
+
+
+                        <div
+                            class="
+                                workflow-step
+
+                                {% if job.status == 'completed' %}
+                                    done
+                                {% endif %}
+                            "
+                        >
+                            3. Completed
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-action">
+
+
+                        {% if job.status == "scheduled" %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'core:job_status_action' job.id 'start' %}"
+                                class="inline-form"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="button warning"
+                                >
+                                    Start Job
+                                </button>
+
+                            </form>
+
+
+                            <div class="workflow-note">
+                                Start the job when work begins.
+                            </div>
+
+
+                        {% elif job.status == "in_progress" %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'core:job_status_action' job.id 'complete' %}"
+                                class="inline-form"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="button success"
+                                >
+                                    ✓ Mark Job Complete
+                                </button>
+
+                            </form>
+
+
+                            <div class="workflow-note">
+                                Complete the job once the agreed work
+                                has been finished.
+                            </div>
+
+
+                        {% elif job.status == "completed" %}
+
+                            <span class="button success disabled">
+                                ✓ Work Completed
+                            </span>
+
+
+                            {% if not existing_invoice %}
+
+                                <div class="workflow-note">
+                                    This job is ready to be invoiced.
+                                </div>
+
+                            {% else %}
+
+                                <div class="workflow-note">
+                                    This job has already been invoiced.
+                                </div>
+
+                            {% endif %}
+
+
+                        {% endif %}
+
+
+                    </div>
+
+                </div>
+
+
+            {% else %}
+
+                <div class="workflow">
+
+                    <div class="workflow-title">
+                        Job Workflow
+                    </div>
+
+                    <div class="workflow-note">
+                        This job has been cancelled.
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 BASIC DETAILS
+                 ================================================= -->
+
             <div class="details">
+
 
                 <div>
 
@@ -378,8 +900,13 @@
 
                 </div>
 
+
             </div>
 
+
+            <!-- =================================================
+                 SOURCE QUOTE
+                 ================================================= -->
 
             {% if job.quote %}
 
@@ -388,6 +915,7 @@
                     <h3>
                         Source Quote
                     </h3>
+
 
                     <div class="quote-box">
 
@@ -398,11 +926,13 @@
                         <br><br>
 
                         Quoted total:
+
                         <strong>
                             R{{ job.quote.total|floatformat:2 }}
                         </strong>
 
                         <br><br>
+
 
                         <a
                             href="{% url 'core:quote_detail' job.quote.id %}"
@@ -416,6 +946,10 @@
 
             {% endif %}
 
+
+            <!-- =================================================
+                 INVOICE
+                 ================================================= -->
 
             <div class="section">
 
@@ -437,15 +971,18 @@
                         Status:
                         {{ existing_invoice.get_status_display }}
 
+
                         <div class="money">
                             Total:
                             R{{ existing_invoice.total|floatformat:2 }}
                         </div>
 
+
                         <div>
                             Paid:
                             R{{ existing_invoice.amount_paid|floatformat:2 }}
                         </div>
+
 
                         <div>
                             Balance:
@@ -465,14 +1002,20 @@
 
                     </div>
 
-                {% else %}
 
-                    <div class="invoice-box">
+                {% elif job.status == "completed" %}
 
-                        No invoice has been created for
-                        this job yet.
+                    <div class="invoice-box ready">
 
-                        <br><br>
+                        <strong>
+                            Ready to invoice
+                        </strong>
+
+                        <p>
+                            The job has been completed and can
+                            now be converted into an invoice.
+                        </p>
+
 
                         <a
                             href="{% url 'core:job_to_invoice' job.id %}"
@@ -483,10 +1026,40 @@
 
                     </div>
 
+
+                {% elif job.status == "cancelled" %}
+
+                    <div class="invoice-box pending">
+
+                        No invoice can be created from a
+                        cancelled job.
+
+                    </div>
+
+
+                {% else %}
+
+                    <div class="invoice-box pending">
+
+                        <strong>
+                            Invoice not available yet
+                        </strong>
+
+                        <p>
+                            Complete the job before creating
+                            the customer invoice.
+                        </p>
+
+                    </div>
+
                 {% endif %}
 
             </div>
 
+
+            <!-- =================================================
+                 WORK DESCRIPTION
+                 ================================================= -->
 
             {% if job.description %}
 
@@ -505,6 +1078,10 @@
             {% endif %}
 
 
+            <!-- =================================================
+                 NOTES
+                 ================================================= -->
+
             {% if job.notes %}
 
                 <div class="section">
@@ -520,6 +1097,7 @@
                 </div>
 
             {% endif %}
+
 
         </div>
 

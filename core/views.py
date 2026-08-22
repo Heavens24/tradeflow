@@ -2135,6 +2135,136 @@ def job_detail(
 
 
 @login_required
+@require_POST
+def job_status_action(
+    request,
+    job_id,
+    action,
+):
+    """
+    Move a job through the controlled TradeFlow lifecycle.
+
+    Allowed transitions:
+
+    Scheduled -> In Progress
+    In Progress -> Completed
+
+    The job must belong to the authenticated business.
+    """
+
+    business = get_user_business(
+        request.user
+    )
+
+    if not business:
+        return redirect(
+            "core:business_setup"
+        )
+
+    job = get_object_or_404(
+        Job,
+        id=job_id,
+        business=business,
+    )
+
+    if action == "start":
+
+        if (
+            job.status
+            != Job.STATUS_SCHEDULED
+        ):
+            messages.warning(
+                request,
+                (
+                    f"{job.job_number} cannot be "
+                    "started from its current status."
+                ),
+            )
+
+            return redirect(
+                "core:job_detail",
+                job_id=job.id,
+            )
+
+        job.status = (
+            Job.STATUS_IN_PROGRESS
+        )
+
+        job.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        messages.success(
+            request,
+            (
+                f"{job.job_number} is now "
+                "In Progress."
+            ),
+        )
+
+        return redirect(
+            "core:job_detail",
+            job_id=job.id,
+        )
+
+    if action == "complete":
+
+        if (
+            job.status
+            != Job.STATUS_IN_PROGRESS
+        ):
+            messages.warning(
+                request,
+                (
+                    f"{job.job_number} cannot be "
+                    "completed from its current status."
+                ),
+            )
+
+            return redirect(
+                "core:job_detail",
+                job_id=job.id,
+            )
+
+        job.status = (
+            Job.STATUS_COMPLETED
+        )
+
+        job.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        messages.success(
+            request,
+            (
+                f"{job.job_number} has been "
+                "marked as Completed."
+            ),
+        )
+
+        return redirect(
+            "core:job_detail",
+            job_id=job.id,
+        )
+
+    messages.error(
+        request,
+        "Invalid job action.",
+    )
+
+    return redirect(
+        "core:job_detail",
+        job_id=job.id,
+    )
+
+
+@login_required
 def job_edit(
     request,
     job_id,
@@ -2532,6 +2662,24 @@ def job_to_invoice(
         return redirect(
             "core:invoice_detail",
             invoice_id=existing_invoice.id,
+        )
+
+    if (
+        job.status
+        != Job.STATUS_COMPLETED
+    ):
+        messages.warning(
+            request,
+            (
+                f"{job.job_number} must be "
+                "completed before an invoice "
+                "can be created."
+            ),
+        )
+
+        return redirect(
+            "core:job_detail",
+            job_id=job.id,
         )
 
     invoice = Invoice(

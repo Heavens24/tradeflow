@@ -258,6 +258,12 @@ urlpatterns = [
     ),
 
     path(
+        "jobs/<int:job_id>/status/<str:action>/",
+        views.job_status_action,
+        name="job_status_action",
+    ),
+
+    path(
         "jobs/<int:job_id>/edit/",
         views.job_edit,
         name="job_edit",
