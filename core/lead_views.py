@@ -28,9 +28,81 @@ from .models import (
 
 
 def get_user_business(user):
+    """
+    Return the business belonging to the authenticated user.
+    """
+
     return Business.objects.filter(
         owner=user
     ).first()
+
+
+def find_matching_customer(
+    business,
+    quote_request,
+):
+    """
+    Safely look for an existing customer.
+
+    A contact detail alone is not enough to match a person.
+
+    We require the customer's name to match AND at least
+    one contact field to match.
+
+    This prevents a reused/shared phone number or email
+    address from attaching a quote request to the wrong
+    customer.
+    """
+
+    customer_name = (
+        quote_request.customer_name
+        or ""
+    ).strip()
+
+    phone = (
+        quote_request.phone
+        or ""
+    ).strip()
+
+    email = (
+        quote_request.email
+        or ""
+    ).strip()
+
+
+    if not customer_name:
+        return None
+
+
+    contact_query = Q()
+
+
+    if phone:
+        contact_query |= Q(
+            phone__iexact=phone
+        )
+
+
+    if email:
+        contact_query |= Q(
+            email__iexact=email
+        )
+
+
+    if not phone and not email:
+        return None
+
+
+    return (
+        Customer.objects.filter(
+            business=business,
+            name__iexact=customer_name,
+        )
+        .filter(
+            contact_query
+        )
+        .first()
+    )
 
 
 # =========================================================
@@ -49,26 +121,38 @@ def quote_request_list(request):
             "core:business_setup"
         )
 
+
     status_filter = request.GET.get(
         "status",
         "",
     ).strip()
 
-    requests = QuoteRequest.objects.filter(
-        business=business
+
+    quote_requests = (
+        QuoteRequest.objects.filter(
+            business=business
+        )
+        .select_related(
+            "converted_customer",
+            "converted_quote",
+        )
     )
 
+
     if status_filter:
-        requests = requests.filter(
-            status=status_filter
+        quote_requests = (
+            quote_requests.filter(
+                status=status_filter
+            )
         )
+
 
     return render(
         request,
         "core/quote_requests.html",
         {
             "business": business,
-            "quote_requests": requests,
+            "quote_requests": quote_requests,
             "status_filter": status_filter,
             "status_choices": (
                 QuoteRequest.STATUS_CHOICES
@@ -96,6 +180,7 @@ def quote_request_detail(
             "core:business_setup"
         )
 
+
     quote_request = get_object_or_404(
         QuoteRequest.objects.select_related(
             "converted_customer",
@@ -104,6 +189,7 @@ def quote_request_detail(
         id=request_id,
         business=business,
     )
+
 
     return render(
         request,
@@ -135,11 +221,13 @@ def quote_request_contacted(
             "core:business_setup"
         )
 
+
     quote_request = get_object_or_404(
         QuoteRequest,
         id=request_id,
         business=business,
     )
+
 
     if (
         quote_request.status
@@ -159,8 +247,12 @@ def quote_request_contacted(
 
         messages.success(
             request,
-            "Quote request marked as contacted.",
+            (
+                "Quote request marked "
+                "as contacted."
+            ),
         )
+
 
     return redirect(
         "core:quote_request_detail",
@@ -179,6 +271,20 @@ def quote_request_convert(
     request,
     request_id,
 ):
+    """
+    Convert a public QuoteRequest into:
+
+    1. An existing matching Customer, or a newly-created
+       Customer.
+    2. A normal TradeFlow draft Quote.
+    3. A zero-priced QuoteItem containing the customer's
+       original work description.
+
+    Matching is deliberately strict so a phone number or
+    email address cannot accidentally connect one person's
+    enquiry to another customer's account.
+    """
+
     business = get_user_business(
         request.user
     )
@@ -188,12 +294,20 @@ def quote_request_convert(
             "core:business_setup"
         )
 
+
     quote_request = get_object_or_404(
-        QuoteRequest,
+        QuoteRequest.objects.select_related(
+            "converted_customer",
+            "converted_quote",
+        ),
         id=request_id,
         business=business,
     )
 
+
+    # =====================================================
+    # ALREADY CONVERTED
+    # =====================================================
 
     if quote_request.converted_quote:
 
@@ -214,46 +328,50 @@ def quote_request_convert(
         )
 
 
+    # =====================================================
+    # CONVERSION TRANSACTION
+    # =====================================================
+
     with transaction.atomic():
 
         # -------------------------------------------------
-        # MATCH EXISTING CUSTOMER
+        # FIND EXISTING CUSTOMER SAFELY
         # -------------------------------------------------
 
-        customer_query = Q(
-            phone__iexact=quote_request.phone
-        )
-
-        if quote_request.email:
-
-            customer_query |= Q(
-                email__iexact=(
-                    quote_request.email
-                )
-            )
-
-
-        customer = (
-            Customer.objects.filter(
-                customer_query,
-                business=business,
-            )
-            .first()
+        customer = find_matching_customer(
+            business,
+            quote_request,
         )
 
 
         # -------------------------------------------------
-        # CREATE CUSTOMER IF REQUIRED
+        # CREATE CUSTOMER WHEN NO SAFE MATCH EXISTS
         # -------------------------------------------------
 
         if not customer:
 
             customer = Customer.objects.create(
                 business=business,
-                name=quote_request.customer_name,
-                phone=quote_request.phone,
-                email=quote_request.email,
-                address=quote_request.location,
+                name=(
+                    quote_request
+                    .customer_name
+                    .strip()
+                ),
+                phone=(
+                    quote_request
+                    .phone
+                    .strip()
+                ),
+                email=(
+                    quote_request
+                    .email
+                    .strip()
+                ),
+                address=(
+                    quote_request
+                    .location
+                    .strip()
+                ),
                 notes=(
                     "Created automatically from "
                     "a TradeFlow public quote request."
@@ -270,23 +388,40 @@ def quote_request_convert(
             customer=customer,
             status=Quote.STATUS_DRAFT,
             notes=(
-                "Created from public quote request.\n\n"
-                f"Customer request:\n"
+                "Created from public quote request."
+                "\n\n"
+                "Customer request:"
+                "\n"
                 f"{quote_request.description}"
             ),
         )
 
 
-        # The owner reviews and prices this line item.
+        # -------------------------------------------------
+        # CREATE FIRST QUOTE ITEM
+        # -------------------------------------------------
+        #
+        # Pricing stays at zero because the customer has
+        # described the job but has not supplied a verified
+        # business price.
+        #
+        # The business owner reviews and prices it manually.
+        # -------------------------------------------------
+
         QuoteItem.objects.create(
             quote=quote,
             description=(
-                quote_request.description[:255]
+                quote_request
+                .description[:255]
             ),
             quantity=1,
             unit_price=0,
         )
 
+
+        # -------------------------------------------------
+        # COMPLETE QUOTE REQUEST
+        # -------------------------------------------------
 
         quote_request.status = (
             QuoteRequest.STATUS_CONVERTED
@@ -296,7 +431,9 @@ def quote_request_convert(
             customer
         )
 
-        quote_request.converted_quote = quote
+        quote_request.converted_quote = (
+            quote
+        )
 
         quote_request.save(
             update_fields=[
