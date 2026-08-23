@@ -154,6 +154,12 @@
             color: #c2410c;
         }
 
+        .rating-badge {
+            background: #fffbeb;
+
+            color: #92400e;
+        }
+
         .actions {
             display: flex;
 
@@ -249,6 +255,121 @@
         .contact-value {
             font-weight: 600;
         }
+
+
+        /* =================================================
+           CUSTOMER REVIEWS
+           ================================================= */
+
+        .review-summary {
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 24px;
+        }
+
+        .review-stars {
+            color: #f59e0b;
+
+            font-size: 22px;
+
+            letter-spacing: 2px;
+        }
+
+        .review-score {
+            font-size: 22px;
+
+            font-weight: 800;
+
+            color: #111827;
+        }
+
+        .review-count {
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .review-list {
+            display: grid;
+
+            gap: 16px;
+        }
+
+        .review-card {
+            padding: 20px;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 12px;
+
+            background: #f9fafb;
+        }
+
+        .review-card-stars {
+            color: #f59e0b;
+
+            font-size: 18px;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 10px;
+        }
+
+        .review-comment {
+            margin:
+                0 0 14px;
+
+            color: #374151;
+
+            line-height: 1.7;
+
+            white-space: normal;
+        }
+
+        .review-meta {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+        .review-customer {
+            color: #111827;
+
+            font-weight: 700;
+        }
+
+        .review-trust {
+            margin-top: 20px;
+
+            padding-top: 16px;
+
+            border-top:
+                1px solid
+                #e5e7eb;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
 
         .footer {
             text-align: center;
@@ -365,6 +486,28 @@
 
                 <span class="badge verified">
                     ✓ Verified business
+                </span>
+
+            {% endif %}
+
+
+            {% if review_count %}
+
+                <span class="badge rating-badge">
+
+                    ★
+                    {{ average_rating|floatformat:1 }}
+
+                    ·
+
+                    {{ review_count }}
+
+                    {% if review_count == 1 %}
+                        review
+                    {% else %}
+                        reviews
+                    {% endif %}
+
                 </span>
 
             {% endif %}
@@ -492,6 +635,129 @@
                 {% endfor %}
 
             </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         CUSTOMER REVIEWS
+         ===================================================== -->
+
+    {% if review_count %}
+
+        <section class="section">
+
+            <h2>
+                Customer Reviews
+            </h2>
+
+
+            <div class="review-summary">
+
+                <div class="review-stars">
+                    ★★★★★
+                </div>
+
+                <div class="review-score">
+                    {{ average_rating|floatformat:1 }}
+                </div>
+
+                <div class="review-count">
+
+                    Based on
+                    {{ review_count }}
+
+                    {% if review_count == 1 %}
+                        customer review
+                    {% else %}
+                        customer reviews
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="review-list">
+
+                {% for review in approved_reviews %}
+
+                    <article class="review-card">
+
+
+                        <div class="review-card-stars">
+
+                            {% if review.rating == 5 %}
+                                ★★★★★
+                            {% elif review.rating == 4 %}
+                                ★★★★☆
+                            {% elif review.rating == 3 %}
+                                ★★★☆☆
+                            {% elif review.rating == 2 %}
+                                ★★☆☆☆
+                            {% elif review.rating == 1 %}
+                                ★☆☆☆☆
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if review.comment %}
+
+                            <p class="review-comment">
+                                {{ review.comment }}
+                            </p>
+
+                        {% endif %}
+
+
+                        <div class="review-meta">
+
+                            <div>
+
+                                <span class="review-customer">
+                                    {{ review.customer_display_name }}
+                                </span>
+
+                                {% if review.job %}
+
+                                    <span>
+                                        · Completed TradeFlow job
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div>
+                                {{ review.created_at|date:"j M Y" }}
+                            </div>
+
+                        </div>
+
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="review-trust">
+
+                <strong>
+                    TradeFlow customer review
+                </strong>
+
+                · Reviews shown here are linked to completed
+                TradeFlow jobs and approved through TradeFlow's
+                moderation process.
+
+            </div>
+
 
         </section>
 

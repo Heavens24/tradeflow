@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -476,6 +477,270 @@ class Job(models.Model):
             ).update(
                 job_number=self.job_number
             )
+
+
+# =========================================================
+# BUSINESS REVIEWS
+# =========================================================
+
+
+class BusinessReview(models.Model):
+    """
+    Customer review tied to a real completed TradeFlow job.
+
+    Trust rules:
+    - one review per job
+    - the reviewed business comes from the job
+    - the reviewing customer comes from the job
+    - only completed jobs are eligible
+    - public visibility is controlled by moderation status
+
+    Public marketplace pages should use only reviews whose
+    status is STATUS_APPROVED.
+    """
+
+    # =====================================================
+    # MODERATION STATUS
+    # =====================================================
+
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (
+            STATUS_PENDING,
+            "Pending review",
+        ),
+        (
+            STATUS_APPROVED,
+            "Approved / public",
+        ),
+        (
+            STATUS_REJECTED,
+            "Rejected / hidden",
+        ),
+    ]
+
+    # =====================================================
+    # RATING
+    # =====================================================
+
+    RATING_CHOICES = [
+        (1, "1 star"),
+        (2, "2 stars"),
+        (3, "3 stars"),
+        (4, "4 stars"),
+        (5, "5 stars"),
+    ]
+
+    # =====================================================
+    # TRUSTED RELATIONSHIPS
+    # =====================================================
+
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="business_reviews",
+    )
+
+    job = models.OneToOneField(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="review",
+    )
+
+    # =====================================================
+    # CUSTOMER REVIEW CONTENT
+    # =====================================================
+
+    rating = models.PositiveSmallIntegerField(
+        choices=RATING_CHOICES,
+    )
+
+    comment = models.TextField(
+        blank=True,
+        max_length=2000,
+    )
+
+    customer_display_name = models.CharField(
+        max_length=150,
+        blank=True,
+        help_text=(
+            "Snapshot of the customer name shown with the "
+            "review. It is filled automatically from the job."
+        ),
+    )
+
+    # =====================================================
+    # TRADEFLOW MODERATION
+    # =====================================================
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+    )
+
+    moderation_notes = models.TextField(
+        blank=True,
+    )
+
+    moderated_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    moderated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="moderated_business_reviews",
+        blank=True,
+        null=True,
+    )
+
+    # =====================================================
+    # TIMESTAMPS
+    # =====================================================
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    # =====================================================
+    # MODEL OPTIONS
+    # =====================================================
+
+    class Meta:
+        ordering = [
+            "-created_at",
+        ]
+
+        verbose_name = "Business Review"
+        verbose_name_plural = "Business Reviews"
+
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(rating__gte=1)
+                    & models.Q(rating__lte=5)
+                ),
+                name="business_review_rating_1_to_5",
+            ),
+        ]
+
+    # =====================================================
+    # DISPLAY
+    # =====================================================
+
+    def __str__(self):
+        return (
+            f"{self.customer_display_name or self.customer.name} "
+            f"→ {self.business.name} "
+            f"({self.rating}/5)"
+        )
+
+    # =====================================================
+    # TRUST VALIDATION
+    # =====================================================
+
+    def clean(self):
+        """
+        Protect review integrity at model level.
+
+        The job is authoritative for both the business and
+        customer, and only completed jobs may be reviewed.
+        """
+
+        super().clean()
+
+        if not self.job_id:
+            return
+
+        if self.job.status != Job.STATUS_COMPLETED:
+            raise ValidationError(
+                {
+                    "job": (
+                        "Only completed jobs can receive "
+                        "customer reviews."
+                    )
+                }
+            )
+
+        if (
+            self.business_id
+            and self.business_id != self.job.business_id
+        ):
+            raise ValidationError(
+                {
+                    "business": (
+                        "The review business must match the "
+                        "business that completed the job."
+                    )
+                }
+            )
+
+        if (
+            self.customer_id
+            and self.customer_id != self.job.customer_id
+        ):
+            raise ValidationError(
+                {
+                    "customer": (
+                        "The review customer must match the "
+                        "customer attached to the job."
+                    )
+                }
+            )
+
+    # =====================================================
+    # SAVE PROTECTION
+    # =====================================================
+
+    def save(
+        self,
+        *args,
+        **kwargs,
+    ):
+        """
+        Derive trusted relationship fields from the job.
+
+        This prevents callers from assigning a review to a
+        different business or customer through submitted data.
+        """
+
+        if self.job_id:
+            self.business_id = self.job.business_id
+            self.customer_id = self.job.customer_id
+
+            if not self.customer_display_name:
+                self.customer_display_name = (
+                    self.job.customer.name
+                )
+
+        self.full_clean()
+
+        super().save(
+            *args,
+            **kwargs,
+        )
+
+    @property
+    def is_public(self):
+        return (
+            self.status
+            == self.STATUS_APPROVED
+        )
 
 
 # =========================================================

@@ -3,6 +3,7 @@ from django import template
 from core.models import (
     Business,
     BusinessPublicProfile,
+    BusinessReview,
     BusinessVerification,
     QuoteRequest,
 )
@@ -75,6 +76,47 @@ def tradeflow_admin_stats():
 
         "total_quote_requests": (
             QuoteRequest.objects.count()
+        ),
+
+        # =================================================
+        # CUSTOMER REVIEWS
+        # =================================================
+
+        "pending_reviews": (
+            BusinessReview.objects
+            .filter(
+                status=(
+                    BusinessReview
+                    .STATUS_PENDING
+                )
+            )
+            .count()
+        ),
+
+        "approved_reviews": (
+            BusinessReview.objects
+            .filter(
+                status=(
+                    BusinessReview
+                    .STATUS_APPROVED
+                )
+            )
+            .count()
+        ),
+
+        "rejected_reviews": (
+            BusinessReview.objects
+            .filter(
+                status=(
+                    BusinessReview
+                    .STATUS_REJECTED
+                )
+            )
+            .count()
+        ),
+
+        "total_reviews": (
+            BusinessReview.objects.count()
         ),
 
     }

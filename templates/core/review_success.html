@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Review Submitted | TradeFlow
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+
+            font-family:
+                Inter,
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f3f6f9;
+
+            color: #18212f;
+        }
+
+
+        .page {
+            display: flex;
+
+            min-height: 100vh;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px 18px;
+        }
+
+
+        .card {
+            width: 100%;
+
+            max-width: 620px;
+
+            padding: 42px;
+
+            background: #ffffff;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 20px;
+
+            box-shadow:
+                0 18px 50px
+                rgba(15, 23, 42, 0.08);
+
+            text-align: center;
+        }
+
+
+        .icon {
+            display: flex;
+
+            width: 68px;
+            height: 68px;
+
+            margin:
+                0
+                auto
+                22px;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #ecfdf5;
+
+            color: #047857;
+
+            font-size: 30px;
+
+            font-weight: 900;
+        }
+
+
+        .brand {
+            margin-bottom: 10px;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            letter-spacing: 1px;
+
+            text-transform: uppercase;
+        }
+
+
+        h1 {
+            margin:
+                0
+                0
+                14px;
+
+            font-size: 31px;
+        }
+
+
+        .intro {
+            margin:
+                0
+                auto
+                28px;
+
+            max-width: 490px;
+
+            color: #64748b;
+
+            font-size: 15px;
+
+            line-height: 1.7;
+        }
+
+
+        .summary {
+            margin-bottom: 25px;
+
+            padding: 20px;
+
+            background: #f8fafc;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 14px;
+
+            text-align: left;
+        }
+
+
+        .row {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding: 9px 0;
+        }
+
+
+        .row + .row {
+            border-top:
+                1px solid
+                #e5e7eb;
+        }
+
+
+        .row span {
+            color: #6b7280;
+        }
+
+
+        .row strong {
+            text-align: right;
+        }
+
+
+        .stars {
+            color: #b7791f;
+
+            font-weight: 800;
+        }
+
+
+        .status {
+            display: inline-block;
+
+            margin-bottom: 24px;
+
+            padding:
+                8px
+                12px;
+
+            background: #fff7ed;
+
+            border:
+                1px solid
+                #fed7aa;
+
+            border-radius: 999px;
+
+            color: #9a3412;
+
+            font-size: 13px;
+
+            font-weight: 800;
+        }
+
+
+        .button {
+            display: inline-flex;
+
+            min-height: 44px;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 0 18px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+            text-decoration: none;
+        }
+
+
+        .footer {
+            margin-top: 28px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid
+                #e5e7eb;
+
+            color: #94a3b8;
+
+            font-size: 13px;
+        }
+
+
+        @media (
+            max-width: 520px
+        ) {
+
+            .card {
+                padding:
+                    30px
+                    20px;
+            }
+
+
+            h1 {
+                font-size: 27px;
+            }
+
+
+            .row {
+                flex-direction: column;
+
+                gap: 4px;
+            }
+
+
+            .row strong {
+                text-align: left;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <div class="card">
+
+
+        <div class="icon">
+            ✓
+        </div>
+
+
+        <div class="brand">
+            TradeFlow
+        </div>
+
+
+        {% if already_submitted %}
+
+            <h1>
+                Review already submitted
+            </h1>
+
+            <p class="intro">
+                A review has already been submitted for
+                {{ job.job_number }}.
+                TradeFlow permits one customer review per
+                completed job.
+            </p>
+
+        {% else %}
+
+            <h1>
+                Thank you for your review
+            </h1>
+
+            <p class="intro">
+                Your feedback for {{ business.name }} has
+                been received successfully.
+            </p>
+
+        {% endif %}
+
+
+        <div class="status">
+            Pending TradeFlow moderation
+        </div>
+
+
+        <div class="summary">
+
+
+            <div class="row">
+
+                <span>
+                    Business
+                </span>
+
+                <strong>
+                    {{ business.name }}
+                </strong>
+
+            </div>
+
+
+            <div class="row">
+
+                <span>
+                    Job
+                </span>
+
+                <strong>
+                    {{ job.job_number }}
+                </strong>
+
+            </div>
+
+
+            <div class="row">
+
+                <span>
+                    Rating
+                </span>
+
+                <strong class="stars">
+                    {{ review.rating }} / 5 ★
+                </strong>
+
+            </div>
+
+
+            <div class="row">
+
+                <span>
+                    Review status
+                </span>
+
+                <strong>
+                    {{ review.get_status_display }}
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+        {% if profile and profile.public_profile_enabled %}
+
+            <a
+                href="{% url 'core:public_business_profile' profile.slug %}"
+                class="button"
+            >
+                View {{ business.name }}
+            </a>
+
+        {% else %}
+
+            <a
+                href="{% url 'core:marketplace' %}"
+                class="button"
+            >
+                Visit TradeFlow Marketplace
+            </a>
+
+        {% endif %}
+
+
+        <div class="footer">
+
+            Reviews are moderated to help keep the
+            TradeFlow marketplace useful and trustworthy.
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

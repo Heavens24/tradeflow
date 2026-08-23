@@ -55,6 +55,23 @@ urlpatterns = [
 
 
     # =====================================================
+    # PUBLIC CUSTOMER REVIEWS
+    # =====================================================
+
+    path(
+        "review/<str:token>/",
+        public_views.public_review_submit,
+        name="public_review_submit",
+    ),
+
+    path(
+        "review/<str:token>/success/",
+        public_views.public_review_success,
+        name="public_review_success",
+    ),
+
+
+    # =====================================================
     # DASHBOARD
     # =====================================================
     path(

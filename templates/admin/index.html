@@ -146,6 +146,26 @@
             </a>
 
 
+            <a
+                href="{% url 'admin:core_businessreview_changelist' %}?status__exact=pending"
+                class="tf-stat-card tf-stat-card-warning"
+            >
+
+                <span class="tf-stat-label">
+                    Pending Reviews
+                </span>
+
+                <strong class="tf-stat-number">
+                    {{ stats.pending_reviews }}
+                </strong>
+
+                <span class="tf-stat-detail">
+                    Awaiting moderation
+                </span>
+
+            </a>
+
+
         </div>
 
     </section>
@@ -255,6 +275,163 @@
                     <span>
                         {{ stats.rejected_verifications }}
                         applications
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CUSTOMER TRUST AND REVIEWS
+         ===================================================== -->
+
+    <section class="tf-admin-section">
+
+
+        <div class="tf-admin-section-heading">
+
+            <div>
+
+                <h2>
+                    Customer Trust &amp; Reviews
+                </h2>
+
+                <p>
+                    Moderate customer feedback before approved
+                    reviews appear on public business profiles.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="tf-admin-action-grid">
+
+
+            <!-- Pending Reviews -->
+
+            <a
+                href="{% url 'admin:core_businessreview_changelist' %}?status__exact=pending"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    ★
+                </div>
+
+                <div>
+
+                    <strong>
+                        Pending Reviews
+                    </strong>
+
+                    <span>
+                        {{ stats.pending_reviews }}
+                        awaiting moderation
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <!-- Approved Reviews -->
+
+            <a
+                href="{% url 'admin:core_businessreview_changelist' %}?status__exact=approved"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Approved Reviews
+                    </strong>
+
+                    <span>
+                        {{ stats.approved_reviews }}
+                        public reviews
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <!-- Rejected Reviews -->
+
+            <a
+                href="{% url 'admin:core_businessreview_changelist' %}?status__exact=rejected"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <strong>
+                        Rejected Reviews
+                    </strong>
+
+                    <span>
+                        {{ stats.rejected_reviews }}
+                        hidden reviews
+                    </span>
+
+                </div>
+
+                <div class="tf-admin-action-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <!-- All Reviews -->
+
+            <a
+                href="{% url 'admin:core_businessreview_changelist' %}"
+                class="tf-admin-action-card"
+            >
+
+                <div class="tf-admin-action-icon">
+                    R
+                </div>
+
+                <div>
+
+                    <strong>
+                        All Reviews
+                    </strong>
+
+                    <span>
+                        {{ stats.total_reviews }}
+                        total reviews
                     </span>
 
                 </div>

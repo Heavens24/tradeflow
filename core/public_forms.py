@@ -2,6 +2,7 @@ from django import forms
 
 from .models import (
     BusinessPublicProfile,
+    BusinessReview,
     QuoteRequest,
 )
 
@@ -281,5 +282,66 @@ class PublicQuoteRequestForm(
                     "information about the work."
                 )
             )
+
+        return value
+
+
+# =========================================================
+# PUBLIC BUSINESS REVIEW FORM
+# =========================================================
+
+
+class PublicBusinessReviewForm(
+    forms.ModelForm
+):
+    """
+    Customer-facing review form.
+
+    Only customer-written review content is exposed.
+
+    The customer, business, job and moderation status are
+    never selectable through this form. Those trusted values
+    are attached by the server from the signed review link.
+    """
+
+    class Meta:
+        model = BusinessReview
+
+        fields = [
+            "rating",
+            "comment",
+        ]
+
+        widgets = {
+
+            "rating": forms.RadioSelect(
+                attrs={
+                    "class": "rating-radio",
+                }
+            ),
+
+            "comment": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 6,
+                    "maxlength": 2000,
+                    "placeholder": (
+                        "Tell others about the service you "
+                        "received. What went well?"
+                    ),
+                }
+            ),
+
+        }
+
+
+    def clean_comment(self):
+        value = (
+            self.cleaned_data.get(
+                "comment",
+                "",
+            )
+            .strip()
+        )
 
         return value

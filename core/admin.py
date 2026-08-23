@@ -7,6 +7,7 @@ from django.utils.html import format_html
 from .models import (
     Business,
     BusinessPublicProfile,
+    BusinessReview,
     BusinessVerification,
     Customer,
     Invoice,
@@ -827,6 +828,372 @@ class BusinessVerificationAdmin(
             (
                 f"{count} business verification "
                 f"application(s) rejected."
+            ),
+            level=messages.WARNING,
+        )
+
+
+# =========================================================
+# BUSINESS REVIEW MODERATION
+# =========================================================
+
+
+@admin.register(BusinessReview)
+class BusinessReviewAdmin(
+    admin.ModelAdmin
+):
+    """
+    TradeFlow customer-review moderation area.
+
+    Reviews originate from completed TradeFlow jobs. Admins
+    moderate submitted reviews but cannot create customer
+    reviews manually.
+
+    Trusted relationship fields and review content remain
+    read-only here. Platform staff may add moderation notes
+    and approve or reject submitted reviews.
+    """
+
+    # =====================================================
+    # LIST PAGE
+    # =====================================================
+
+    list_display = (
+        "customer_display_name",
+        "business",
+        "job",
+        "rating_stars",
+        "status_badge",
+        "created_at",
+        "moderated_by",
+        "review_application",
+    )
+
+    list_filter = (
+        "status",
+        "rating",
+        "created_at",
+        "moderated_at",
+    )
+
+    search_fields = (
+        "customer_display_name",
+        "customer__name",
+        "customer__phone",
+        "customer__email",
+        "business__name",
+        "job__job_number",
+        "job__title",
+        "comment",
+    )
+
+    ordering = (
+        "status",
+        "-created_at",
+    )
+
+    list_per_page = 25
+
+    # =====================================================
+    # REVIEW FORM
+    # =====================================================
+
+    readonly_fields = (
+        "business",
+        "customer",
+        "job",
+        "customer_display_name",
+        "rating",
+        "comment",
+        "status",
+        "created_at",
+        "updated_at",
+        "moderated_at",
+        "moderated_by",
+    )
+
+    fieldsets = (
+        (
+            "Completed TradeFlow job",
+            {
+                "fields": (
+                    "business",
+                    "customer",
+                    "job",
+                ),
+            },
+        ),
+        (
+            "Customer review",
+            {
+                "fields": (
+                    "customer_display_name",
+                    "rating",
+                    "comment",
+                    "created_at",
+                ),
+            },
+        ),
+        (
+            "TradeFlow moderation",
+            {
+                "fields": (
+                    "status",
+                    "moderation_notes",
+                    "moderated_at",
+                    "moderated_by",
+                ),
+            },
+        ),
+        (
+            "System information",
+            {
+                "classes": (
+                    "collapse",
+                ),
+                "fields": (
+                    "updated_at",
+                ),
+            },
+        ),
+    )
+
+    actions = (
+        "approve_reviews",
+        "reject_reviews",
+    )
+
+    # =====================================================
+    # PREVENT MANUAL REVIEW CREATION
+    # =====================================================
+
+    def has_add_permission(
+        self,
+        request,
+    ):
+        """
+        Customer reviews must originate from the TradeFlow
+        completed-job review workflow, never from admin.
+        """
+
+        return False
+
+    # =====================================================
+    # STATUS BADGE
+    # =====================================================
+
+    @admin.display(
+        description="Status",
+        ordering="status",
+    )
+    def status_badge(
+        self,
+        obj,
+    ):
+
+        if (
+            obj.status
+            == BusinessReview.STATUS_APPROVED
+        ):
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-success">'
+                    '{}'
+                    '</span>'
+                ),
+                "✓ Approved",
+            )
+
+        if (
+            obj.status
+            == BusinessReview.STATUS_REJECTED
+        ):
+
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-danger">'
+                    '{}'
+                    '</span>'
+                ),
+                "Rejected / Hidden",
+            )
+
+        return format_html(
+            (
+                '<span class="tf-status '
+                'tf-status-warning">'
+                '{}'
+                '</span>'
+            ),
+            "Pending Review",
+        )
+
+    # =====================================================
+    # STAR DISPLAY
+    # =====================================================
+
+    @admin.display(
+        description="Rating",
+        ordering="rating",
+    )
+    def rating_stars(
+        self,
+        obj,
+    ):
+
+        stars = (
+            "★" * obj.rating
+            + "☆" * (5 - obj.rating)
+        )
+
+        return format_html(
+            '<strong title="{} out of 5">{}</strong>',
+            obj.rating,
+            stars,
+        )
+
+    # =====================================================
+    # REVIEW LINK
+    # =====================================================
+
+    @admin.display(
+        description="Moderate",
+    )
+    def review_application(
+        self,
+        obj,
+    ):
+
+        url = reverse(
+            "admin:core_businessreview_change",
+            args=[
+                obj.pk,
+            ],
+        )
+
+        return format_html(
+            (
+                '<a class="tf-review-link" '
+                'href="{}">'
+                'Review'
+                '</a>'
+            ),
+            url,
+        )
+
+    # =====================================================
+    # NORMAL ADMIN SAVE
+    # =====================================================
+
+    def save_model(
+        self,
+        request,
+        obj,
+        form,
+        change,
+    ):
+        """
+        Standard saves are used for moderation_notes only.
+
+        Approval/rejection is performed through the dedicated
+        moderation actions below so the moderator and time are
+        always recorded together with the status change.
+        """
+
+        super().save_model(
+            request,
+            obj,
+            form,
+            change,
+        )
+
+    # =====================================================
+    # BULK APPROVE
+    # =====================================================
+
+    @admin.action(
+        description=(
+            "Approve selected customer review(s)"
+        )
+    )
+    def approve_reviews(
+        self,
+        request,
+        queryset,
+    ):
+
+        count = 0
+
+        for review in queryset:
+
+            review.status = (
+                BusinessReview.STATUS_APPROVED
+            )
+
+            review.moderated_by = (
+                request.user
+            )
+
+            review.moderated_at = (
+                timezone.now()
+            )
+
+            review.save()
+
+            count += 1
+
+        self.message_user(
+            request,
+            (
+                f"{count} customer review(s) "
+                f"approved and made public."
+            ),
+            level=messages.SUCCESS,
+        )
+
+    # =====================================================
+    # BULK REJECT
+    # =====================================================
+
+    @admin.action(
+        description=(
+            "Reject / hide selected customer review(s)"
+        )
+    )
+    def reject_reviews(
+        self,
+        request,
+        queryset,
+    ):
+
+        count = 0
+
+        for review in queryset:
+
+            review.status = (
+                BusinessReview.STATUS_REJECTED
+            )
+
+            review.moderated_by = (
+                request.user
+            )
+
+            review.moderated_at = (
+                timezone.now()
+            )
+
+            review.save()
+
+            count += 1
+
+        self.message_user(
+            request,
+            (
+                f"{count} customer review(s) "
+                f"rejected and hidden."
             ),
             level=messages.WARNING,
         )
