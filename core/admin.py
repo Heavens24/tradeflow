@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from .models import (
+    AIUsage,
     Business,
     BusinessPublicProfile,
     BusinessReview,
@@ -1705,3 +1706,81 @@ class QuoteRequestAdmin(
         "business__name",
         "description",
     )
+
+# =========================================================
+# AI USAGE
+# =========================================================
+
+
+@admin.register(AIUsage)
+class AIUsageAdmin(admin.ModelAdmin):
+    """Read-only operational visibility for AI consumption."""
+
+    list_display = (
+        "business",
+        "document_type",
+        "status_badge",
+        "model_name",
+        "token_total_display",
+        "period_start",
+        "period_end",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "document_type",
+        "model_name",
+        "created_at",
+    )
+
+    search_fields = (
+        "business__name",
+        "business__owner__username",
+        "model_name",
+        "error_category",
+    )
+
+    ordering = ("-created_at",)
+    list_per_page = 50
+
+    readonly_fields = (
+        "business",
+        "subscription",
+        "document_type",
+        "model_name",
+        "status",
+        "period_start",
+        "period_end",
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "error_category",
+        "created_at",
+        "completed_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="Status", ordering="status")
+    def status_badge(self, obj):
+        if obj.status == AIUsage.STATUS_SUCCEEDED:
+            css_class = "tf-status-success"
+        elif obj.status == AIUsage.STATUS_FAILED:
+            css_class = "tf-status-danger"
+        else:
+            css_class = "tf-status-warning"
+
+        return format_html(
+            '<span class="tf-status {}">{}</span>',
+            css_class,
+            obj.get_status_display(),
+        )
+
+    @admin.display(description="Tokens", ordering="total_tokens")
+    def token_total_display(self, obj):
+        return obj.total_tokens if obj.total_tokens is not None else "—"

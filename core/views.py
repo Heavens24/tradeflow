@@ -45,9 +45,11 @@ from .forms import (
 )
 
 from .models import (
+    AIUsage,
     Business,
     BusinessPublicProfile,
     BusinessReview,
+    BusinessSubscription,
     Customer,
     Invoice,
     Job,
@@ -1025,68 +1027,42 @@ def ai_document_assistant(request):
     """
     Generate review-first quote or invoice suggestions.
 
-    The AI never saves a Quote or Invoice. It only returns
-    suggested line items, VAT preference and notes for the
-    user to review inside the existing Django form.
+    AI access is subscription-gated and every outbound OpenAI
+    attempt is reserved against a hard per-period allowance before
+    the external API call is made.
     """
 
-    business = get_user_business(
-        request.user
-    )
+    AI_PRO_REQUEST_LIMIT = 100
+
+    business = get_user_business(request.user)
 
     if not business:
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "Please create your business "
-                    "profile first."
-                ),
+                "error": "Please create your business profile first.",
             },
             status=400,
         )
 
     try:
-        payload = json.loads(
-            request.body.decode("utf-8")
-        )
-    except (
-        json.JSONDecodeError,
-        UnicodeDecodeError,
-    ):
+        payload = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return JsonResponse(
-            {
-                "success": False,
-                "error": "Invalid request data.",
-            },
+            {"success": False, "error": "Invalid request data."},
             status=400,
         )
 
     document_type = str(
-        payload.get(
-            "document_type",
-            "quote",
-        )
+        payload.get("document_type", "quote")
     ).strip().lower()
+    description = str(payload.get("description", "")).strip()
 
-    description = str(
-        payload.get(
-            "description",
-            "",
-        )
-    ).strip()
-
-    if document_type not in {
-        "quote",
-        "invoice",
-    }:
+    if document_type not in {"quote", "invoice"}:
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "Document type must be "
-                    "quote or invoice."
-                ),
+                "error": "Document type must be quote or invoice.",
             },
             status=400,
         )
@@ -1095,10 +1071,7 @@ def ai_document_assistant(request):
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "Describe the work before "
-                    "asking the AI assistant."
-                ),
+                "error": "Describe the work before asking the AI assistant.",
             },
             status=400,
         )
@@ -1107,23 +1080,89 @@ def ai_document_assistant(request):
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "Please keep the work "
-                    "description under 3000 characters."
-                ),
+                "error": "Please keep the work description under 3000 characters.",
             },
             status=400,
         )
 
-    model_name = os.getenv(
-        "OPENAI_MODEL",
-        "gpt-5-mini",
-    ).strip()
+    model_name = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip()
 
-    business_name = (
-        business.name
-        or "the business"
-    )
+    # Reserve one request while locking the subscription row. The
+    # reservation happens before OpenAI is called, so simultaneous
+    # requests cannot bypass the hard allowance.
+    with transaction.atomic():
+        subscription, _ = BusinessSubscription.objects.select_for_update().get_or_create(
+            business=business
+        )
+
+        if not subscription.has_ai_access:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": (
+                        "AI Assistant is available on an active TradeFlow Pro plan. "
+                        "Your current subscription does not have AI access."
+                    ),
+                    "code": "ai_subscription_required",
+                },
+                status=403,
+            )
+
+        if subscription.status == BusinessSubscription.STATUS_TRIALING:
+            period_start = subscription.started_at or subscription.created_at
+            period_end = subscription.trial_ends_at
+        else:
+            period_start = subscription.current_period_start
+            period_end = subscription.current_period_end
+
+        if not period_start or not period_end:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": (
+                        "Your subscription billing period is incomplete. "
+                        "Please contact TradeFlow support before using AI."
+                    ),
+                    "code": "ai_period_unavailable",
+                },
+                status=403,
+            )
+
+        used_requests = AIUsage.objects.filter(
+            business=business,
+            period_start=period_start,
+            period_end=period_end,
+        ).count()
+
+        if used_requests >= AI_PRO_REQUEST_LIMIT:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": (
+                        "You have reached the AI request limit for this "
+                        "subscription period."
+                    ),
+                    "code": "ai_limit_reached",
+                    "limit": AI_PRO_REQUEST_LIMIT,
+                    "used": used_requests,
+                    "remaining": 0,
+                },
+                status=429,
+            )
+
+        usage_record = AIUsage.objects.create(
+            business=business,
+            subscription=subscription,
+            document_type=document_type,
+            model_name=model_name,
+            status=AIUsage.STATUS_RESERVED,
+            period_start=period_start,
+            period_end=period_end,
+        )
+
+        used_after_reservation = used_requests + 1
+
+    business_name = business.name or "the business"
 
     prompt = (
         "You are the Simple AI Quote / Invoice Assistant "
@@ -1158,44 +1197,30 @@ def ai_document_assistant(request):
                 "items": {
                     "type": "object",
                     "properties": {
-                        "description": {
-                            "type": "string",
-                        },
-                        "quantity": {
-                            "type": "number",
-                            "exclusiveMinimum": 0,
-                        },
-                        "unit_price": {
-                            "type": "number",
-                            "minimum": 0,
-                        },
+                        "description": {"type": "string"},
+                        "quantity": {"type": "number", "exclusiveMinimum": 0},
+                        "unit_price": {"type": "number", "minimum": 0},
                     },
-                    "required": [
-                        "description",
-                        "quantity",
-                        "unit_price",
-                    ],
+                    "required": ["description", "quantity", "unit_price"],
                     "additionalProperties": False,
                 },
             },
-            "apply_vat": {
-                "type": "boolean",
-            },
-            "notes": {
-                "type": "string",
-            },
+            "apply_vat": {"type": "boolean"},
+            "notes": {"type": "string"},
         },
-        "required": [
-            "items",
-            "apply_vat",
-            "notes",
-        ],
+        "required": ["items", "apply_vat", "notes"],
         "additionalProperties": False,
     }
 
+    def mark_failed(category):
+        AIUsage.objects.filter(pk=usage_record.pk).update(
+            status=AIUsage.STATUS_FAILED,
+            error_category=category,
+            completed_at=timezone.now(),
+        )
+
     try:
         client = OpenAI()
-
         response = client.responses.create(
             model=model_name,
             input=prompt,
@@ -1208,113 +1233,103 @@ def ai_document_assistant(request):
                 }
             },
         )
+        suggestion = json.loads(response.output_text)
 
-        suggestion = json.loads(
-            response.output_text
+        response_usage = getattr(response, "usage", None)
+        input_tokens = getattr(response_usage, "input_tokens", None)
+        output_tokens = getattr(response_usage, "output_tokens", None)
+        total_tokens = getattr(response_usage, "total_tokens", None)
+
+        AIUsage.objects.filter(pk=usage_record.pk).update(
+            status=AIUsage.STATUS_SUCCEEDED,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            total_tokens=total_tokens,
+            completed_at=timezone.now(),
         )
 
     except AuthenticationError:
+        mark_failed("authentication")
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "OpenAI authentication failed. "
-                    "Please check the API key configured "
-                    "for TradeFlow."
-                ),
+                "error": "TradeFlow AI is temporarily unavailable.",
             },
-            status=401,
+            status=503,
         )
 
     except PermissionDeniedError:
+        mark_failed("permission_denied")
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "The OpenAI project does not have "
-                    "permission to use the selected model."
-                ),
+                "error": "TradeFlow AI is temporarily unavailable.",
             },
-            status=403,
+            status=503,
         )
 
     except RateLimitError as exc:
         error_text = str(exc).lower()
-
-        if (
-            "insufficient_quota" in error_text
-            or "current quota" in error_text
-            or "billing" in error_text
-        ):
-            message = (
-                "OpenAI API quota or billing is unavailable. "
-                "Please add API credits or check the billing "
-                "settings for the OpenAI project used by "
-                "TradeFlow."
+        category = (
+            "provider_quota"
+            if (
+                "insufficient_quota" in error_text
+                or "current quota" in error_text
+                or "billing" in error_text
             )
-        else:
-            message = (
-                "The OpenAI API rate limit was reached. "
-                "Please wait a moment and try again."
-            )
-
-        return JsonResponse(
-            {
-                "success": False,
-                "error": message,
-            },
-            status=429,
+            else "provider_rate_limit"
         )
-
-    except BadRequestError as exc:
+        mark_failed(category)
         return JsonResponse(
             {
                 "success": False,
                 "error": (
-                    "OpenAI rejected the AI request. "
-                    "Please check the selected model and "
-                    "request format, then try again."
-                ),
-                "detail": str(exc),
-            },
-            status=400,
-        )
-
-    except APIConnectionError:
-        return JsonResponse(
-            {
-                "success": False,
-                "error": (
-                    "TradeFlow could not connect to OpenAI. "
-                    "Please check the internet connection "
-                    "and try again."
+                    "TradeFlow AI is temporarily busy or unavailable. "
+                    "Please try again later."
                 ),
             },
             status=503,
         )
 
-    except APIStatusError as exc:
+    except BadRequestError:
+        mark_failed("bad_request")
         return JsonResponse(
             {
                 "success": False,
-                "error": (
-                    "OpenAI returned an API error. "
-                    "Please try again."
-                ),
-                "status_code": exc.status_code,
+                "error": "The AI request could not be processed.",
+            },
+            status=400,
+        )
+
+    except APIConnectionError:
+        mark_failed("connection")
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "TradeFlow could not connect to the AI service.",
+            },
+            status=503,
+        )
+
+    except APIStatusError:
+        mark_failed("api_status")
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "The AI service returned an error. Please try again.",
             },
             status=502,
         )
 
-    except Exception as exc:
+    except Exception:
+        mark_failed("unexpected")
         return JsonResponse(
             {
                 "success": False,
                 "error": (
-                    "The AI assistant could not generate "
-                    "a suggestion right now. Please try again."
+                    "The AI assistant could not generate a suggestion right now. "
+                    "Please try again."
                 ),
-                "detail": str(exc),
             },
             status=502,
         )
@@ -1324,13 +1339,17 @@ def ai_document_assistant(request):
             "success": True,
             "suggestion": suggestion,
             "notice": (
-                "AI prices are suggestions only. "
-                "Review all quantities, prices, VAT "
-                "and notes before saving."
+                "AI prices are suggestions only. Review all quantities, "
+                "prices, VAT and notes before saving."
             ),
+            "usage": {
+                "limit": AI_PRO_REQUEST_LIMIT,
+                "used": used_after_reservation,
+                "remaining": max(AI_PRO_REQUEST_LIMIT - used_after_reservation, 0),
+                "period_end": period_end.isoformat(),
+            },
         }
     )
-
 
 # =========================================================
 # QUOTES

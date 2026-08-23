@@ -2211,3 +2211,116 @@ class QuoteRequest(models.Model):
             f"{self.customer_name} → "
             f"{self.business.name}"
         )
+
+# =========================================================
+# AI USAGE
+# =========================================================
+
+
+class AIUsage(models.Model):
+    """
+    One auditable reservation for one TradeFlow AI API attempt.
+
+    A row is created before an OpenAI request is sent. This makes
+    the plan limit fail closed: concurrent requests cannot all pass
+    the limit check and create accidental unlimited API spend.
+    """
+
+    STATUS_RESERVED = "reserved"
+    STATUS_SUCCEEDED = "succeeded"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = [
+        (STATUS_RESERVED, "Reserved"),
+        (STATUS_SUCCEEDED, "Succeeded"),
+        (STATUS_FAILED, "Failed"),
+    ]
+
+    DOCUMENT_QUOTE = "quote"
+    DOCUMENT_INVOICE = "invoice"
+
+    DOCUMENT_TYPE_CHOICES = [
+        (DOCUMENT_QUOTE, "Quote"),
+        (DOCUMENT_INVOICE, "Invoice"),
+    ]
+
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="ai_usage_records",
+    )
+
+    subscription = models.ForeignKey(
+        BusinessSubscription,
+        on_delete=models.PROTECT,
+        related_name="ai_usage_records",
+    )
+
+    document_type = models.CharField(
+        max_length=20,
+        choices=DOCUMENT_TYPE_CHOICES,
+    )
+
+    model_name = models.CharField(
+        max_length=100,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_RESERVED,
+    )
+
+    period_start = models.DateTimeField()
+    period_end = models.DateTimeField()
+
+    input_tokens = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+
+    output_tokens = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+
+    total_tokens = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+
+    error_category = models.CharField(
+        max_length=80,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    completed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["business", "period_start", "period_end"],
+                name="core_aiusag_busines_3ecbc3_idx",
+            ),
+            models.Index(
+                fields=["business", "status", "created_at"],
+                name="core_aiusag_busines_9288bf_idx",
+            ),
+        ]
+        verbose_name = "AI Usage"
+        verbose_name_plural = "AI Usage"
+
+    def __str__(self):
+        return (
+            f"{self.business.name} — "
+            f"{self.get_document_type_display()} — "
+            f"{self.get_status_display()}"
+        )
