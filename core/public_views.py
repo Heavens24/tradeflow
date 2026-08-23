@@ -47,6 +47,16 @@ REVIEW_TOKEN_MAX_AGE = (
 
 
 # =========================================================
+# MARKETPLACE REPUTATION
+# =========================================================
+
+
+MARKETPLACE_PRIOR_RATING = 4.0
+
+MARKETPLACE_PRIOR_WEIGHT = 5
+
+
+# =========================================================
 # HELPERS
 # =========================================================
 
@@ -138,6 +148,162 @@ def get_job_from_review_token(token):
     )
 
 
+def marketplace_reputation(
+    average_rating,
+    review_count,
+):
+    """
+    Return a weighted marketplace reputation score.
+
+    A business with only one review should not automatically
+    outrank a business that has consistently strong feedback
+    across many completed TradeFlow jobs.
+
+    The score therefore shrinks small review samples toward
+    a neutral marketplace prior.
+
+    Businesses with no approved reviews receive a score of
+    zero rather than receiving an artificial public rating.
+    """
+
+    if (
+        not review_count
+        or average_rating is None
+    ):
+        return 0.0
+
+
+    weighted_total = (
+        float(average_rating)
+        * review_count
+    )
+
+    prior_total = (
+        MARKETPLACE_PRIOR_RATING
+        * MARKETPLACE_PRIOR_WEIGHT
+    )
+
+
+    reputation = (
+        weighted_total
+        + prior_total
+    ) / (
+        review_count
+        + MARKETPLACE_PRIOR_WEIGHT
+    )
+
+
+    return round(
+        reputation,
+        4,
+    )
+
+
+def marketplace_search_score(
+    profile,
+    query,
+):
+    """
+    Give matching marketplace businesses a lightweight
+    relevance score.
+
+    This is used only after the normal database search has
+    already removed unrelated businesses.
+
+    Search relevance stays ahead of reputation whenever a
+    customer explicitly enters a search query.
+    """
+
+    if not query:
+        return 0
+
+
+    query_value = (
+        query
+        .strip()
+        .lower()
+    )
+
+
+    if not query_value:
+        return 0
+
+
+    business_name = (
+        profile.business.name
+        or ""
+    ).lower()
+
+    city = (
+        profile.business.city
+        or ""
+    ).lower()
+
+    headline = (
+        profile.headline
+        or ""
+    ).lower()
+
+    description = (
+        profile.description
+        or ""
+    ).lower()
+
+    services = (
+        profile.services
+        or ""
+    ).lower()
+
+
+    score = 0
+
+
+    # -----------------------------------------------------
+    # BUSINESS NAME
+    # -----------------------------------------------------
+
+    if business_name == query_value:
+
+        score += 100
+
+    elif business_name.startswith(
+        query_value
+    ):
+
+        score += 70
+
+    elif query_value in business_name:
+
+        score += 50
+
+
+    # -----------------------------------------------------
+    # PUBLIC PROFILE CONTENT
+    # -----------------------------------------------------
+
+    if query_value in headline:
+
+        score += 35
+
+
+    if query_value in services:
+
+        score += 30
+
+
+    if query_value in description:
+
+        score += 20
+
+
+    if query_value in city:
+
+        score += 10
+
+
+    return score
+
+
 # =========================================================
 # PUBLIC MARKETPLACE
 # =========================================================
@@ -152,6 +318,17 @@ def marketplace(request):
 
     Private operational information is never queried or
     exposed here.
+
+    Marketplace ordering combines:
+
+    - customer search relevance
+    - TradeFlow verification
+    - approved-review reputation
+    - approved review volume
+    - emergency availability
+
+    Only approved reviews contribute to public marketplace
+    ratings and ranking.
     """
 
     query = request.GET.get(
@@ -255,6 +432,135 @@ def marketplace(request):
 
 
     # =====================================================
+    # MARKETPLACE REPUTATION
+    # =====================================================
+
+    ranked_profiles = []
+
+
+    for profile in profiles:
+
+        review_summary = (
+            BusinessReview.objects
+            .filter(
+                business=profile.business,
+                status=(
+                    BusinessReview
+                    .STATUS_APPROVED
+                ),
+            )
+            .aggregate(
+                average_rating=Avg(
+                    "rating"
+                ),
+            )
+        )
+
+
+        review_count = (
+            BusinessReview.objects
+            .filter(
+                business=profile.business,
+                status=(
+                    BusinessReview
+                    .STATUS_APPROVED
+                ),
+            )
+            .count()
+        )
+
+
+        average_rating = (
+            review_summary.get(
+                "average_rating"
+            )
+        )
+
+
+        profile.marketplace_review_count = (
+            review_count
+        )
+
+
+        profile.marketplace_average_rating = (
+            average_rating
+        )
+
+
+        profile.marketplace_reputation_score = (
+            marketplace_reputation(
+                average_rating,
+                review_count,
+            )
+        )
+
+
+        profile.marketplace_search_score = (
+            marketplace_search_score(
+                profile,
+                query,
+            )
+        )
+
+
+        ranked_profiles.append(
+            profile
+        )
+
+
+    # =====================================================
+    # MARKETPLACE ORDERING
+    # =====================================================
+
+    if query:
+
+        ranked_profiles.sort(
+            key=lambda profile: (
+                -profile.marketplace_search_score,
+                -int(
+                    bool(
+                        profile.is_verified
+                    )
+                ),
+                -profile.marketplace_reputation_score,
+                -profile.marketplace_review_count,
+                -int(
+                    bool(
+                        profile.emergency_callouts
+                    )
+                ),
+                (
+                    profile.business.name
+                    or ""
+                ).lower(),
+            )
+        )
+
+    else:
+
+        ranked_profiles.sort(
+            key=lambda profile: (
+                -int(
+                    bool(
+                        profile.is_verified
+                    )
+                ),
+                -profile.marketplace_reputation_score,
+                -profile.marketplace_review_count,
+                -int(
+                    bool(
+                        profile.emergency_callouts
+                    )
+                ),
+                (
+                    profile.business.name
+                    or ""
+                ).lower(),
+            )
+        )
+
+
+    # =====================================================
     # FILTER OPTIONS
     # =====================================================
 
@@ -278,7 +584,7 @@ def marketplace(request):
 
 
     context = {
-        "profiles": profiles,
+        "profiles": ranked_profiles,
         "query": query,
         "trade_category": trade_category,
         "city": city,

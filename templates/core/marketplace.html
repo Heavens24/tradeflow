@@ -12,18 +12,20 @@
 
     <meta
         name="description"
-        content="Find local service businesses on the TradeFlow marketplace."
+        content="Find trusted local service businesses on the TradeFlow marketplace."
     >
 
     <title>
         Marketplace | TradeFlow
     </title>
 
+
     <style>
 
         * {
             box-sizing: border-box;
         }
+
 
         body {
             margin: 0;
@@ -34,8 +36,14 @@
                 sans-serif;
 
             background: #f4f6f8;
+
             color: #1f2937;
         }
+
+
+        /* =================================================
+           TOP BAR
+           ================================================= */
 
         .topbar {
             background: white;
@@ -44,6 +52,7 @@
                 1px solid
                 #e5e7eb;
         }
+
 
         .topbar-inner {
             width: 100%;
@@ -61,8 +70,10 @@
             gap: 20px;
         }
 
+
         .brand {
             font-size: 23px;
+
             font-weight: 800;
 
             color: #111827;
@@ -70,11 +81,17 @@
             text-decoration: none;
         }
 
+
         .tagline {
             color: #6b7280;
 
             font-size: 13px;
         }
+
+
+        /* =================================================
+           PAGE
+           ================================================= */
 
         .page {
             width: 100%;
@@ -85,11 +102,17 @@
             padding: 45px 20px 70px;
         }
 
+
+        /* =================================================
+           HERO
+           ================================================= */
+
         .hero {
             margin-bottom: 30px;
 
             text-align: center;
         }
+
 
         .hero h1 {
             margin:
@@ -98,8 +121,9 @@
             font-size: 38px;
         }
 
+
         .hero p {
-            max-width: 680px;
+            max-width: 700px;
 
             margin:
                 0 auto;
@@ -107,8 +131,14 @@
             color: #6b7280;
 
             font-size: 17px;
+
             line-height: 1.6;
         }
+
+
+        /* =================================================
+           FILTERS
+           ================================================= */
 
         .filters {
             margin-bottom: 28px;
@@ -124,6 +154,7 @@
                 rgba(0, 0, 0, 0.05);
         }
 
+
         .filter-grid {
             display: grid;
 
@@ -132,6 +163,7 @@
 
             gap: 12px;
         }
+
 
         .form-control {
             width: 100%;
@@ -149,6 +181,7 @@
             font: inherit;
         }
 
+
         .checks {
             display: flex;
 
@@ -159,6 +192,7 @@
             margin-top: 16px;
         }
 
+
         .check {
             display: flex;
 
@@ -166,6 +200,7 @@
 
             gap: 8px;
         }
+
 
         .filter-actions {
             display: flex;
@@ -176,6 +211,11 @@
 
             margin-top: 18px;
         }
+
+
+        /* =================================================
+           BUTTONS
+           ================================================= */
 
         .button {
             display: inline-block;
@@ -191,6 +231,7 @@
             color: white;
 
             font: inherit;
+
             font-weight: 700;
 
             text-decoration: none;
@@ -198,11 +239,22 @@
             cursor: pointer;
         }
 
+
+        .button:hover {
+            opacity: 0.93;
+        }
+
+
         .button.secondary {
             background: #e5e7eb;
 
             color: #111827;
         }
+
+
+        /* =================================================
+           RESULTS HEADER
+           ================================================= */
 
         .results-header {
             display: flex;
@@ -212,18 +264,46 @@
 
             gap: 15px;
 
-            margin-bottom: 16px;
+            margin-bottom: 10px;
         }
+
 
         .results-header h2 {
             margin: 0;
         }
+
 
         .results-count {
             color: #6b7280;
 
             font-size: 14px;
         }
+
+
+        .ranking-note {
+            margin-bottom: 18px;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 10px;
+
+            background: #ffffff;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            line-height: 1.55;
+        }
+
+
+        /* =================================================
+           BUSINESS GRID
+           ================================================= */
 
         .business-grid {
             display: grid;
@@ -237,8 +317,10 @@
             gap: 18px;
         }
 
+
         .business-card {
             display: flex;
+
             flex-direction: column;
 
             min-height: 100%;
@@ -247,12 +329,26 @@
 
             background: white;
 
+            border:
+                1px solid
+                transparent;
+
             border-radius: 16px;
 
             box-shadow:
                 0 7px 24px
                 rgba(0, 0, 0, 0.05);
         }
+
+
+        .business-card:hover {
+            border-color: #dbeafe;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.07);
+        }
+
 
         .business-card h3 {
             margin:
@@ -261,11 +357,17 @@
             font-size: 22px;
         }
 
+
         .location {
             color: #6b7280;
 
             margin-bottom: 13px;
         }
+
+
+        /* =================================================
+           BADGES
+           ================================================= */
 
         .badges {
             display: flex;
@@ -277,6 +379,7 @@
             margin-bottom: 15px;
         }
 
+
         .badge {
             display: inline-block;
 
@@ -286,9 +389,13 @@
 
             background: #f3f4f6;
 
+            color: #374151;
+
             font-size: 12px;
+
             font-weight: 700;
         }
+
 
         .badge.verified {
             background: #ecfdf5;
@@ -296,11 +403,90 @@
             color: #047857;
         }
 
+
         .badge.emergency {
             background: #fff7ed;
 
             color: #c2410c;
         }
+
+
+        .badge.rating {
+            background: #fffbeb;
+
+            color: #92400e;
+        }
+
+
+        /* =================================================
+           REPUTATION
+           ================================================= */
+
+        .reputation {
+            margin-bottom: 16px;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid
+                #f3e8c5;
+
+            border-radius: 10px;
+
+            background: #fffcf5;
+        }
+
+
+        .reputation-main {
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .stars {
+            color: #d97706;
+
+            letter-spacing: 1px;
+
+            font-size: 17px;
+        }
+
+
+        .rating-value {
+            color: #111827;
+
+            font-size: 16px;
+
+            font-weight: 800;
+        }
+
+
+        .review-count {
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+
+        .reputation-note {
+            margin-top: 6px;
+
+            color: #78716c;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+        }
+
+
+        /* =================================================
+           PROFILE CONTENT
+           ================================================= */
 
         .headline {
             margin-bottom: 17px;
@@ -310,9 +496,11 @@
             line-height: 1.6;
         }
 
+
         .services {
             margin-bottom: 20px;
         }
+
 
         .service {
             margin-bottom: 6px;
@@ -321,6 +509,7 @@
 
             font-size: 14px;
         }
+
 
         .card-actions {
             display: flex;
@@ -331,6 +520,11 @@
 
             margin-top: auto;
         }
+
+
+        /* =================================================
+           EMPTY STATE
+           ================================================= */
 
         .empty {
             padding: 45px 25px;
@@ -344,6 +538,11 @@
             color: #6b7280;
         }
 
+
+        /* =================================================
+           FOOTER
+           ================================================= */
+
         .footer {
             margin-top: 45px;
 
@@ -354,15 +553,22 @@
             font-size: 13px;
         }
 
+
+        /* =================================================
+           MOBILE
+           ================================================= */
+
         @media (max-width: 760px) {
 
             .filter-grid {
                 grid-template-columns: 1fr;
             }
 
+
             .hero h1 {
                 font-size: 30px;
             }
+
 
             .topbar-inner {
                 align-items: flex-start;
@@ -370,8 +576,28 @@
                 flex-direction: column;
             }
 
+
             .business-grid {
                 grid-template-columns: 1fr;
+            }
+
+
+            .results-header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+
+            .card-actions .button {
+                width: 100%;
+
+                text-align: center;
             }
 
         }
@@ -395,6 +621,7 @@
             TradeFlow Marketplace
         </a>
 
+
         <div class="tagline">
             Find trusted local service businesses
         </div>
@@ -407,6 +634,10 @@
 <main class="page">
 
 
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
     <section class="hero">
 
         <h1>
@@ -415,12 +646,17 @@
 
         <p>
             Search TradeFlow businesses by service,
-            trade and location, then request a quote
+            trade and location, compare verified businesses
+            and customer ratings, then request a quote
             directly from the business.
         </p>
 
     </section>
 
+
+    <!-- =====================================================
+         FILTERS
+         ===================================================== -->
 
     <section class="filters">
 
@@ -447,6 +683,7 @@
                         All trades
                     </option>
 
+
                     {% for value, label in trade_choices %}
 
                         <option
@@ -471,6 +708,7 @@
                     <option value="">
                         All locations
                     </option>
+
 
                     {% for city_name in city_choices %}
 
@@ -538,6 +776,7 @@
                     Search Marketplace
                 </button>
 
+
                 <a
                     href="{% url 'core:marketplace' %}"
                     class="button secondary"
@@ -552,16 +791,44 @@
     </section>
 
 
+    <!-- =====================================================
+         RESULTS
+         ===================================================== -->
+
     <div class="results-header">
 
         <h2>
             Businesses
         </h2>
 
+
         <div class="results-count">
+
             {{ profiles|length }}
+
             result{{ profiles|length|pluralize }}
+
         </div>
+
+    </div>
+
+
+    <div class="ranking-note">
+
+        {% if query %}
+
+            Results are ordered first by how closely they
+            match your search, then by TradeFlow trust
+            signals such as verification, approved customer
+            reviews and review history.
+
+        {% else %}
+
+            Marketplace results use TradeFlow trust signals
+            including verification, approved customer
+            reviews, review history and service availability.
+
+        {% endif %}
 
     </div>
 
@@ -594,6 +861,10 @@
                     </div>
 
 
+                    <!-- =========================================
+                         TRUST BADGES
+                         ========================================= -->
+
                     <div class="badges">
 
 
@@ -601,6 +872,25 @@
 
                             <span class="badge verified">
                                 ✓ Verified Business
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if profile.marketplace_review_count %}
+
+                            <span class="badge rating">
+
+                                ★
+
+                                {{ profile.marketplace_average_rating|floatformat:1 }}
+
+                                ·
+
+                                {{ profile.marketplace_review_count }}
+
+                                review{{ profile.marketplace_review_count|pluralize }}
+
                             </span>
 
                         {% endif %}
@@ -618,6 +908,75 @@
                     </div>
 
 
+                    <!-- =========================================
+                         CUSTOMER REPUTATION
+                         ========================================= -->
+
+                    {% if profile.marketplace_review_count %}
+
+                        <div class="reputation">
+
+
+                            <div class="reputation-main">
+
+                                <span class="stars">
+
+                                    {% if profile.marketplace_average_rating >= 4.5 %}
+                                        ★★★★★
+                                    {% elif profile.marketplace_average_rating >= 3.5 %}
+                                        ★★★★☆
+                                    {% elif profile.marketplace_average_rating >= 2.5 %}
+                                        ★★★☆☆
+                                    {% elif profile.marketplace_average_rating >= 1.5 %}
+                                        ★★☆☆☆
+                                    {% else %}
+                                        ★☆☆☆☆
+                                    {% endif %}
+
+                                </span>
+
+
+                                <span class="rating-value">
+
+                                    {{ profile.marketplace_average_rating|floatformat:1 }}
+
+                                </span>
+
+
+                                <span class="review-count">
+
+                                    from
+
+                                    {{ profile.marketplace_review_count }}
+
+                                    approved customer
+
+                                    review{{ profile.marketplace_review_count|pluralize }}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="reputation-note">
+
+                                Reviews shown in marketplace
+                                reputation are linked to completed
+                                TradeFlow jobs and approved through
+                                moderation.
+
+                            </div>
+
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- =========================================
+                         PROFILE HEADLINE
+                         ========================================= -->
+
                     {% if profile.headline %}
 
                         <div class="headline">
@@ -626,6 +985,10 @@
 
                     {% endif %}
 
+
+                    <!-- =========================================
+                         SERVICES
+                         ========================================= -->
 
                     {% if profile.service_list %}
 
@@ -644,6 +1007,10 @@
                     {% endif %}
 
 
+                    <!-- =========================================
+                         ACTIONS
+                         ========================================= -->
+
                     <div class="card-actions">
 
                         <a
@@ -652,6 +1019,7 @@
                         >
                             View Business
                         </a>
+
 
                         <a
                             href="{% url 'core:public_quote_request' profile.slug %}"
@@ -669,6 +1037,7 @@
 
 
         </section>
+
 
     {% else %}
 
