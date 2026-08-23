@@ -493,6 +493,220 @@
 
 
         /* =================================================
+           CUSTOMER REVIEW
+           ================================================= */
+
+        .review-box {
+            padding: 20px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 12px;
+
+            background: #f9fafb;
+        }
+
+
+        .review-box.available {
+            border-color: #93c5fd;
+
+            background: #eff6ff;
+        }
+
+
+        .review-box.pending {
+            border-color: #fcd34d;
+
+            background: #fffbeb;
+        }
+
+
+        .review-box.approved {
+            border-color: #86efac;
+
+            background: #ecfdf5;
+        }
+
+
+        .review-box.rejected {
+            border-color: #fca5a5;
+
+            background: #fef2f2;
+        }
+
+
+        .review-heading {
+            display: flex;
+
+            align-items: flex-start;
+
+            gap: 12px;
+
+            margin-bottom: 16px;
+        }
+
+
+        .review-icon {
+            display: flex;
+
+            width: 42px;
+            height: 42px;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 10px;
+
+            background: #111827;
+
+            color: white;
+
+            font-size: 18px;
+
+            font-weight: 800;
+        }
+
+
+        .review-heading-content {
+            min-width: 0;
+        }
+
+
+        .review-heading-content strong {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: #111827;
+
+            font-size: 16px;
+        }
+
+
+        .review-heading-content p {
+            margin: 0;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            line-height: 1.55;
+        }
+
+
+        .review-status {
+            display: inline-flex;
+
+            align-items: center;
+
+            margin-bottom: 14px;
+
+            padding: 6px 10px;
+
+            border-radius: 999px;
+
+            background: white;
+
+            color: #374151;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.4px;
+        }
+
+
+        .review-rating {
+            margin: 10px 0;
+
+            color: #b7791f;
+
+            font-size: 19px;
+
+            font-weight: 800;
+        }
+
+
+        .review-comment {
+            margin-top: 12px;
+
+            color: #374151;
+
+            line-height: 1.65;
+
+            white-space: pre-line;
+        }
+
+
+        .review-link-wrap {
+            margin-top: 16px;
+        }
+
+
+        .review-link-label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #475569;
+
+            font-size: 12px;
+
+            font-weight: 800;
+        }
+
+
+        .review-link {
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 8px;
+
+            background: white;
+
+            color: #374151;
+
+            font-family: inherit;
+
+            font-size: 13px;
+        }
+
+
+        .review-actions {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 15px;
+        }
+
+
+        .review-note {
+            margin-top: 14px;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            line-height: 1.55;
+        }
+
+
+        /* =================================================
            MOBILE
            ================================================= */
 
@@ -536,6 +750,16 @@
             .workflow-action .button,
             .workflow-action form,
             .workflow-action form .button {
+                width: 100%;
+            }
+
+
+            .review-actions {
+                flex-direction: column;
+            }
+
+
+            .review-actions .button {
                 width: 100%;
             }
 
@@ -1058,6 +1282,453 @@
 
 
             <!-- =================================================
+                 CUSTOMER REVIEW
+                 ================================================= -->
+
+            {% if job.status == "completed" %}
+
+                <div class="section">
+
+                    <h3>
+                        Customer Review
+                    </h3>
+
+
+                    <!-- =========================================
+                         EXISTING REVIEW
+                         ========================================= -->
+
+                    {% if existing_review %}
+
+
+                        {% if existing_review.status == "approved" %}
+
+                            <div class="review-box approved">
+
+
+                                <div class="review-status">
+                                    ✓ Approved / Public
+                                </div>
+
+
+                                <div class="review-heading">
+
+                                    <div class="review-icon">
+                                        ★
+                                    </div>
+
+                                    <div class="review-heading-content">
+
+                                        <strong>
+                                            Customer review received
+                                        </strong>
+
+                                        <p>
+                                            This review has been approved
+                                            by TradeFlow and may appear
+                                            publicly.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="review-rating">
+
+                                    {% if existing_review.rating == 5 %}
+                                        ★★★★★
+                                    {% elif existing_review.rating == 4 %}
+                                        ★★★★☆
+                                    {% elif existing_review.rating == 3 %}
+                                        ★★★☆☆
+                                    {% elif existing_review.rating == 2 %}
+                                        ★★☆☆☆
+                                    {% elif existing_review.rating == 1 %}
+                                        ★☆☆☆☆
+                                    {% endif %}
+
+                                    {{ existing_review.rating }}/5
+
+                                </div>
+
+
+                                {% if existing_review.comment %}
+
+                                    <div class="review-comment">
+                                        “{{ existing_review.comment }}”
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="review-note">
+                                    Customer:
+                                    <strong>
+                                        {{ existing_review.customer_display_name }}
+                                    </strong>
+                                </div>
+
+
+                                {% if public_profile %}
+
+                                    <div class="review-actions">
+
+                                        <a
+                                            href="{% url 'core:public_business_profile' public_profile.slug %}"
+                                            class="button success"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            View Public Profile
+                                        </a>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                        {% elif existing_review.status == "pending" %}
+
+                            <div class="review-box pending">
+
+
+                                <div class="review-status">
+                                    ⏳ Pending Moderation
+                                </div>
+
+
+                                <div class="review-heading">
+
+                                    <div class="review-icon">
+                                        ★
+                                    </div>
+
+                                    <div class="review-heading-content">
+
+                                        <strong>
+                                            Customer review submitted
+                                        </strong>
+
+                                        <p>
+                                            TradeFlow moderation must
+                                            approve this review before it
+                                            can appear publicly.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="review-rating">
+
+                                    {% if existing_review.rating == 5 %}
+                                        ★★★★★
+                                    {% elif existing_review.rating == 4 %}
+                                        ★★★★☆
+                                    {% elif existing_review.rating == 3 %}
+                                        ★★★☆☆
+                                    {% elif existing_review.rating == 2 %}
+                                        ★★☆☆☆
+                                    {% elif existing_review.rating == 1 %}
+                                        ★☆☆☆☆
+                                    {% endif %}
+
+                                    {{ existing_review.rating }}/5
+
+                                </div>
+
+
+                                {% if existing_review.comment %}
+
+                                    <div class="review-comment">
+                                        “{{ existing_review.comment }}”
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="review-note">
+                                    Customer:
+                                    <strong>
+                                        {{ existing_review.customer_display_name }}
+                                    </strong>
+                                </div>
+
+
+                            </div>
+
+
+                        {% elif existing_review.status == "rejected" %}
+
+                            <div class="review-box rejected">
+
+
+                                <div class="review-status">
+                                    ! Rejected / Hidden
+                                </div>
+
+
+                                <div class="review-heading">
+
+                                    <div class="review-icon">
+                                        ★
+                                    </div>
+
+                                    <div class="review-heading-content">
+
+                                        <strong>
+                                            Review not public
+                                        </strong>
+
+                                        <p>
+                                            This customer review is stored
+                                            in TradeFlow but is not visible
+                                            on the public marketplace.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="review-rating">
+
+                                    {% if existing_review.rating == 5 %}
+                                        ★★★★★
+                                    {% elif existing_review.rating == 4 %}
+                                        ★★★★☆
+                                    {% elif existing_review.rating == 3 %}
+                                        ★★★☆☆
+                                    {% elif existing_review.rating == 2 %}
+                                        ★★☆☆☆
+                                    {% elif existing_review.rating == 1 %}
+                                        ★☆☆☆☆
+                                    {% endif %}
+
+                                    {{ existing_review.rating }}/5
+
+                                </div>
+
+
+                                {% if existing_review.comment %}
+
+                                    <div class="review-comment">
+                                        “{{ existing_review.comment }}”
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="review-note">
+                                    Customer:
+                                    <strong>
+                                        {{ existing_review.customer_display_name }}
+                                    </strong>
+                                </div>
+
+
+                            </div>
+
+
+                        {% else %}
+
+                            <div class="review-box">
+
+
+                                <div class="review-status">
+                                    Review Recorded
+                                </div>
+
+
+                                <div class="review-heading">
+
+                                    <div class="review-icon">
+                                        ★
+                                    </div>
+
+                                    <div class="review-heading-content">
+
+                                        <strong>
+                                            Customer review exists
+                                        </strong>
+
+                                        <p>
+                                            TradeFlow has a review
+                                            associated with this completed
+                                            job.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+
+                        {% endif %}
+
+
+                    <!-- =========================================
+                         NO REVIEW YET
+                         ========================================= -->
+
+                    {% else %}
+
+
+                        <div class="review-box available">
+
+
+                            <div class="review-status">
+                                Awaiting Customer Review
+                            </div>
+
+
+                            <div class="review-heading">
+
+                                <div class="review-icon">
+                                    ★
+                                </div>
+
+                                <div class="review-heading-content">
+
+                                    <strong>
+                                        Request a review from
+                                        {{ job.customer.name }}
+                                    </strong>
+
+                                    <p>
+                                        Send the secure TradeFlow review
+                                        link after completing the work.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="review-note">
+
+                                This link is tied specifically to
+
+                                <strong>
+                                    {{ job.job_number }}
+                                </strong>,
+
+                                <strong>
+                                    {{ job.customer.name }}
+                                </strong>
+
+                                and
+
+                                <strong>
+                                    {{ business.name }}
+                                </strong>.
+
+                                The customer cannot change the business,
+                                customer or job attached to the review.
+
+                            </div>
+
+
+                            {% if review_url %}
+
+                                <div class="review-link-wrap">
+
+                                    <label
+                                        for="tradeflow-review-link"
+                                        class="review-link-label"
+                                    >
+                                        Secure Customer Review Link
+                                    </label>
+
+
+                                    <input
+                                        type="text"
+                                        id="tradeflow-review-link"
+                                        class="review-link"
+                                        value="{{ review_url }}"
+                                        readonly
+                                        aria-label="Secure customer review link"
+                                    >
+
+                                </div>
+
+
+                                <div class="review-actions">
+
+
+                                    {% if review_whatsapp_url %}
+
+                                        <a
+                                            href="{{ review_whatsapp_url }}"
+                                            class="button success"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Request Review on WhatsApp
+                                        </a>
+
+                                    {% endif %}
+
+
+                                    <button
+                                        type="button"
+                                        class="button"
+                                        id="copy-review-link"
+                                    >
+                                        Copy Review Link
+                                    </button>
+
+
+                                    <a
+                                        href="{{ review_url }}"
+                                        class="button secondary"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Preview Review Page
+                                    </a>
+
+
+                                </div>
+
+
+                                <div
+                                    id="copy-review-feedback"
+                                    class="review-note"
+                                    aria-live="polite"
+                                >
+
+                                    The customer can submit only one
+                                    review for this completed job.
+
+                                    Reviews enter TradeFlow moderation
+                                    before appearing publicly.
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
                  WORK DESCRIPTION
                  ================================================= -->
 
@@ -1104,6 +1775,174 @@
     </div>
 
 </div>
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const copyButton =
+                document.getElementById(
+                    "copy-review-link"
+                );
+
+            const reviewInput =
+                document.getElementById(
+                    "tradeflow-review-link"
+                );
+
+            const feedback =
+                document.getElementById(
+                    "copy-review-feedback"
+                );
+
+
+            if (
+                !copyButton
+                || !reviewInput
+            ) {
+                return;
+            }
+
+
+            copyButton.addEventListener(
+                "click",
+                async function () {
+
+                    const reviewUrl =
+                        reviewInput.value;
+
+
+                    try {
+
+                        if (
+                            navigator.clipboard
+                            && window.isSecureContext
+                        ) {
+
+                            await navigator.clipboard.writeText(
+                                reviewUrl
+                            );
+
+                        } else {
+
+                            throw new Error(
+                                "Clipboard API unavailable"
+                            );
+
+                        }
+
+
+                        copyButton.textContent =
+                            "✓ Link Copied";
+
+
+                        if (feedback) {
+
+                            feedback.textContent =
+                                (
+                                    "Secure review link copied. "
+                                    + "You can now send it to "
+                                    + "the customer."
+                                );
+
+                        }
+
+
+                        window.setTimeout(
+                            function () {
+
+                                copyButton.textContent =
+                                    "Copy Review Link";
+
+                            },
+                            2500
+                        );
+
+                    }
+
+                    catch (error) {
+
+                        reviewInput.focus();
+
+                        reviewInput.select();
+
+                        reviewInput.setSelectionRange(
+                            0,
+                            99999
+                        );
+
+
+                        let copied = false;
+
+
+                        try {
+
+                            copied =
+                                document.execCommand(
+                                    "copy"
+                                );
+
+                        } catch (
+                            copyError
+                        ) {
+
+                            copied = false;
+
+                        }
+
+
+                        if (copied) {
+
+                            copyButton.textContent =
+                                "✓ Link Copied";
+
+
+                            if (feedback) {
+
+                                feedback.textContent =
+                                    (
+                                        "Secure review link "
+                                        + "copied successfully."
+                                    );
+
+                            }
+
+
+                            window.setTimeout(
+                                function () {
+
+                                    copyButton.textContent =
+                                        "Copy Review Link";
+
+                                },
+                                2500
+                            );
+
+                        } else if (feedback) {
+
+                            feedback.textContent =
+                                (
+                                    "Automatic copying was "
+                                    + "blocked by the browser. "
+                                    + "Select the secure link "
+                                    + "above and copy it manually."
+                                );
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
 
 </body>
 

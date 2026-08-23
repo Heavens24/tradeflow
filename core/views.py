@@ -2,6 +2,7 @@ import json
 import os
 from datetime import date
 from decimal import Decimal
+from urllib.parse import quote as urlquote
 
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
@@ -14,6 +15,7 @@ from django.shortcuts import (
     render,
 )
 from django.http import JsonResponse
+from django.urls import reverse
 
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -44,6 +46,8 @@ from .forms import (
 
 from .models import (
     Business,
+    BusinessPublicProfile,
+    BusinessReview,
     Customer,
     Invoice,
     Job,
@@ -51,6 +55,8 @@ from .models import (
     Quote,
     QuoteRequest,
 )
+
+from .public_views import make_review_token
 
 
 # =========================================================
@@ -2090,6 +2096,16 @@ def job_detail(
     request,
     job_id,
 ):
+    """
+    Display one TradeFlow job.
+
+    Completed jobs also expose the secure customer-review
+    request workflow to the business owner.
+
+    Review links are generated with the same signed-token
+    system used by the public customer review endpoint.
+    """
+
     business = get_user_business(
         request.user
     )
@@ -2121,10 +2137,107 @@ def job_detail(
         .first()
     )
 
+    existing_review = (
+        BusinessReview.objects
+        .filter(
+            job=job,
+            business=business,
+        )
+        .first()
+    )
+
+    public_profile = (
+        BusinessPublicProfile.objects
+        .filter(
+            business=business,
+            public_profile_enabled=True,
+        )
+        .first()
+    )
+
+    review_url = ""
+    review_whatsapp_url = ""
+
+    if (
+        job.status == Job.STATUS_COMPLETED
+        and not existing_review
+    ):
+        review_token = make_review_token(
+            job
+        )
+
+        review_path = reverse(
+            "core:public_review_submit",
+            kwargs={
+                "token": review_token,
+            },
+        )
+
+        review_url = (
+            request.build_absolute_uri(
+                review_path
+            )
+        )
+
+        phone_digits = "".join(
+            character
+            for character
+            in (
+                job.customer.phone
+                or ""
+            )
+            if character.isdigit()
+        )
+
+        if (
+            phone_digits.startswith("0")
+            and len(phone_digits) >= 10
+        ):
+            phone_digits = (
+                "27"
+                + phone_digits[1:]
+            )
+
+        review_message = (
+            f"Hi {job.customer.name}, "
+            f"thank you for choosing "
+            f"{business.name}. "
+            f"We'd appreciate your feedback "
+            f"on the work completed for "
+            f"{job.job_number}.\n\n"
+            f"Please leave your TradeFlow "
+            f"review here:\n"
+            f"{review_url}"
+        )
+
+        encoded_message = urlquote(
+            review_message
+        )
+
+        if phone_digits:
+            review_whatsapp_url = (
+                "https://wa.me/"
+                f"{phone_digits}"
+                "?text="
+                f"{encoded_message}"
+            )
+        else:
+            review_whatsapp_url = (
+                "https://wa.me/"
+                "?text="
+                f"{encoded_message}"
+            )
+
     context = {
         "business": business,
         "job": job,
         "existing_invoice": existing_invoice,
+        "existing_review": existing_review,
+        "public_profile": public_profile,
+        "review_url": review_url,
+        "review_whatsapp_url": (
+            review_whatsapp_url
+        ),
     }
 
     return render(
