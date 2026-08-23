@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -13,10 +14,13 @@
         Quote Requests | TradeFlow
     </title>
 
+
     <style>
+
         * {
             box-sizing: border-box;
         }
+
 
         body {
             margin: 0;
@@ -31,40 +35,49 @@
             color: #1f2937;
         }
 
+
         .page {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
 
             margin: 0 auto;
 
-            padding: 38px 20px 60px;
+            padding: 38px 20px 65px;
         }
 
-        .top {
+
+        .header {
             display: flex;
 
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
 
             gap: 20px;
 
-            margin-bottom: 26px;
+            margin-bottom: 25px;
         }
+
 
         h1 {
-            margin: 0;
+            margin:
+                0 0 6px;
         }
 
-        .subtitle {
-            margin-top: 6px;
 
+        .muted {
             color: #6b7280;
         }
 
-        .button {
-            display: inline-block;
 
-            padding: 12px 17px;
+        .button {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 11px 16px;
+
+            border: 0;
 
             border-radius: 8px;
 
@@ -72,10 +85,15 @@
 
             color: white;
 
+            font: inherit;
+
+            font-weight: 700;
+
             text-decoration: none;
 
-            font-weight: 600;
+            cursor: pointer;
         }
+
 
         .button.secondary {
             background: #e5e7eb;
@@ -83,100 +101,269 @@
             color: #111827;
         }
 
-        .filters {
-            margin-bottom: 20px;
 
-            display: flex;
+        /* =================================================
+           SUMMARY
+           ================================================= */
 
-            gap: 8px;
+        .summary {
+            display: grid;
 
-            flex-wrap: wrap;
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 14px;
+
+            margin-bottom: 22px;
         }
 
-        .filter {
-            padding: 9px 13px;
 
-            border-radius: 999px;
-
-            background: white;
-
-            color: #374151;
-
-            text-decoration: none;
-
-            border:
-                1px solid
-                #e5e7eb;
-        }
-
-        .filter.active {
-            background: #111827;
-
-            color: white;
-        }
-
-        .request {
-            display: block;
-
-            margin-bottom: 14px;
-
-            padding: 20px;
+        .summary-card {
+            padding: 18px;
 
             background: white;
 
             border-radius: 12px;
 
-            text-decoration: none;
-
-            color: inherit;
-
             box-shadow:
-                0 4px 18px
-                rgba(0, 0, 0, 0.05);
+                0 5px 18px
+                rgba(0, 0, 0, 0.04);
         }
 
-        .request-top {
+
+        .summary-label {
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+
+        .summary-number {
+            display: block;
+
+            margin-top: 6px;
+
+            font-size: 26px;
+
+            font-weight: 800;
+        }
+
+
+        /* =================================================
+           FILTERS
+           ================================================= */
+
+        .filters {
+            margin-bottom: 22px;
+
+            padding: 18px;
+
+            background: white;
+
+            border-radius: 12px;
+        }
+
+
+        .filter-grid {
+            display: grid;
+
+            grid-template-columns:
+                2fr 1fr 1fr auto;
+
+            gap: 10px;
+        }
+
+
+        .form-control {
+            width: 100%;
+
+            min-height: 42px;
+
+            padding: 10px 12px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 8px;
+
+            background: white;
+
+            font: inherit;
+        }
+
+
+        /* =================================================
+           LEADS
+           ================================================= */
+
+        .lead-list {
+            display: grid;
+
+            gap: 14px;
+        }
+
+
+        .lead {
+            padding: 20px;
+
+            background: white;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius: 13px;
+
+            box-shadow:
+                0 5px 18px
+                rgba(0, 0, 0, 0.035);
+        }
+
+
+        .lead-top {
             display: flex;
 
             justify-content: space-between;
+            align-items: flex-start;
 
-            gap: 20px;
+            gap: 18px;
         }
 
-        .name {
-            font-size: 18px;
 
-            font-weight: 700;
+        .lead h2 {
+            margin:
+                0 0 5px;
+
+            font-size: 19px;
         }
+
 
         .meta {
-            margin-top: 7px;
-
             color: #6b7280;
 
-            font-size: 14px;
-        }
-
-        .status {
             font-size: 13px;
-
-            font-weight: 700;
-
-            text-transform: uppercase;
-        }
-
-        .description {
-            margin-top: 14px;
-
-            color: #4b5563;
 
             line-height: 1.6;
         }
 
-        .empty {
-            background: white;
 
+        .badges {
+            display: flex;
+
+            gap: 7px;
+
+            flex-wrap: wrap;
+
+            justify-content: flex-end;
+        }
+
+
+        .badge {
+            display: inline-block;
+
+            padding: 6px 9px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            color: #374151;
+
+            font-size: 12px;
+
+            font-weight: 800;
+        }
+
+
+        .badge.new {
+            background: #dbeafe;
+
+            color: #1d4ed8;
+        }
+
+
+        .badge.contacted {
+            background: #fef3c7;
+
+            color: #92400e;
+        }
+
+
+        .badge.converted {
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+
+        .badge.closed {
+            background: #e5e7eb;
+
+            color: #4b5563;
+        }
+
+
+        .badge.urgent {
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+
+        .badge.high {
+            background: #ffedd5;
+
+            color: #9a3412;
+        }
+
+
+        .badge.medium {
+            background: #fef3c7;
+
+            color: #92400e;
+        }
+
+
+        .badge.standard {
+            background: #f3f4f6;
+
+            color: #4b5563;
+        }
+
+
+        .badge.handled {
+            background: #ecfdf5;
+
+            color: #166534;
+        }
+
+
+        .description {
+            margin-top: 14px;
+
+            color: #374151;
+
+            line-height: 1.6;
+        }
+
+
+        .lead-actions {
+            margin-top: 15px;
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 12px;
+        }
+
+
+        .empty {
             padding: 35px;
+
+            background: white;
 
             border-radius: 12px;
 
@@ -185,22 +372,74 @@
             color: #6b7280;
         }
 
-        @media (max-width: 650px) {
-            .top,
-            .request-top {
-                align-items: flex-start;
+
+        .message {
+            margin-bottom: 18px;
+
+            padding: 13px 15px;
+
+            border-radius: 8px;
+
+            background: #ecfdf5;
+
+            color: #065f46;
+        }
+
+
+        @media (max-width: 760px) {
+
+            .header,
+            .lead-top,
+            .lead-actions {
+                align-items: stretch;
 
                 flex-direction: column;
             }
+
+
+            .summary,
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .badges {
+                justify-content: flex-start;
+            }
+
+
+            .button {
+                width: 100%;
+
+                text-align: center;
+            }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
 <div class="page">
 
-    <div class="top">
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="message">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <div class="header">
 
         <div>
 
@@ -208,12 +447,13 @@
                 Quote Requests
             </h1>
 
-            <div class="subtitle">
-                Customer enquiries sent to
-                {{ business.name }}
+            <div class="muted">
+                Prioritize and convert marketplace enquiries
+                for {{ business.name }}.
             </div>
 
         </div>
+
 
         <a
             href="{% url 'core:dashboard' %}"
@@ -225,78 +465,251 @@
     </div>
 
 
-    <div class="filters">
+    <!-- =================================================
+         SUMMARY
+         ================================================= -->
 
-        <a
-            href="{% url 'core:quote_request_list' %}"
-            class="filter {% if not status_filter %}active{% endif %}"
-        >
-            All
-        </a>
+    <div class="summary">
 
-        {% for value, label in status_choices %}
+        <div class="summary-card">
 
-            <a
-                href="?status={{ value }}"
-                class="filter {% if status_filter == value %}active{% endif %}"
-            >
-                {{ label }}
-            </a>
+            <span class="summary-label">
+                New leads
+            </span>
 
-        {% endfor %}
+            <strong class="summary-number">
+                {{ new_count }}
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Urgent open leads
+            </span>
+
+            <strong class="summary-number">
+                {{ urgent_count }}
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Contacted
+            </span>
+
+            <strong class="summary-number">
+                {{ contacted_count }}
+            </strong>
+
+        </div>
 
     </div>
 
 
-    {% for item in quote_requests %}
+    <!-- =================================================
+         FILTERS
+         ================================================= -->
 
-        <a
-            href="{% url 'core:quote_request_detail' item.id %}"
-            class="request"
-        >
+    <div class="filters">
 
-            <div class="request-top">
+        <form method="GET">
 
-                <div>
+            <div class="filter-grid">
 
-                    <div class="name">
-                        {{ item.customer_name }}
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Search customer, phone, location or work..."
+                >
+
+
+                <select
+                    name="status"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        All statuses
+                    </option>
+
+                    {% for value, label in status_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if status_filter == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <select
+                    name="urgency"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        All urgency levels
+                    </option>
+
+                    {% for value, label in urgency_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if urgency_filter == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Filter
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =================================================
+         LEADS
+         ================================================= -->
+
+    {% if quote_requests %}
+
+        <div class="lead-list">
+
+            {% for quote_request in quote_requests %}
+
+                <article class="lead">
+
+                    <div class="lead-top">
+
+                        <div>
+
+                            <h2>
+                                {{ quote_request.customer_name }}
+                            </h2>
+
+                            <div class="meta">
+
+                                {{ quote_request.get_urgency_display }}
+
+                                ·
+
+                                {{ quote_request.get_preferred_contact_display }}
+
+                                {% if quote_request.location %}
+                                    · {{ quote_request.location }}
+                                {% endif %}
+
+                                ·
+
+                                {{ quote_request.lead_age_label }}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="badges">
+
+                            <span
+                                class="badge {{ quote_request.lead_priority_level }}"
+                            >
+                                {{ quote_request.lead_priority_label }}
+                                priority
+                            </span>
+
+
+                            <span
+                                class="badge {{ quote_request.status }}"
+                            >
+                                {{ quote_request.get_status_display }}
+                            </span>
+
+                        </div>
+
                     </div>
 
-                    <div class="meta">
-                        {{ item.phone }}
 
-                        {% if item.location %}
-                            · {{ item.location }}
-                        {% endif %}
+                    <div class="description">
+                        {{ quote_request.description|truncatechars:220 }}
                     </div>
 
-                </div>
 
-                <div class="status">
-                    {{ item.get_status_display }}
-                </div>
+                    <div class="lead-actions">
 
-            </div>
+                        <div class="meta">
 
-            <div class="description">
-                {{ item.description|truncatechars:180 }}
-            </div>
+                            {% if quote_request.phone %}
+                                {{ quote_request.phone }}
+                            {% endif %}
 
-            <div class="meta">
-                {{ item.get_urgency_display }}
-                · {{ item.created_at|date:"d M Y H:i" }}
-            </div>
+                            {% if quote_request.email %}
+                                · {{ quote_request.email }}
+                            {% endif %}
 
-        </a>
+                        </div>
 
-    {% empty %}
 
-        <div class="empty">
-            No quote requests found.
+                        <a
+                            href="{% url 'core:quote_request_detail' quote_request.id %}"
+                            class="button"
+                        >
+                            Review Lead →
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
         </div>
 
-    {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+
+            <h2>
+                No quote requests found
+            </h2>
+
+            <p>
+                Try changing your filters or wait for a new
+                marketplace enquiry.
+            </p>
+
+        </div>
+
+    {% endif %}
+
 
 </div>
 

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -13,10 +14,13 @@
         Quote Request | TradeFlow
     </title>
 
+
     <style>
+
         * {
             box-sizing: border-box;
         }
+
 
         body {
             margin: 0;
@@ -31,14 +35,16 @@
             color: #1f2937;
         }
 
+
         .page {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
 
             margin: 0 auto;
 
             padding: 40px 20px 60px;
         }
+
 
         .card {
             background: white;
@@ -52,6 +58,7 @@
                 rgba(0, 0, 0, 0.06);
         }
 
+
         .top {
             display: flex;
 
@@ -63,11 +70,33 @@
             margin-bottom: 25px;
         }
 
+
         h1 {
-            margin: 0;
+            margin:
+                0 0 6px;
         }
 
-        .status {
+
+        .subtext {
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+
+        .badges {
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+
+            justify-content: flex-end;
+        }
+
+
+        .status,
+        .priority {
             padding: 7px 11px;
 
             border-radius: 999px;
@@ -76,8 +105,44 @@
 
             font-size: 13px;
 
-            font-weight: 700;
+            font-weight: 800;
         }
+
+
+        .priority.urgent {
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+
+        .priority.high {
+            background: #ffedd5;
+
+            color: #9a3412;
+        }
+
+
+        .priority.medium {
+            background: #fef3c7;
+
+            color: #92400e;
+        }
+
+
+        .priority.standard {
+            background: #f3f4f6;
+
+            color: #4b5563;
+        }
+
+
+        .priority.handled {
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
 
         .section {
             margin-top: 25px;
@@ -89,6 +154,17 @@
                 #e5e7eb;
         }
 
+
+        .grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+
         .label {
             margin-bottom: 4px;
 
@@ -96,6 +172,7 @@
 
             font-size: 13px;
         }
+
 
         .value {
             margin-bottom: 14px;
@@ -105,15 +182,16 @@
             line-height: 1.6;
         }
 
+
         .description {
             white-space: pre-line;
 
             font-weight: normal;
         }
 
-        .actions {
-            margin-top: 28px;
 
+        .contact-actions,
+        .actions {
             display: flex;
 
             gap: 10px;
@@ -121,8 +199,22 @@
             flex-wrap: wrap;
         }
 
+
+        .contact-actions {
+            margin-top: 12px;
+        }
+
+
+        .actions {
+            margin-top: 28px;
+        }
+
+
         .button {
-            display: inline-block;
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
 
             border: 0;
 
@@ -136,16 +228,38 @@
 
             text-decoration: none;
 
+            font: inherit;
+
             font-weight: 700;
 
             cursor: pointer;
         }
+
 
         .button.secondary {
             background: #e5e7eb;
 
             color: #111827;
         }
+
+
+        .button.success {
+            background: #15803d;
+        }
+
+
+        .conversion-box {
+            padding: 17px;
+
+            border:
+                1px solid
+                #86efac;
+
+            border-radius: 10px;
+
+            background: #ecfdf5;
+        }
+
 
         .message {
             margin-bottom: 20px;
@@ -159,24 +273,45 @@
             color: #065f46;
         }
 
+
         @media (max-width: 650px) {
+
             .top,
-            .actions {
+            .actions,
+            .contact-actions {
+                align-items: stretch;
+
                 flex-direction: column;
             }
+
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .badges {
+                justify-content: flex-start;
+            }
+
 
             .button {
                 width: 100%;
 
                 text-align: center;
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
 <div class="page">
+
 
     {% if messages %}
 
@@ -193,6 +328,7 @@
 
     <div class="card">
 
+
         <div class="top">
 
             <div>
@@ -201,76 +337,191 @@
                     {{ quote_request.customer_name }}
                 </h1>
 
-                <div>
+                <div class="subtext">
+
                     Quote request for
                     {{ business.name }}
+
+                    ·
+
+                    Received
+                    {{ quote_request.lead_age_label }}
+
                 </div>
 
             </div>
 
-            <div class="status">
-                {{ quote_request.get_status_display }}
+
+            <div class="badges">
+
+                <div
+                    class="priority {{ quote_request.lead_priority_level }}"
+                >
+                    {{ quote_request.lead_priority_label }}
+                    priority
+                </div>
+
+
+                <div class="status">
+                    {{ quote_request.get_status_display }}
+                </div>
+
             </div>
 
         </div>
 
+
+        <!-- =================================================
+             CONTACT / REQUEST INFORMATION
+             ================================================= -->
 
         <div class="section">
 
-            <div class="label">
-                Phone
-            </div>
-
-            <div class="value">
-                {{ quote_request.phone }}
-            </div>
+            <div class="grid">
 
 
-            {% if quote_request.email %}
+                <div>
 
-                <div class="label">
-                    Email
+                    <div class="label">
+                        Phone
+                    </div>
+
+                    <div class="value">
+                        {{ quote_request.phone }}
+                    </div>
+
                 </div>
 
-                <div class="value">
-                    {{ quote_request.email }}
+
+                <div>
+
+                    <div class="label">
+                        Preferred contact
+                    </div>
+
+                    <div class="value">
+                        {{ quote_request.get_preferred_contact_display }}
+                    </div>
+
                 </div>
 
-            {% endif %}
+
+                {% if quote_request.email %}
+
+                    <div>
+
+                        <div class="label">
+                            Email
+                        </div>
+
+                        <div class="value">
+                            {{ quote_request.email }}
+                        </div>
+
+                    </div>
+
+                {% endif %}
 
 
-            {% if quote_request.location %}
+                {% if quote_request.location %}
 
-                <div class="label">
-                    Job location
+                    <div>
+
+                        <div class="label">
+                            Job location
+                        </div>
+
+                        <div class="value">
+                            {{ quote_request.location }}
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div>
+
+                    <div class="label">
+                        Urgency
+                    </div>
+
+                    <div class="value">
+                        {{ quote_request.get_urgency_display }}
+                    </div>
+
                 </div>
 
-                <div class="value">
-                    {{ quote_request.location }}
+
+                <div>
+
+                    <div class="label">
+                        Received
+                    </div>
+
+                    <div class="value">
+                        {{ quote_request.created_at }}
+                    </div>
+
                 </div>
 
-            {% endif %}
 
-
-            <div class="label">
-                Preferred contact
-            </div>
-
-            <div class="value">
-                {{ quote_request.get_preferred_contact_display }}
             </div>
 
 
-            <div class="label">
-                Urgency
-            </div>
+            <!-- =============================================
+                 QUICK CONTACT
+                 ============================================= -->
 
-            <div class="value">
-                {{ quote_request.get_urgency_display }}
+            <div class="contact-actions">
+
+
+                {% if quote_request.whatsapp_digits %}
+
+                    <a
+                        href="https://wa.me/{{ quote_request.whatsapp_digits }}"
+                        class="button success"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        WhatsApp Customer
+                    </a>
+
+                {% endif %}
+
+
+                {% if quote_request.phone %}
+
+                    <a
+                        href="tel:{{ quote_request.phone }}"
+                        class="button secondary"
+                    >
+                        Call Customer
+                    </a>
+
+                {% endif %}
+
+
+                {% if quote_request.email %}
+
+                    <a
+                        href="mailto:{{ quote_request.email }}"
+                        class="button secondary"
+                    >
+                        Email Customer
+                    </a>
+
+                {% endif %}
+
+
             </div>
 
         </div>
 
+
+        <!-- =================================================
+             WORK REQUESTED
+             ================================================= -->
 
         <div class="section">
 
@@ -285,15 +536,33 @@
         </div>
 
 
+        <!-- =================================================
+             CONVERSION
+             ================================================= -->
+
         {% if quote_request.converted_quote %}
 
             <div class="section">
 
-                <div class="label">
-                    Converted quotation
-                </div>
+                <div class="conversion-box">
 
-                <div class="value">
+                    <strong>
+                        ✓ Converted to TradeFlow quotation
+                    </strong>
+
+                    <br><br>
+
+
+                    Customer:
+
+                    <strong>
+                        {{ quote_request.converted_customer.name }}
+                    </strong>
+
+                    <br>
+
+
+                    Quote:
 
                     <a
                         href="{% url 'core:quote_detail' quote_request.converted_quote.id %}"
@@ -308,6 +577,10 @@
         {% endif %}
 
 
+        <!-- =================================================
+             ACTIONS
+             ================================================= -->
+
         <div class="actions">
 
             <a
@@ -318,23 +591,28 @@
             </a>
 
 
-            {% if quote_request.status != 'converted' %}
+            {% if quote_request.status != 'converted' and quote_request.status != 'closed' %}
 
-                <form
-                    method="POST"
-                    action="{% url 'core:quote_request_contacted' quote_request.id %}"
-                >
 
-                    {% csrf_token %}
+                {% if quote_request.status == 'new' %}
 
-                    <button
-                        type="submit"
-                        class="button secondary"
+                    <form
+                        method="POST"
+                        action="{% url 'core:quote_request_contacted' quote_request.id %}"
                     >
-                        Mark Contacted
-                    </button>
 
-                </form>
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="button secondary"
+                        >
+                            Mark Contacted
+                        </button>
+
+                    </form>
+
+                {% endif %}
 
 
                 <form
@@ -353,6 +631,7 @@
 
                 </form>
 
+
             {% endif %}
 
 
@@ -368,6 +647,7 @@
             {% endif %}
 
         </div>
+
 
     </div>
 

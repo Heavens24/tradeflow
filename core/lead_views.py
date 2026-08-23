@@ -9,6 +9,7 @@ from django.shortcuts import (
     redirect,
     render,
 )
+from django.utils import timezone
 from django.views.decorators.http import (
     require_POST,
 )
@@ -105,6 +106,296 @@ def find_matching_customer(
     )
 
 
+def whatsapp_digits(value):
+    """
+    Convert a phone number into a WhatsApp-compatible
+    digits-only value.
+
+    South African local numbers beginning with 0 are
+    converted to country code 27.
+    """
+
+    digits = "".join(
+        character
+        for character in (
+            value
+            or ""
+        )
+        if character.isdigit()
+    )
+
+
+    if digits.startswith("0"):
+        digits = (
+            "27"
+            + digits[1:]
+        )
+
+
+    return digits
+
+
+def calculate_lead_priority(
+    quote_request,
+):
+    """
+    Calculate a lightweight operational lead-priority score.
+
+    No priority is stored in the database. It is calculated
+    from existing TradeFlow data each time the inbox loads.
+
+    Signals:
+    - customer urgency
+    - new vs contacted status
+    - how recently the lead arrived
+    - completeness of job/contact information
+
+    Converted and closed enquiries are deliberately removed
+    from active-priority competition.
+    """
+
+    # -----------------------------------------------------
+    # ALREADY HANDLED
+    # -----------------------------------------------------
+
+    if quote_request.status in (
+        QuoteRequest.STATUS_CONVERTED,
+        QuoteRequest.STATUS_CLOSED,
+    ):
+
+        return {
+            "score": 0,
+            "label": "Handled",
+            "level": "handled",
+        }
+
+
+    score = 0
+
+
+    # -----------------------------------------------------
+    # URGENCY
+    # -----------------------------------------------------
+
+    if (
+        quote_request.urgency
+        == QuoteRequest.URGENCY_URGENT
+    ):
+
+        score += 60
+
+    elif (
+        quote_request.urgency
+        == QuoteRequest.URGENCY_SOON
+    ):
+
+        score += 30
+
+    else:
+
+        score += 10
+
+
+    # -----------------------------------------------------
+    # WORKFLOW STATUS
+    # -----------------------------------------------------
+
+    if (
+        quote_request.status
+        == QuoteRequest.STATUS_NEW
+    ):
+
+        score += 25
+
+    elif (
+        quote_request.status
+        == QuoteRequest.STATUS_CONTACTED
+    ):
+
+        score += 5
+
+
+    # -----------------------------------------------------
+    # LEAD FRESHNESS
+    # -----------------------------------------------------
+
+    now = timezone.now()
+
+    age = (
+        now
+        - quote_request.created_at
+    )
+
+    age_hours = (
+        age.total_seconds()
+        / 3600
+    )
+
+
+    if age_hours <= 6:
+
+        score += 20
+
+    elif age_hours <= 24:
+
+        score += 15
+
+    elif age_hours <= 72:
+
+        score += 10
+
+    elif age.days <= 7:
+
+        score += 5
+
+
+    # -----------------------------------------------------
+    # INFORMATION COMPLETENESS
+    # -----------------------------------------------------
+
+    if (
+        quote_request.email
+        or ""
+    ).strip():
+
+        score += 3
+
+
+    if (
+        quote_request.location
+        or ""
+    ).strip():
+
+        score += 3
+
+
+    if len(
+        (
+            quote_request.description
+            or ""
+        ).strip()
+    ) >= 40:
+
+        score += 4
+
+
+    # -----------------------------------------------------
+    # PRIORITY LABEL
+    # -----------------------------------------------------
+
+    if score >= 90:
+
+        label = "Urgent"
+        level = "urgent"
+
+    elif score >= 65:
+
+        label = "High"
+        level = "high"
+
+    elif score >= 40:
+
+        label = "Medium"
+        level = "medium"
+
+    else:
+
+        label = "Standard"
+        level = "standard"
+
+
+    return {
+        "score": score,
+        "label": label,
+        "level": level,
+    }
+
+
+def decorate_quote_request(
+    quote_request,
+):
+    """
+    Add presentation-only lead intelligence to a
+    QuoteRequest instance.
+
+    Nothing is written to the database.
+    """
+
+    priority = calculate_lead_priority(
+        quote_request
+    )
+
+
+    quote_request.lead_priority_score = (
+        priority["score"]
+    )
+
+    quote_request.lead_priority_label = (
+        priority["label"]
+    )
+
+    quote_request.lead_priority_level = (
+        priority["level"]
+    )
+
+
+    # -----------------------------------------------------
+    # AGE
+    # -----------------------------------------------------
+
+    age = (
+        timezone.now()
+        - quote_request.created_at
+    )
+
+
+    if age.days > 0:
+
+        quote_request.lead_age_label = (
+            f"{age.days} day"
+            f"{'s' if age.days != 1 else ''} ago"
+        )
+
+    else:
+
+        hours = int(
+            age.total_seconds()
+            / 3600
+        )
+
+        if hours > 0:
+
+            quote_request.lead_age_label = (
+                f"{hours} hour"
+                f"{'s' if hours != 1 else ''} ago"
+            )
+
+        else:
+
+            minutes = max(
+                0,
+                int(
+                    age.total_seconds()
+                    / 60
+                ),
+            )
+
+            quote_request.lead_age_label = (
+                f"{minutes} minute"
+                f"{'s' if minutes != 1 else ''} ago"
+            )
+
+
+    quote_request.whatsapp_digits = (
+        whatsapp_digits(
+            quote_request.phone
+        )
+    )
+
+
+    return quote_request
+
+
 # =========================================================
 # QUOTE REQUEST INBOX
 # =========================================================
@@ -112,11 +403,20 @@ def find_matching_customer(
 
 @login_required
 def quote_request_list(request):
+    """
+    Private lead inbox for one TradeFlow business.
+
+    Results are scoped to the authenticated business and
+    prioritized using existing quote-request information.
+    """
+
     business = get_user_business(
         request.user
     )
 
+
     if not business:
+
         return redirect(
             "core:business_setup"
         )
@@ -124,6 +424,18 @@ def quote_request_list(request):
 
     status_filter = request.GET.get(
         "status",
+        "",
+    ).strip()
+
+
+    urgency_filter = request.GET.get(
+        "urgency",
+        "",
+    ).strip()
+
+
+    query = request.GET.get(
+        "q",
         "",
     ).strip()
 
@@ -139,12 +451,128 @@ def quote_request_list(request):
     )
 
 
+    # =====================================================
+    # FILTERS
+    # =====================================================
+
     if status_filter:
+
         quote_requests = (
             quote_requests.filter(
                 status=status_filter
             )
         )
+
+
+    if urgency_filter:
+
+        quote_requests = (
+            quote_requests.filter(
+                urgency=urgency_filter
+            )
+        )
+
+
+    if query:
+
+        quote_requests = (
+            quote_requests.filter(
+                Q(
+                    customer_name__icontains=query
+                )
+                | Q(
+                    phone__icontains=query
+                )
+                | Q(
+                    email__icontains=query
+                )
+                | Q(
+                    location__icontains=query
+                )
+                | Q(
+                    description__icontains=query
+                )
+            )
+        )
+
+
+    # =====================================================
+    # PRIORITY DECORATION
+    # =====================================================
+
+    quote_requests = [
+        decorate_quote_request(
+            item
+        )
+        for item
+        in quote_requests
+    ]
+
+
+    # =====================================================
+    # PRIORITY SORT
+    # =====================================================
+
+    quote_requests.sort(
+        key=lambda item: (
+            (
+                item.status
+                in (
+                    QuoteRequest.STATUS_CONVERTED,
+                    QuoteRequest.STATUS_CLOSED,
+                )
+            ),
+            -item.lead_priority_score,
+            -item.created_at.timestamp(),
+        )
+    )
+
+
+    # =====================================================
+    # INBOX SUMMARY
+    # =====================================================
+
+    business_requests = (
+        QuoteRequest.objects.filter(
+            business=business
+        )
+    )
+
+
+    new_count = (
+        business_requests.filter(
+            status=QuoteRequest.STATUS_NEW
+        )
+        .count()
+    )
+
+
+    contacted_count = (
+        business_requests.filter(
+            status=(
+                QuoteRequest
+                .STATUS_CONTACTED
+            )
+        )
+        .count()
+    )
+
+
+    urgent_count = (
+        business_requests.filter(
+            urgency=(
+                QuoteRequest
+                .URGENCY_URGENT
+            ),
+        )
+        .exclude(
+            status__in=[
+                QuoteRequest.STATUS_CONVERTED,
+                QuoteRequest.STATUS_CLOSED,
+            ]
+        )
+        .count()
+    )
 
 
     return render(
@@ -154,9 +582,17 @@ def quote_request_list(request):
             "business": business,
             "quote_requests": quote_requests,
             "status_filter": status_filter,
+            "urgency_filter": urgency_filter,
+            "query": query,
             "status_choices": (
                 QuoteRequest.STATUS_CHOICES
             ),
+            "urgency_choices": (
+                QuoteRequest.URGENCY_CHOICES
+            ),
+            "new_count": new_count,
+            "contacted_count": contacted_count,
+            "urgent_count": urgent_count,
         },
     )
 
@@ -175,7 +611,9 @@ def quote_request_detail(
         request.user
     )
 
+
     if not business:
+
         return redirect(
             "core:business_setup"
         )
@@ -188,6 +626,11 @@ def quote_request_detail(
         ),
         id=request_id,
         business=business,
+    )
+
+
+    decorate_quote_request(
+        quote_request
     )
 
 
@@ -216,7 +659,9 @@ def quote_request_contacted(
         request.user
     )
 
+
     if not business:
+
         return redirect(
             "core:business_setup"
         )
@@ -231,7 +676,10 @@ def quote_request_contacted(
 
     if (
         quote_request.status
-        != QuoteRequest.STATUS_CONVERTED
+        not in (
+            QuoteRequest.STATUS_CONVERTED,
+            QuoteRequest.STATUS_CLOSED,
+        )
     ):
 
         quote_request.status = (
@@ -244,6 +692,7 @@ def quote_request_contacted(
                 "updated_at",
             ]
         )
+
 
         messages.success(
             request,
@@ -289,7 +738,9 @@ def quote_request_convert(
         request.user
     )
 
+
     if not business:
+
         return redirect(
             "core:business_setup"
         )
@@ -325,6 +776,25 @@ def quote_request_convert(
                 quote_request
                 .converted_quote_id
             ),
+        )
+
+
+    if (
+        quote_request.status
+        == QuoteRequest.STATUS_CLOSED
+    ):
+
+        messages.warning(
+            request,
+            (
+                "This quote request is closed "
+                "and cannot be converted."
+            ),
+        )
+
+        return redirect(
+            "core:quote_request_detail",
+            request_id=quote_request.id,
         )
 
 
