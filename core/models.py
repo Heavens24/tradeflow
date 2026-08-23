@@ -118,6 +118,313 @@ class Business(models.Model):
 
 
 # =========================================================
+# BUSINESS SUBSCRIPTION
+# =========================================================
+
+
+class BusinessSubscription(models.Model):
+    """
+    TradeFlow-owned subscription record for one business.
+
+    TradeFlow remains the source of truth for product access.
+
+    Payment providers such as Paystack may later update this
+    record, but application features should not need to query
+    Paystack directly in order to decide whether access is
+    allowed.
+
+    Manual activation is also supported for EFT or other
+    offline payment methods.
+    """
+
+    # =====================================================
+    # PLAN
+    # =====================================================
+
+    PLAN_FREE = "free"
+    PLAN_PRO = "pro"
+
+    PLAN_CHOICES = [
+        (
+            PLAN_FREE,
+            "Free",
+        ),
+        (
+            PLAN_PRO,
+            "Pro",
+        ),
+    ]
+
+    # =====================================================
+    # STATUS
+    # =====================================================
+
+    STATUS_FREE = "free"
+    STATUS_TRIALING = "trialing"
+    STATUS_ACTIVE = "active"
+    STATUS_PAST_DUE = "past_due"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_EXPIRED = "expired"
+
+    STATUS_CHOICES = [
+        (
+            STATUS_FREE,
+            "Free",
+        ),
+        (
+            STATUS_TRIALING,
+            "Trialing",
+        ),
+        (
+            STATUS_ACTIVE,
+            "Active",
+        ),
+        (
+            STATUS_PAST_DUE,
+            "Past due",
+        ),
+        (
+            STATUS_CANCELLED,
+            "Cancelled",
+        ),
+        (
+            STATUS_EXPIRED,
+            "Expired",
+        ),
+    ]
+
+    # =====================================================
+    # BILLING PROVIDER
+    # =====================================================
+
+    PROVIDER_MANUAL = "manual"
+    PROVIDER_PAYSTACK = "paystack"
+
+    PROVIDER_CHOICES = [
+        (
+            PROVIDER_MANUAL,
+            "Manual / EFT",
+        ),
+        (
+            PROVIDER_PAYSTACK,
+            "Paystack",
+        ),
+    ]
+
+    # =====================================================
+    # BUSINESS
+    # =====================================================
+
+    business = models.OneToOneField(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="subscription",
+    )
+
+    # =====================================================
+    # SUBSCRIPTION STATE
+    # =====================================================
+
+    plan = models.CharField(
+        max_length=20,
+        choices=PLAN_CHOICES,
+        default=PLAN_FREE,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_FREE,
+    )
+
+    billing_provider = models.CharField(
+        max_length=20,
+        choices=PROVIDER_CHOICES,
+        default=PROVIDER_MANUAL,
+    )
+
+    # =====================================================
+    # PERIOD / TRIAL DATES
+    # =====================================================
+
+    started_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    trial_ends_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    current_period_start = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    current_period_end = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    cancelled_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    # =====================================================
+    # PAYMENT PROVIDER REFERENCES
+    # =====================================================
+
+    provider_customer_code = models.CharField(
+        max_length=120,
+        blank=True,
+    )
+
+    provider_subscription_code = models.CharField(
+        max_length=120,
+        blank=True,
+    )
+
+    provider_reference = models.CharField(
+        max_length=160,
+        blank=True,
+    )
+
+    # =====================================================
+    # ADMIN NOTES
+    # =====================================================
+
+    admin_notes = models.TextField(
+        blank=True,
+        help_text=(
+            "Internal TradeFlow notes about billing, "
+            "manual EFT activation or account history."
+        ),
+    )
+
+    # =====================================================
+    # TIMESTAMPS
+    # =====================================================
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    # =====================================================
+    # MODEL OPTIONS
+    # =====================================================
+
+    class Meta:
+        ordering = [
+            "business__name",
+        ]
+
+        verbose_name = (
+            "Business Subscription"
+        )
+
+        verbose_name_plural = (
+            "Business Subscriptions"
+        )
+
+    # =====================================================
+    # DISPLAY
+    # =====================================================
+
+    def __str__(self):
+        return (
+            f"{self.business.name} — "
+            f"{self.get_plan_display()} / "
+            f"{self.get_status_display()}"
+        )
+
+    # =====================================================
+    # EFFECTIVE STATE
+    # =====================================================
+
+    @property
+    def effective_status(self):
+        """
+        Return the effective subscription state.
+
+        An expired trial or billing period must not continue
+        to grant paid access merely because the stored status
+        has not yet been changed.
+        """
+
+        now = timezone.now()
+
+        if self.status == self.STATUS_TRIALING:
+            if (
+                not self.trial_ends_at
+                or self.trial_ends_at <= now
+            ):
+                return self.STATUS_EXPIRED
+
+        if self.status == self.STATUS_ACTIVE:
+            if (
+                not self.current_period_end
+                or self.current_period_end <= now
+            ):
+                return self.STATUS_EXPIRED
+
+        return self.status
+
+    # =====================================================
+    # ACCESS HELPERS
+    # =====================================================
+
+    @property
+    def is_paid_access_current(self):
+        """
+        True only when a Pro subscription is currently valid.
+        """
+
+        if self.plan != self.PLAN_PRO:
+            return False
+
+        return self.effective_status in (
+            self.STATUS_TRIALING,
+            self.STATUS_ACTIVE,
+        )
+
+    @property
+    def has_pro_access(self):
+        """
+        Main application-level Pro access switch.
+        """
+
+        return self.is_paid_access_current
+
+    @property
+    def has_ai_access(self):
+        """
+        Subscription-level AI eligibility.
+
+        Hard AI usage limits are enforced separately so this
+        property must never be treated as unlimited usage.
+        """
+
+        return self.has_pro_access
+
+    @property
+    def is_free_plan(self):
+        return self.plan == self.PLAN_FREE
+
+    @property
+    def period_has_ended(self):
+        if not self.current_period_end:
+            return False
+
+        return self.current_period_end <= timezone.now()
+
+
+# =========================================================
 # CUSTOMER
 # =========================================================
 

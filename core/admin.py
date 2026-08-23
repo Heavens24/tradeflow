@@ -8,6 +8,7 @@ from .models import (
     Business,
     BusinessPublicProfile,
     BusinessReview,
+    BusinessSubscription,
     BusinessVerification,
     Customer,
     Invoice,
@@ -64,6 +65,257 @@ class BusinessAdmin(admin.ModelAdmin):
     ordering = (
         "name",
     )
+
+
+# =========================================================
+# BUSINESS SUBSCRIPTION
+# =========================================================
+
+
+@admin.register(BusinessSubscription)
+class BusinessSubscriptionAdmin(
+    admin.ModelAdmin
+):
+    """
+    Platform subscription administration.
+
+    TradeFlow administrators may manually activate paid
+    access after EFT or manage provider-linked subscription
+    records.
+
+    Provider references are stored here so Paystack can be
+    connected later without making Paystack the source of
+    truth for application access.
+    """
+
+    list_display = (
+        "business",
+        "plan",
+        "status_badge",
+        "billing_provider",
+        "access_badge",
+        "current_period_end",
+        "updated_at",
+    )
+
+    list_filter = (
+        "plan",
+        "status",
+        "billing_provider",
+        "created_at",
+        "updated_at",
+    )
+
+    search_fields = (
+        "business__name",
+        "business__owner__username",
+        "business__email",
+        "provider_customer_code",
+        "provider_subscription_code",
+        "provider_reference",
+    )
+
+    ordering = (
+        "business__name",
+    )
+
+    list_per_page = 25
+
+    readonly_fields = (
+        "effective_status_display",
+        "pro_access_display",
+        "created_at",
+        "updated_at",
+    )
+
+    fieldsets = (
+        (
+            "Business",
+            {
+                "fields": (
+                    "business",
+                ),
+            },
+        ),
+        (
+            "Subscription",
+            {
+                "fields": (
+                    "plan",
+                    "status",
+                    "billing_provider",
+                    "effective_status_display",
+                    "pro_access_display",
+                ),
+            },
+        ),
+        (
+            "Billing period",
+            {
+                "fields": (
+                    "started_at",
+                    "trial_ends_at",
+                    "current_period_start",
+                    "current_period_end",
+                    "cancelled_at",
+                ),
+            },
+        ),
+        (
+            "Payment provider",
+            {
+                "fields": (
+                    "provider_customer_code",
+                    "provider_subscription_code",
+                    "provider_reference",
+                ),
+            },
+        ),
+        (
+            "Internal notes",
+            {
+                "fields": (
+                    "admin_notes",
+                ),
+            },
+        ),
+        (
+            "System information",
+            {
+                "classes": (
+                    "collapse",
+                ),
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                ),
+            },
+        ),
+    )
+
+    @admin.display(
+        description="Status",
+        ordering="status",
+    )
+    def status_badge(
+        self,
+        obj,
+    ):
+        effective_status = (
+            obj.effective_status
+        )
+
+        if effective_status in (
+            BusinessSubscription.STATUS_ACTIVE,
+            BusinessSubscription.STATUS_TRIALING,
+        ):
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-success">'
+                    '{}'
+                    '</span>'
+                ),
+                obj.get_status_display(),
+            )
+
+        if (
+            effective_status
+            == BusinessSubscription.STATUS_PAST_DUE
+        ):
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-warning">'
+                    '{}'
+                    '</span>'
+                ),
+                "Past Due",
+            )
+
+        if effective_status in (
+            BusinessSubscription.STATUS_CANCELLED,
+            BusinessSubscription.STATUS_EXPIRED,
+        ):
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-danger">'
+                    '{}'
+                    '</span>'
+                ),
+                (
+                    "Expired"
+                    if effective_status
+                    == BusinessSubscription.STATUS_EXPIRED
+                    else "Cancelled"
+                ),
+            )
+
+        return format_html(
+            (
+                '<span class="tf-status '
+                'tf-status-muted">'
+                '{}'
+                '</span>'
+            ),
+            "Free",
+        )
+
+    @admin.display(
+        description="Pro access",
+        boolean=False,
+    )
+    def access_badge(
+        self,
+        obj,
+    ):
+        if obj.has_pro_access:
+            return format_html(
+                (
+                    '<span class="tf-status '
+                    'tf-status-success">'
+                    '{}'
+                    '</span>'
+                ),
+                "✓ Allowed",
+            )
+
+        return format_html(
+            (
+                '<span class="tf-status '
+                'tf-status-muted">'
+                '{}'
+                '</span>'
+            ),
+            "No",
+        )
+
+    @admin.display(
+        description="Effective status",
+    )
+    def effective_status_display(
+        self,
+        obj,
+    ):
+        labels = dict(
+            BusinessSubscription.STATUS_CHOICES
+        )
+
+        return labels.get(
+            obj.effective_status,
+            obj.effective_status,
+        )
+
+    @admin.display(
+        description="Current Pro access",
+        boolean=True,
+    )
+    def pro_access_display(
+        self,
+        obj,
+    ):
+        return obj.has_pro_access
 
 
 # =========================================================
