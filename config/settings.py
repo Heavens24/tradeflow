@@ -8,6 +8,7 @@ TradeFlow
 """
 
 import os
+from decimal import Decimal
 from pathlib import Path
 
 import dj_database_url
@@ -619,6 +620,86 @@ SERVER_EMAIL = os.getenv(
     "SERVER_EMAIL",
     DEFAULT_FROM_EMAIL,
 )
+
+
+# =========================================================
+# PAYSTACK / TRADEFLOW PRO BILLING
+# =========================================================
+
+# Keep Paystack disabled until test/live keys and the Pro plan
+# have been configured. When disabled, TradeFlow still supports
+# the existing Manual / EFT subscription workflow.
+PAYSTACK_ENABLED = env_bool(
+    "PAYSTACK_ENABLED",
+    default=False,
+)
+
+# Secret keys are backend-only. Never expose this value in a
+# template, browser script, repository or client-side request.
+PAYSTACK_SECRET_KEY = os.getenv(
+    "PAYSTACK_SECRET_KEY",
+    "",
+).strip()
+
+# Stored for future frontend integrations. The hosted-checkout
+# flow below does not require this key in the browser.
+PAYSTACK_PUBLIC_KEY = os.getenv(
+    "PAYSTACK_PUBLIC_KEY",
+    "",
+).strip()
+
+# Create the monthly TradeFlow Pro plan in Paystack and place
+# its PLN_... code in this environment variable.
+PAYSTACK_PRO_PLAN_CODE = os.getenv(
+    "PAYSTACK_PRO_PLAN_CODE",
+    "",
+).strip()
+
+# The amount shown by TradeFlow and independently verified when
+# Paystack confirms a charge. Set the exact same monthly amount
+# as the Paystack plan.
+TRADEFLOW_PRO_PRICE_ZAR_TEXT = os.getenv(
+    "TRADEFLOW_PRO_PRICE_ZAR",
+    "",
+).strip()
+
+try:
+    TRADEFLOW_PRO_PRICE_ZAR = (
+        Decimal(TRADEFLOW_PRO_PRICE_ZAR_TEXT)
+        if TRADEFLOW_PRO_PRICE_ZAR_TEXT
+        else Decimal("0.00")
+    )
+except Exception as exc:
+    raise RuntimeError(
+        "TRADEFLOW_PRO_PRICE_ZAR must be a valid decimal amount."
+    ) from exc
+
+if PAYSTACK_ENABLED:
+    missing_paystack_settings = [
+        name
+        for name, value in (
+            (
+                "PAYSTACK_SECRET_KEY",
+                PAYSTACK_SECRET_KEY,
+            ),
+            (
+                "PAYSTACK_PRO_PLAN_CODE",
+                PAYSTACK_PRO_PLAN_CODE,
+            ),
+        )
+        if not value
+    ]
+
+    if TRADEFLOW_PRO_PRICE_ZAR <= Decimal("0.00"):
+        missing_paystack_settings.append(
+            "TRADEFLOW_PRO_PRICE_ZAR"
+        )
+
+    if missing_paystack_settings:
+        raise RuntimeError(
+            "Paystack billing is enabled but these settings are missing: "
+            + ", ".join(missing_paystack_settings)
+        )
 
 
 # =========================================================

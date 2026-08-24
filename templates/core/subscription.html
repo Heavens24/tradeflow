@@ -1,0 +1,466 @@
+{% extends "core/base.html" %}
+
+
+{% block title %}
+    Subscription | TradeFlow
+{% endblock %}
+
+
+{% block extra_css %}
+
+.subscription-wrap {
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.subscription-hero,
+.plan-card,
+.history-card {
+    background: white;
+    border-radius: 14px;
+    padding: 26px;
+
+    box-shadow:
+        0 2px 10px
+        rgba(0, 0, 0, 0.06);
+}
+
+.subscription-hero {
+    margin-bottom: 22px;
+}
+
+.subscription-hero h1,
+.plan-card h2,
+.history-card h2 {
+    margin-top: 0;
+}
+
+.subscription-state {
+    display: inline-block;
+
+    margin-top: 10px;
+
+    padding: 7px 11px;
+
+    border-radius: 999px;
+
+    background: #f3f4f6;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.plan-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+.plan-card.pro {
+    border:
+        2px solid
+        #111827;
+}
+
+.price {
+    margin: 12px 0;
+
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.price small {
+    font-size: 14px;
+
+    color: #6b7280;
+
+    font-weight: normal;
+}
+
+.features {
+    margin: 18px 0;
+
+    padding-left: 20px;
+
+    line-height: 1.9;
+}
+
+.notice {
+    margin-top: 16px;
+
+    padding: 14px;
+
+    border-radius: 9px;
+
+    background: #fff7ed;
+
+    color: #9a3412;
+
+    line-height: 1.5;
+}
+
+.success-note {
+    background: #ecfdf5;
+
+    color: #166534;
+}
+
+.payment-row {
+    display: grid;
+
+    grid-template-columns:
+        1fr auto auto;
+
+    gap: 12px;
+
+    padding: 12px 0;
+
+    border-bottom:
+        1px solid
+        #e5e7eb;
+
+    font-size: 14px;
+}
+
+.payment-row:last-child {
+    border-bottom: 0;
+}
+
+
+@media (max-width: 760px) {
+
+    .plan-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-row {
+        grid-template-columns: 1fr;
+    }
+
+    .plan-card .button {
+        width: 100%;
+        text-align: center;
+    }
+
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="subscription-wrap">
+
+
+    <!-- =====================================================
+         SUBSCRIPTION HEADER
+         ===================================================== -->
+
+    <section class="subscription-hero">
+
+        <a href="{% url 'core:dashboard' %}">
+            ← Dashboard
+        </a>
+
+
+        <h1 style="margin-top: 18px;">
+            TradeFlow Subscription
+        </h1>
+
+
+        <p>
+            Manage Pro access for {{ business.name }}.
+        </p>
+
+
+        <span class="subscription-state">
+
+            {{ subscription.get_plan_display }}
+
+            ·
+
+            {{ subscription.effective_status|title }}
+
+        </span>
+
+
+        {% if subscription.has_pro_access %}
+
+            <p>
+
+                <strong>
+                    Pro access is active.
+                </strong>
+
+                {% if subscription.current_period_end %}
+
+                    Current access runs until
+
+                    {{ subscription.current_period_end|date:"j M Y, H:i" }}.
+
+                {% endif %}
+
+            </p>
+
+        {% endif %}
+
+
+    </section>
+
+
+    <!-- =====================================================
+         PLANS
+         ===================================================== -->
+
+    <section class="plan-grid">
+
+
+        <!-- =================================================
+             FREE
+             ================================================= -->
+
+        <article class="plan-card">
+
+            <h2>
+                Free
+            </h2>
+
+
+            <div class="price">
+
+                R0
+
+                <small>
+                    / month
+                </small>
+
+            </div>
+
+
+            <ul class="features">
+
+                <li>
+                    Core TradeFlow business records
+                </li>
+
+                <li>
+                    Customers, quotes, jobs and invoices
+                </li>
+
+                <li>
+                    Marketplace and public profile
+                </li>
+
+                <li>
+                    AI assistant not included
+                </li>
+
+            </ul>
+
+
+            {% if subscription.is_free_plan %}
+
+                <strong>
+                    Current plan
+                </strong>
+
+            {% endif %}
+
+
+        </article>
+
+
+        <!-- =================================================
+             PRO
+             ================================================= -->
+
+        <article class="plan-card pro">
+
+            <h2>
+                Pro
+            </h2>
+
+
+            <div class="price">
+
+                {% if pro_price %}
+
+                    R{{ pro_price|floatformat:2 }}
+
+                {% else %}
+
+                    Price configured at checkout
+
+                {% endif %}
+
+                <small>
+                    / month
+                </small>
+
+            </div>
+
+
+            <ul class="features">
+
+                <li>
+                    Everything in TradeFlow Free
+                </li>
+
+                <li>
+                    Subscription-gated Pro access
+                </li>
+
+                <li>
+                    AI assistant access subject to usage limits
+                </li>
+
+                <li>
+                    Automatic monthly renewal through Paystack
+                </li>
+
+            </ul>
+
+
+            {% if subscription.has_pro_access %}
+
+                <div class="notice success-note">
+
+                    ✓ Your Pro subscription is active.
+
+                </div>
+
+
+            {% elif paystack_ready %}
+
+
+                {% if payment_email %}
+
+                    <form
+                        method="POST"
+                        action="{% url 'core:subscription_checkout' %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="button"
+                        >
+                            Upgrade securely with Paystack
+                        </button>
+
+                    </form>
+
+
+                    <p
+                        style="
+                            color: #6b7280;
+                            font-size: 13px;
+                        "
+                    >
+                        Checkout email:
+                        {{ payment_email }}
+                    </p>
+
+
+                {% else %}
+
+                    <div class="notice">
+
+                        Add a business email address before
+                        starting online subscription checkout.
+
+                    </div>
+
+                {% endif %}
+
+
+            {% else %}
+
+                <div class="notice">
+
+                    Online Paystack checkout is not enabled yet.
+
+                    TradeFlow administrators can still activate
+                    Pro manually after an EFT payment.
+
+                </div>
+
+            {% endif %}
+
+
+        </article>
+
+
+    </section>
+
+
+    <!-- =====================================================
+         PAYMENT HISTORY
+         ===================================================== -->
+
+    <section class="history-card">
+
+        <h2>
+            Subscription payment history
+        </h2>
+
+
+        {% if recent_payments %}
+
+
+            {% for payment in recent_payments %}
+
+                <div class="payment-row">
+
+                    <span>
+                        {{ payment.reference }}
+                    </span>
+
+
+                    <strong>
+                        R{{ payment.amount|floatformat:2 }}
+                    </strong>
+
+
+                    <span>
+
+                        {{ payment.get_status_display }}
+
+                        ·
+
+                        {{ payment.created_at|date:"j M Y" }}
+
+                    </span>
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <p>
+                No online subscription payments have been
+                recorded yet.
+            </p>
+
+        {% endif %}
+
+
+    </section>
+
+
+</div>
+
+
+{% endblock %}

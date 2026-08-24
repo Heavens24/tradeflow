@@ -425,6 +425,147 @@ class BusinessSubscription(models.Model):
 
 
 # =========================================================
+# SUBSCRIPTION PAYMENT
+# =========================================================
+
+
+class SubscriptionPayment(models.Model):
+    """
+    One Paystack payment attempt or successful subscription
+    charge for a TradeFlow business.
+
+    The reference is unique so callback and webhook delivery
+    can safely process the same payment more than once without
+    extending the subscription twice.
+    """
+
+    PROVIDER_PAYSTACK = "paystack"
+
+    PROVIDER_CHOICES = [
+        (
+            PROVIDER_PAYSTACK,
+            "Paystack",
+        ),
+    ]
+
+    STATUS_INITIALIZED = "initialized"
+    STATUS_SUCCESS = "success"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = [
+        (
+            STATUS_INITIALIZED,
+            "Initialized",
+        ),
+        (
+            STATUS_SUCCESS,
+            "Successful",
+        ),
+        (
+            STATUS_FAILED,
+            "Failed / rejected",
+        ),
+    ]
+
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="subscription_payments",
+    )
+
+    subscription = models.ForeignKey(
+        BusinessSubscription,
+        on_delete=models.CASCADE,
+        related_name="payments",
+    )
+
+    provider = models.CharField(
+        max_length=20,
+        choices=PROVIDER_CHOICES,
+        default=PROVIDER_PAYSTACK,
+    )
+
+    reference = models.CharField(
+        max_length=160,
+        unique=True,
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    currency = models.CharField(
+        max_length=3,
+        default="ZAR",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_INITIALIZED,
+    )
+
+    provider_transaction_id = models.BigIntegerField(
+        blank=True,
+        null=True,
+        unique=True,
+    )
+
+    provider_customer_code = models.CharField(
+        max_length=120,
+        blank=True,
+    )
+
+    provider_subscription_code = models.CharField(
+        max_length=120,
+        blank=True,
+    )
+
+    last_event_type = models.CharField(
+        max_length=80,
+        blank=True,
+    )
+
+    provider_message = models.TextField(
+        blank=True,
+    )
+
+    paid_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = [
+            "-created_at",
+        ]
+
+        verbose_name = (
+            "Subscription Payment"
+        )
+
+        verbose_name_plural = (
+            "Subscription Payments"
+        )
+
+    def __str__(self):
+        return (
+            f"{self.business.name} — "
+            f"{self.reference} — "
+            f"{self.get_status_display()}"
+        )
+
+
+# =========================================================
 # CUSTOMER
 # =========================================================
 

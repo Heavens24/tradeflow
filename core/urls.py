@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import billing_views
 from . import lead_views
 from . import public_views
 from . import verification_views
@@ -78,6 +79,34 @@ urlpatterns = [
         "dashboard/",
         views.dashboard,
         name="dashboard",
+    ),
+
+
+    # =====================================================
+    # SUBSCRIPTION / PAYSTACK
+    # =====================================================
+    path(
+        "subscription/",
+        billing_views.subscription_overview,
+        name="subscription",
+    ),
+
+    path(
+        "subscription/checkout/",
+        billing_views.subscription_checkout,
+        name="subscription_checkout",
+    ),
+
+    path(
+        "subscription/callback/",
+        billing_views.subscription_callback,
+        name="subscription_callback",
+    ),
+
+    path(
+        "webhooks/paystack/",
+        billing_views.paystack_webhook,
+        name="paystack_webhook",
     ),
 
 
