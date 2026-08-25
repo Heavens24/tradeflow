@@ -5,36 +5,102 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
-    help = "Reset the password for the January22 production admin account."
+    help = (
+        "Safely identify production staff accounts and optionally "
+        "reset a matching admin password."
+    )
 
     def handle(self, *args, **options):
-        username = "January22"
-        new_password = os.getenv("DJANGO_ADMIN_RESET_PASSWORD", "").strip()
+        User = get_user_model()
+
+        staff_users = User.objects.filter(
+            is_staff=True
+        ).order_by("username")
+
+        if not staff_users.exists():
+            self.stdout.write(
+                self.style.WARNING(
+                    "No staff accounts exist in this database."
+                )
+            )
+            return
+
+        self.stdout.write(
+            "Production staff accounts:"
+        )
+
+        for user in staff_users:
+            self.stdout.write(
+                (
+                    f"- username={user.get_username()!r} "
+                    f"superuser={user.is_superuser} "
+                    f"active={user.is_active}"
+                )
+            )
+
+        requested_username = os.getenv(
+            "DJANGO_ADMIN_RESET_USERNAME",
+            "",
+        ).strip()
+
+        new_password = os.getenv(
+            "DJANGO_ADMIN_RESET_PASSWORD",
+            "",
+        ).strip()
+
+        if not requested_username:
+            self.stdout.write(
+                self.style.WARNING(
+                    "DJANGO_ADMIN_RESET_USERNAME is not set. "
+                    "No password was changed."
+                )
+            )
+            return
 
         if not new_password:
             raise CommandError(
-                "DJANGO_ADMIN_RESET_PASSWORD environment variable is not set."
+                "DJANGO_ADMIN_RESET_PASSWORD is not set."
             )
 
-        User = get_user_model()
+        user = User.objects.filter(
+            username__iexact=requested_username
+        ).first()
 
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise CommandError(
-                f"Admin user {username!r} does not exist."
+        if not user:
+            self.stdout.write(
+                self.style.WARNING(
+                    (
+                        f"No account matched "
+                        f"{requested_username!r}. "
+                        "No password was changed."
+                    )
+                )
             )
+            return
 
         if not user.is_staff:
             raise CommandError(
-                f"{username!r} exists but is not a staff account."
+                (
+                    f"{user.get_username()!r} exists "
+                    "but is not a staff account."
+                )
             )
 
-        user.set_password(new_password)
-        user.save(update_fields=["password"])
+        user.set_password(
+            new_password
+        )
+
+        user.save(
+            update_fields=[
+                "password",
+            ]
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Password successfully reset for {username!r}."
+                (
+                    "Password successfully reset for "
+                    f"{user.get_username()!r}."
+                )
             )
         )
