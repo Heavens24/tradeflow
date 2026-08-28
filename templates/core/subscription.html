@@ -178,7 +178,7 @@
 
 
         <p>
-            Manage Pro access for {{ business.name }}.
+            Manage TradeFlow Pro access for {{ business.name }}.
         </p>
 
 
@@ -209,6 +209,13 @@
 
                 {% endif %}
 
+            </p>
+
+        {% else %}
+
+            <p>
+                Upgrade to TradeFlow Pro to publish your business
+                in the Marketplace and receive customer leads.
             </p>
 
         {% endif %}
@@ -253,11 +260,31 @@
                 </li>
 
                 <li>
-                    Customers, quotes, jobs and invoices
+                    Customers and customer statements
                 </li>
 
                 <li>
-                    Marketplace and public profile
+                    Quotes and quotations
+                </li>
+
+                <li>
+                    Jobs and job tracking
+                </li>
+
+                <li>
+                    Invoices and payments
+                </li>
+
+                <li>
+                    Business profile management
+                </li>
+
+                <li>
+                    Marketplace listing not included
+                </li>
+
+                <li>
+                    Public marketplace profile not included
                 </li>
 
                 <li>
@@ -316,7 +343,23 @@
                 </li>
 
                 <li>
-                    Subscription-gated Pro access
+                    Marketplace business listing
+                </li>
+
+                <li>
+                    Public TradeFlow business profile
+                </li>
+
+                <li>
+                    Receive customer quote requests and leads
+                </li>
+
+                <li>
+                    Marketplace reviews and reputation
+                </li>
+
+                <li>
+                    Business verification visibility
                 </li>
 
                 <li>
@@ -335,6 +378,11 @@
                 <div class="notice success-note">
 
                     ✓ Your Pro subscription is active.
+
+                    <br><br>
+
+                    Your business can use TradeFlow Marketplace
+                    features while this subscription remains active.
 
                 </div>
 
@@ -355,7 +403,12 @@
                             type="submit"
                             class="button"
                         >
-                            Upgrade securely with Paystack
+                            Upgrade to Pro for
+                            {% if pro_price %}
+                                R{{ pro_price|floatformat:2 }}/month
+                            {% else %}
+                                Marketplace access
+                            {% endif %}
                         </button>
 
                     </form>

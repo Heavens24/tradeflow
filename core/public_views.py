@@ -19,6 +19,7 @@ from .models import (
     Business,
     BusinessPublicProfile,
     BusinessReview,
+    BusinessSubscription,
     Job,
 )
 
@@ -69,6 +70,26 @@ def get_user_business(user):
     return Business.objects.filter(
         owner=user
     ).first()
+
+
+def business_has_marketplace_access(business):
+    """
+    Return True only when the business currently has
+    TradeFlow Pro access.
+
+    Marketplace publication is a Pro feature.
+
+    BusinessSubscription.has_pro_access remains the single
+    source of truth for paid access, including billing-period
+    and subscription-status rules.
+    """
+
+    try:
+        subscription = business.subscription
+    except BusinessSubscription.DoesNotExist:
+        return False
+
+    return subscription.has_pro_access
 
 
 def make_review_token(job):
@@ -369,7 +390,8 @@ def marketplace(request):
             public_profile_enabled=True
         )
         .select_related(
-            "business"
+            "business",
+            "business__subscription",
         )
     )
 
@@ -439,6 +461,11 @@ def marketplace(request):
 
 
     for profile in profiles:
+
+        if not business_has_marketplace_access(
+            profile.business
+        ):
+            continue
 
         review_summary = (
             BusinessReview.objects
@@ -564,22 +591,12 @@ def marketplace(request):
     # FILTER OPTIONS
     # =====================================================
 
-    city_choices = (
-        BusinessPublicProfile.objects
-        .filter(
-            public_profile_enabled=True
-        )
-        .exclude(
-            business__city=""
-        )
-        .values_list(
-            "business__city",
-            flat=True,
-        )
-        .distinct()
-        .order_by(
-            "business__city"
-        )
+    city_choices = sorted(
+        {
+            profile.business.city
+            for profile in ranked_profiles
+            if profile.business.city
+        }
     )
 
 
@@ -637,6 +654,25 @@ def public_profile_settings(request):
 
         return redirect(
             "core:business_setup"
+        )
+
+
+    if not business_has_marketplace_access(
+        business
+    ):
+
+        messages.info(
+            request,
+            (
+                "Marketplace publishing is available "
+                "with TradeFlow Pro. Upgrade to Pro "
+                "to publish and manage your public "
+                "business profile."
+            ),
+        )
+
+        return redirect(
+            "core:subscription"
         )
 
 
@@ -724,6 +760,14 @@ def public_business_profile(
     )
 
     business = profile.business
+
+
+    if not business_has_marketplace_access(
+        business
+    ):
+        raise Http404(
+            "This business profile is not currently available."
+        )
 
 
     # =====================================================
@@ -816,6 +860,17 @@ def public_quote_request(
     business = profile.business
 
 
+    if not business_has_marketplace_access(
+        business
+    ):
+        raise Http404(
+            (
+                "This business is not currently accepting "
+                "TradeFlow Marketplace quote requests."
+            )
+        )
+
+
     if request.method == "POST":
 
         form = PublicQuoteRequestForm(
@@ -875,6 +930,13 @@ def public_quote_request_success(
         slug=slug,
         public_profile_enabled=True,
     )
+
+    if not business_has_marketplace_access(
+        profile.business
+    ):
+        raise Http404(
+            "This business profile is not currently available."
+        )
 
     return render(
         request,
