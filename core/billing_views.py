@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import logging
+import secrets
 from datetime import datetime
 from decimal import Decimal
 from urllib.parse import quote
@@ -11,7 +12,10 @@ import requests
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import (
+    login_required,
+    user_passes_test,
+)
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
@@ -25,6 +29,7 @@ from django.views.decorators.http import require_POST
 from .models import (
     Business,
     BusinessSubscription,
+    EFTSubscriptionRequest,
     SubscriptionPayment,
 )
 
@@ -210,6 +215,157 @@ def add_one_month(value):
         month=month,
         day=day,
     )
+
+
+def generate_eft_reference(business):
+    """Generate a short unique customer-facing EFT reference."""
+
+    while True:
+        token = secrets.token_hex(4).upper()
+        reference = f"TFPRO-{business.pk}-{token}"
+
+        if not EFTSubscriptionRequest.objects.filter(
+            reference=reference
+        ).exists():
+            return reference
+
+
+def get_eft_bank_details():
+    """Return TradeFlow platform bank details from settings."""
+
+    return {
+        "bank_name": getattr(
+            settings,
+            "TRADEFLOW_EFT_BANK_NAME",
+            "",
+        ),
+        "account_name": getattr(
+            settings,
+            "TRADEFLOW_EFT_ACCOUNT_NAME",
+            "",
+        ),
+        "account_number": getattr(
+            settings,
+            "TRADEFLOW_EFT_ACCOUNT_NUMBER",
+            "",
+        ),
+        "branch_code": getattr(
+            settings,
+            "TRADEFLOW_EFT_BRANCH_CODE",
+            "",
+        ),
+        "account_type": getattr(
+            settings,
+            "TRADEFLOW_EFT_ACCOUNT_TYPE",
+            "",
+        ),
+    }
+
+
+def eft_is_ready():
+    details = get_eft_bank_details()
+
+    return bool(
+        details["bank_name"]
+        and details["account_name"]
+        and details["account_number"]
+        and settings.TRADEFLOW_PRO_PRICE_ZAR
+        > Decimal("0.00")
+    )
+
+
+@transaction.atomic
+def activate_manual_pro(eft_request, staff_user):
+    """
+    Approve one verified EFT payment and grant one calendar
+    month of TradeFlow Pro. Approval is idempotent.
+    """
+
+    eft_request = (
+        EFTSubscriptionRequest.objects.select_for_update()
+        .select_related(
+            "business",
+            "subscription",
+        )
+        .get(
+            pk=eft_request.pk
+        )
+    )
+
+    if (
+        eft_request.status
+        == EFTSubscriptionRequest.STATUS_APPROVED
+    ):
+        return eft_request.subscription
+
+    if (
+        eft_request.status
+        != EFTSubscriptionRequest.STATUS_PENDING_REVIEW
+    ):
+        raise ValueError(
+            "Only pending EFT payments may be approved."
+        )
+
+    subscription = (
+        BusinessSubscription.objects.select_for_update()
+        .get(
+            pk=eft_request.subscription_id
+        )
+    )
+
+    now = timezone.now()
+    period_start = now
+
+    if (
+        subscription.current_period_end
+        and subscription.current_period_end > now
+    ):
+        period_start = subscription.current_period_end
+
+    period_end = add_one_month(
+        period_start
+    )
+
+    subscription.plan = (
+        BusinessSubscription.PLAN_PRO
+    )
+    subscription.status = (
+        BusinessSubscription.STATUS_ACTIVE
+    )
+    subscription.billing_provider = (
+        BusinessSubscription.PROVIDER_MANUAL
+    )
+
+    if not subscription.started_at:
+        subscription.started_at = now
+
+    subscription.current_period_start = (
+        period_start
+    )
+    subscription.current_period_end = (
+        period_end
+    )
+    subscription.cancelled_at = None
+    subscription.provider_reference = (
+        eft_request.reference
+    )
+    subscription.save()
+
+    eft_request.status = (
+        EFTSubscriptionRequest.STATUS_APPROVED
+    )
+    eft_request.reviewed_by = staff_user
+    eft_request.reviewed_at = now
+    eft_request.save(
+        update_fields=[
+            "status",
+            "reviewed_by",
+            "reviewed_at",
+            "updated_at",
+        ]
+    )
+
+    return subscription
 
 
 def parse_paystack_datetime(value):
@@ -748,6 +904,12 @@ def subscription_overview(request):
         )[:10]
     )
 
+    recent_eft_requests = (
+        EFTSubscriptionRequest.objects.filter(
+            business=business
+        )[:10]
+    )
+
     email = (
         business.email
         or request.user.email
@@ -758,7 +920,9 @@ def subscription_overview(request):
         "business": business,
         "subscription": subscription,
         "recent_payments": recent_payments,
+        "recent_eft_requests": recent_eft_requests,
         "paystack_ready": paystack_is_ready(),
+        "eft_ready": eft_is_ready(),
         "payment_email": email,
         "pro_price": (
             settings.TRADEFLOW_PRO_PRICE_ZAR
@@ -769,6 +933,359 @@ def subscription_overview(request):
         request,
         "core/subscription.html",
         context,
+    )
+
+
+# =========================================================
+# MANUAL EFT CHECKOUT
+# =========================================================
+
+
+@login_required
+@require_POST
+def eft_checkout(request):
+    business = get_user_business(
+        request.user
+    )
+
+    if not business:
+        return redirect(
+            "core:business_setup"
+        )
+
+    subscription = (
+        get_or_create_subscription(
+            business
+        )
+    )
+
+    if subscription.has_pro_access:
+        messages.info(
+            request,
+            "Your TradeFlow Pro subscription is already active.",
+        )
+        return redirect(
+            "core:subscription"
+        )
+
+    if not eft_is_ready():
+        messages.error(
+            request,
+            "EFT payment details are not currently available.",
+        )
+        return redirect(
+            "core:subscription"
+        )
+
+    existing = (
+        EFTSubscriptionRequest.objects.filter(
+            business=business,
+            status__in=[
+                EFTSubscriptionRequest.STATUS_AWAITING_PAYMENT,
+                EFTSubscriptionRequest.STATUS_PENDING_REVIEW,
+            ],
+        )
+        .order_by(
+            "-created_at"
+        )
+        .first()
+    )
+
+    if existing:
+        return redirect(
+            "core:eft_payment",
+            reference=existing.reference,
+        )
+
+    eft_request = (
+        EFTSubscriptionRequest.objects.create(
+            business=business,
+            subscription=subscription,
+            reference=generate_eft_reference(
+                business
+            ),
+            amount=settings.TRADEFLOW_PRO_PRICE_ZAR,
+            currency="ZAR",
+        )
+    )
+
+    return redirect(
+        "core:eft_payment",
+        reference=eft_request.reference,
+    )
+
+
+@login_required
+def eft_payment(request, reference):
+    business = get_user_business(
+        request.user
+    )
+
+    if not business:
+        return redirect(
+            "core:business_setup"
+        )
+
+    eft_request = (
+        EFTSubscriptionRequest.objects.filter(
+            business=business,
+            reference=reference,
+        )
+        .select_related(
+            "subscription"
+        )
+        .first()
+    )
+
+    if not eft_request:
+        return HttpResponse(
+            "EFT request not found.",
+            status=404,
+        )
+
+    if request.method == "POST":
+        if (
+            eft_request.status
+            != EFTSubscriptionRequest.STATUS_AWAITING_PAYMENT
+        ):
+            messages.warning(
+                request,
+                (
+                    "This EFT request has already been "
+                    "submitted for review."
+                ),
+            )
+            return redirect(
+                "core:eft_payment",
+                reference=eft_request.reference,
+            )
+
+        payment_reference = (
+            request.POST.get(
+                "payment_reference",
+                "",
+            )
+            .strip()
+        )
+
+        customer_note = (
+            request.POST.get(
+                "customer_note",
+                "",
+            )
+            .strip()
+        )
+
+        if not payment_reference:
+            messages.error(
+                request,
+                (
+                    "Enter the payment reference or bank "
+                    "transaction reference before submitting."
+                ),
+            )
+
+        else:
+            eft_request.customer_payment_reference = (
+                payment_reference[:160]
+            )
+            eft_request.customer_note = (
+                customer_note[:2000]
+            )
+            eft_request.status = (
+                EFTSubscriptionRequest.STATUS_PENDING_REVIEW
+            )
+            eft_request.submitted_at = timezone.now()
+            eft_request.save(
+                update_fields=[
+                    "customer_payment_reference",
+                    "customer_note",
+                    "status",
+                    "submitted_at",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                (
+                    "Your EFT payment has been submitted for "
+                    "verification. Pro will activate after "
+                    "TradeFlow confirms the payment."
+                ),
+            )
+            return redirect(
+                "core:subscription"
+            )
+
+    context = {
+        "business": business,
+        "eft_request": eft_request,
+        "bank_details": get_eft_bank_details(),
+    }
+
+    return render(
+        request,
+        "core/eft_payment.html",
+        context,
+    )
+
+
+# =========================================================
+# STAFF EFT VERIFICATION
+# =========================================================
+
+
+def staff_required(user):
+    return (
+        user.is_authenticated
+        and user.is_staff
+    )
+
+
+@login_required
+@user_passes_test(
+    staff_required
+)
+def eft_admin_list(request):
+    pending_requests = (
+        EFTSubscriptionRequest.objects.filter(
+            status=(
+                EFTSubscriptionRequest.STATUS_PENDING_REVIEW
+            )
+        )
+        .select_related(
+            "business",
+            "subscription",
+        )
+        .order_by(
+            "submitted_at"
+        )
+    )
+
+    return render(
+        request,
+        "core/eft_admin_list.html",
+        {
+            "pending_requests": pending_requests,
+        },
+    )
+
+
+@login_required
+@user_passes_test(
+    staff_required
+)
+@require_POST
+def eft_admin_approve(
+    request,
+    request_id,
+):
+    eft_request = (
+        EFTSubscriptionRequest.objects.filter(
+            pk=request_id,
+        )
+        .select_related(
+            "business",
+            "subscription",
+        )
+        .first()
+    )
+
+    if not eft_request:
+        return HttpResponse(
+            "EFT request not found.",
+            status=404,
+        )
+
+    try:
+        subscription = activate_manual_pro(
+            eft_request,
+            request.user,
+        )
+
+    except ValueError as exc:
+        messages.error(
+            request,
+            str(exc),
+        )
+
+    else:
+        messages.success(
+            request,
+            (
+                f"EFT approved. "
+                f"{eft_request.business.name} now has "
+                f"TradeFlow Pro until "
+                f"{timezone.localtime(subscription.current_period_end):%d %b %Y}."
+            ),
+        )
+
+    return redirect(
+        "core:eft_admin_list"
+    )
+
+
+@login_required
+@user_passes_test(
+    staff_required
+)
+@require_POST
+@transaction.atomic
+def eft_admin_reject(
+    request,
+    request_id,
+):
+    eft_request = (
+        EFTSubscriptionRequest.objects.select_for_update()
+        .filter(
+            pk=request_id,
+        )
+        .first()
+    )
+
+    if not eft_request:
+        return HttpResponse(
+            "EFT request not found.",
+            status=404,
+        )
+
+    if (
+        eft_request.status
+        != EFTSubscriptionRequest.STATUS_PENDING_REVIEW
+    ):
+        messages.error(
+            request,
+            "Only pending EFT requests may be rejected.",
+        )
+        return redirect(
+            "core:eft_admin_list"
+        )
+
+    eft_request.status = (
+        EFTSubscriptionRequest.STATUS_REJECTED
+    )
+    eft_request.reviewed_by = request.user
+    eft_request.reviewed_at = timezone.now()
+    eft_request.save(
+        update_fields=[
+            "status",
+            "reviewed_by",
+            "reviewed_at",
+            "updated_at",
+        ]
+    )
+
+    messages.success(
+        request,
+        (
+            f"EFT request for "
+            f"{eft_request.business.name} was rejected."
+        ),
+    )
+
+    return redirect(
+        "core:eft_admin_list"
     )
 
 

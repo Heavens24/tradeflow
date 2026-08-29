@@ -703,6 +703,44 @@ if PAYSTACK_ENABLED:
 
 
 # =========================================================
+# TEMPORARY TRADEFLOW EFT BILLING
+# =========================================================
+#
+# TradeFlow platform bank details used for temporary manual
+# TradeFlow Pro subscription payments.
+#
+# Never hard-code real banking information in this file.
+# Store the actual values in .env and production environment
+# variables instead.
+# =========================================================
+
+TRADEFLOW_EFT_BANK_NAME = os.getenv(
+    "TRADEFLOW_EFT_BANK_NAME",
+    "",
+).strip()
+
+TRADEFLOW_EFT_ACCOUNT_NAME = os.getenv(
+    "TRADEFLOW_EFT_ACCOUNT_NAME",
+    "",
+).strip()
+
+TRADEFLOW_EFT_ACCOUNT_NUMBER = os.getenv(
+    "TRADEFLOW_EFT_ACCOUNT_NUMBER",
+    "",
+).strip()
+
+TRADEFLOW_EFT_BRANCH_CODE = os.getenv(
+    "TRADEFLOW_EFT_BRANCH_CODE",
+    "",
+).strip()
+
+TRADEFLOW_EFT_ACCOUNT_TYPE = os.getenv(
+    "TRADEFLOW_EFT_ACCOUNT_TYPE",
+    "",
+).strip()
+
+
+# =========================================================
 # OPENAI
 # =========================================================
 

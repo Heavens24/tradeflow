@@ -566,6 +566,168 @@ class SubscriptionPayment(models.Model):
 
 
 # =========================================================
+# MANUAL EFT SUBSCRIPTION REQUEST
+# =========================================================
+
+
+class EFTSubscriptionRequest(models.Model):
+    """
+    Temporary/manual EFT payment workflow for TradeFlow Pro.
+
+    A business owner may create an EFT request and submit their
+    bank payment reference, but only TradeFlow staff can approve
+    the request and activate Pro access.
+
+    This model is intentionally separate from SubscriptionPayment,
+    which remains the Paystack transaction ledger.
+    """
+
+    # =====================================================
+    # STATUS
+    # =====================================================
+
+    STATUS_AWAITING_PAYMENT = "awaiting_payment"
+    STATUS_PENDING_REVIEW = "pending_review"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (
+            STATUS_AWAITING_PAYMENT,
+            "Awaiting payment",
+        ),
+        (
+            STATUS_PENDING_REVIEW,
+            "Pending verification",
+        ),
+        (
+            STATUS_APPROVED,
+            "Approved",
+        ),
+        (
+            STATUS_REJECTED,
+            "Rejected",
+        ),
+    ]
+
+    # =====================================================
+    # BUSINESS / SUBSCRIPTION
+    # =====================================================
+
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="eft_subscription_requests",
+    )
+
+    subscription = models.ForeignKey(
+        BusinessSubscription,
+        on_delete=models.CASCADE,
+        related_name="eft_requests",
+    )
+
+    # =====================================================
+    # PAYMENT INFORMATION
+    # =====================================================
+
+    reference = models.CharField(
+        max_length=80,
+        unique=True,
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    currency = models.CharField(
+        max_length=3,
+        default="ZAR",
+    )
+
+    customer_payment_reference = models.CharField(
+        max_length=160,
+        blank=True,
+        help_text=(
+            "Reference supplied by the customer after making "
+            "the EFT payment."
+        ),
+    )
+
+    customer_note = models.TextField(
+        blank=True,
+    )
+
+    # =====================================================
+    # REVIEW
+    # =====================================================
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default=STATUS_AWAITING_PAYMENT,
+    )
+
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_eft_subscription_requests",
+        blank=True,
+        null=True,
+    )
+
+    reviewed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    admin_notes = models.TextField(
+        blank=True,
+    )
+
+    # =====================================================
+    # TIMESTAMPS
+    # =====================================================
+
+    submitted_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    # =====================================================
+    # MODEL OPTIONS
+    # =====================================================
+
+    class Meta:
+        ordering = [
+            "-created_at",
+        ]
+
+        verbose_name = (
+            "EFT Subscription Request"
+        )
+
+        verbose_name_plural = (
+            "EFT Subscription Requests"
+        )
+
+    def __str__(self):
+        return (
+            f"{self.business.name} — "
+            f"{self.reference} — "
+            f"{self.get_status_display()}"
+        )
+
+
+# =========================================================
 # CUSTOMER
 # =========================================================
 
@@ -2352,6 +2514,7 @@ class QuoteRequest(models.Model):
             f"{self.customer_name} → "
             f"{self.business.name}"
         )
+
 
 # =========================================================
 # AI USAGE

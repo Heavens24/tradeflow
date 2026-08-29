@@ -1,0 +1,225 @@
+{% extends "core/base.html" %}
+
+
+{% block title %}
+    Pay by EFT | TradeFlow
+{% endblock %}
+
+
+{% block content %}
+
+<div
+    style="
+        max-width: 720px;
+        margin: 0 auto;
+    "
+>
+
+    <a href="{% url 'core:subscription' %}">
+        ← Subscription
+    </a>
+
+
+    <section
+        style="
+            margin-top: 20px;
+            background: white;
+            padding: 28px;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+        "
+    >
+
+        <h1>
+            Pay TradeFlow Pro by EFT
+        </h1>
+
+
+        <p>
+            Amount:
+            <strong>
+                R{{ eft_request.amount|floatformat:2 }}
+            </strong>
+        </p>
+
+
+        <p>
+            Use the following TradeFlow reference exactly:
+        </p>
+
+
+        <div
+            style="
+                padding: 16px;
+                background: #f3f4f6;
+                border-radius: 10px;
+                font-size: 20px;
+                font-weight: 800;
+            "
+        >
+            {{ eft_request.reference }}
+        </div>
+
+
+        <h2 style="margin-top: 26px;">
+            Bank details
+        </h2>
+
+
+        <p>
+            <strong>Bank:</strong>
+            {{ bank_details.bank_name }}
+        </p>
+
+        <p>
+            <strong>Account name:</strong>
+            {{ bank_details.account_name }}
+        </p>
+
+        <p>
+            <strong>Account number:</strong>
+            {{ bank_details.account_number }}
+        </p>
+
+        {% if bank_details.branch_code %}
+
+            <p>
+                <strong>Branch code:</strong>
+                {{ bank_details.branch_code }}
+            </p>
+
+        {% endif %}
+
+        {% if bank_details.account_type %}
+
+            <p>
+                <strong>Account type:</strong>
+                {{ bank_details.account_type }}
+            </p>
+
+        {% endif %}
+
+
+        {% if eft_request.status == "awaiting_payment" %}
+
+            <hr style="margin: 28px 0;">
+
+
+            <h2>
+                Already paid?
+            </h2>
+
+
+            <p>
+                Enter the bank transaction/payment reference below.
+                Submitting this form does not automatically activate
+                Pro. TradeFlow must first confirm that the payment
+                was received.
+            </p>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <label>
+                    Bank / payment reference
+                </label>
+
+                <input
+                    type="text"
+                    name="payment_reference"
+                    maxlength="160"
+                    required
+                    style="
+                        width: 100%;
+                        box-sizing: border-box;
+                        padding: 12px;
+                        margin: 8px 0 18px;
+                    "
+                >
+
+
+                <label>
+                    Note
+                    <small>(optional)</small>
+                </label>
+
+                <textarea
+                    name="customer_note"
+                    rows="4"
+                    maxlength="2000"
+                    style="
+                        width: 100%;
+                        box-sizing: border-box;
+                        padding: 12px;
+                        margin: 8px 0 18px;
+                    "
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    I have paid — submit for verification
+                </button>
+
+            </form>
+
+
+        {% elif eft_request.status == "pending_review" %}
+
+            <div
+                style="
+                    margin-top: 24px;
+                    padding: 16px;
+                    background: #fff7ed;
+                    border-radius: 10px;
+                "
+            >
+                Payment submitted.
+
+                TradeFlow is verifying your EFT.
+                Pro access will activate after approval.
+            </div>
+
+
+        {% elif eft_request.status == "approved" %}
+
+            <div
+                style="
+                    margin-top: 24px;
+                    padding: 16px;
+                    background: #ecfdf5;
+                    border-radius: 10px;
+                "
+            >
+                ✓ Payment approved. TradeFlow Pro is active.
+            </div>
+
+
+        {% elif eft_request.status == "rejected" %}
+
+            <div
+                style="
+                    margin-top: 24px;
+                    padding: 16px;
+                    background: #fef2f2;
+                    border-radius: 10px;
+                "
+            >
+                This payment could not be verified.
+                Please contact TradeFlow support before making
+                another payment.
+            </div>
+
+        {% endif %}
+
+
+    </section>
+
+</div>
+
+{% endblock %}

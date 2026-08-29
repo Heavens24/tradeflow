@@ -14,6 +14,7 @@ urlpatterns = [
     # =====================================================
     # HOME / AUTHENTICATION
     # =====================================================
+
     path(
         "",
         views.home,
@@ -48,6 +49,7 @@ urlpatterns = [
     # =====================================================
     # PUBLIC MARKETPLACE
     # =====================================================
+
     path(
         "marketplace/",
         public_views.marketplace,
@@ -75,6 +77,7 @@ urlpatterns = [
     # =====================================================
     # DASHBOARD
     # =====================================================
+
     path(
         "dashboard/",
         views.dashboard,
@@ -83,13 +86,56 @@ urlpatterns = [
 
 
     # =====================================================
-    # SUBSCRIPTION / PAYSTACK
+    # SUBSCRIPTION / EFT / PAYSTACK
     # =====================================================
+
     path(
         "subscription/",
         billing_views.subscription_overview,
         name="subscription",
     ),
+
+    # -----------------------------------------------------
+    # MANUAL EFT CUSTOMER FLOW
+    # -----------------------------------------------------
+
+    path(
+        "subscription/eft/start/",
+        billing_views.eft_checkout,
+        name="eft_checkout",
+    ),
+
+    path(
+        "subscription/eft/<str:reference>/",
+        billing_views.eft_payment,
+        name="eft_payment",
+    ),
+
+    # -----------------------------------------------------
+    # MANUAL EFT STAFF VERIFICATION
+    # -----------------------------------------------------
+
+    path(
+        "subscription/eft-admin/",
+        billing_views.eft_admin_list,
+        name="eft_admin_list",
+    ),
+
+    path(
+        "subscription/eft-admin/<int:request_id>/approve/",
+        billing_views.eft_admin_approve,
+        name="eft_admin_approve",
+    ),
+
+    path(
+        "subscription/eft-admin/<int:request_id>/reject/",
+        billing_views.eft_admin_reject,
+        name="eft_admin_reject",
+    ),
+
+    # -----------------------------------------------------
+    # PAYSTACK CHECKOUT
+    # -----------------------------------------------------
 
     path(
         "subscription/checkout/",
@@ -113,6 +159,7 @@ urlpatterns = [
     # =====================================================
     # BUSINESS
     # =====================================================
+
     path(
         "business/setup/",
         views.business_setup,
@@ -135,6 +182,7 @@ urlpatterns = [
     # =====================================================
     # PUBLIC QUOTE REQUESTS
     # =====================================================
+
     path(
         "business/<slug:slug>/request-quote/",
         public_views.public_quote_request,
@@ -151,6 +199,7 @@ urlpatterns = [
     # =====================================================
     # PUBLIC BUSINESS MINI-PAGE
     # =====================================================
+
     path(
         "business/<slug:slug>/",
         public_views.public_business_profile,
@@ -161,6 +210,7 @@ urlpatterns = [
     # =====================================================
     # PRIVATE QUOTE REQUEST INBOX
     # =====================================================
+
     path(
         "quote-requests/",
         lead_views.quote_request_list,
@@ -189,6 +239,7 @@ urlpatterns = [
     # =====================================================
     # SIMPLE AI ASSISTANT
     # =====================================================
+
     path(
         "ai/document-assistant/",
         views.ai_document_assistant,
@@ -199,6 +250,7 @@ urlpatterns = [
     # =====================================================
     # CUSTOMERS
     # =====================================================
+
     path(
         "customers/",
         views.customer_list,
@@ -239,6 +291,7 @@ urlpatterns = [
     # =====================================================
     # QUOTES
     # =====================================================
+
     path(
         "quotes/",
         views.quote_list,
@@ -285,6 +338,7 @@ urlpatterns = [
     # =====================================================
     # JOBS
     # =====================================================
+
     path(
         "jobs/",
         views.job_list,
@@ -331,6 +385,7 @@ urlpatterns = [
     # =====================================================
     # INVOICES
     # =====================================================
+
     path(
         "invoices/",
         views.invoice_list,
@@ -371,6 +426,7 @@ urlpatterns = [
     # =====================================================
     # PAYMENTS
     # =====================================================
+
     path(
         "payments/",
         views.payment_list,

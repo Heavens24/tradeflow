@@ -1,0 +1,135 @@
+{% extends "core/base.html" %}
+
+
+{% block title %}
+    EFT Approvals | TradeFlow
+{% endblock %}
+
+
+{% block content %}
+
+<div
+    style="
+        max-width: 1000px;
+        margin: 0 auto;
+    "
+>
+
+    <a href="{% url 'core:dashboard' %}">
+        ← Dashboard
+    </a>
+
+
+    <h1>
+        Pending TradeFlow Pro EFT payments
+    </h1>
+
+
+    {% for eft in pending_requests %}
+
+        <section
+            style="
+                background: white;
+                border-radius: 12px;
+                padding: 22px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            "
+        >
+
+            <h2>
+                {{ eft.business.name }}
+            </h2>
+
+
+            <p>
+                <strong>TradeFlow reference:</strong>
+                {{ eft.reference }}
+            </p>
+
+
+            <p>
+                <strong>Amount:</strong>
+                R{{ eft.amount|floatformat:2 }}
+            </p>
+
+
+            <p>
+                <strong>Customer bank reference:</strong>
+                {{ eft.customer_payment_reference }}
+            </p>
+
+
+            <p>
+                <strong>Submitted:</strong>
+                {{ eft.submitted_at|date:"j M Y, H:i" }}
+            </p>
+
+
+            {% if eft.customer_note %}
+
+                <p>
+                    <strong>Note:</strong>
+                    {{ eft.customer_note }}
+                </p>
+
+            {% endif %}
+
+
+            <div
+                style="
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                "
+            >
+
+                <form
+                    method="POST"
+                    action="{% url 'core:eft_admin_approve' eft.id %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        class="button"
+                        type="submit"
+                    >
+                        Approve & activate Pro
+                    </button>
+
+                </form>
+
+
+                <form
+                    method="POST"
+                    action="{% url 'core:eft_admin_reject' eft.id %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                    >
+                        Reject
+                    </button>
+
+                </form>
+
+            </div>
+
+
+        </section>
+
+
+    {% empty %}
+
+        <p>
+            No EFT payments are waiting for verification.
+        </p>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
