@@ -1,0 +1,11 @@
+{% extends "core/base.html" %}
+{% block title %}{{ guide.title }} | TradeFlow Help{% endblock %}
+{% block content %}
+<style>
+.help-back{display:inline-block;margin-bottom:16px;color:#2563eb;text-decoration:none}.guide-shell{max-width:900px}.guide-hero,.guide-section,.guide-tip{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px;margin-bottom:16px}.guide-hero h1{margin:0 0 8px}.guide-hero p{margin:0;color:#6b7280;line-height:1.6}.guide-section h2{margin-top:0}.guide-section ul{margin-bottom:0;line-height:1.7}.guide-step{display:grid;grid-template-columns:38px 1fr;gap:12px;padding:15px 0;border-bottom:1px solid #eef2f7}.guide-step:last-child{border-bottom:0;padding-bottom:0}.step-number{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eff6ff;color:#1d4ed8;font-weight:700}.guide-step h3{margin:3px 0 5px;font-size:16px}.guide-step p{margin:0;color:#4b5563;line-height:1.55}.guide-tip{background:#fffbeb;border-color:#fde68a}.guide-tip strong{display:block;margin-bottom:6px}
+</style>
+<div class="guide-shell"><a class="help-back" href="{% url 'core:help_center' %}">← Help &amp; Guides</a><div class="guide-hero"><h1>{{ guide.title }}</h1><p>{{ guide.summary }}</p></div>
+<div class="guide-section"><h2>What you'll learn</h2><ul>{% for item in guide.learn %}<li>{{ item }}</li>{% endfor %}</ul></div>
+<div class="guide-section"><h2>Step by step</h2>{% for heading, text in guide.steps %}<div class="guide-step"><div class="step-number">{{ forloop.counter }}</div><div><h3>{{ heading }}</h3><p>{{ text }}</p></div></div>{% endfor %}</div>
+<div class="guide-tip"><strong>TradeFlow tip</strong>{{ guide.tip }}</div></div>
+{% endblock %}

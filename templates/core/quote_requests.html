@@ -102,6 +102,21 @@
         }
 
 
+
+        .guide-card {
+            margin-bottom: 22px;
+            padding: 18px 20px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+        .guide-card h2 { margin: 0 0 8px; color: #1f2937; font-size: 17px; }
+        .guide-card p { margin: 0; }
+        .guide-card-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+        .guide-link { display:inline-block; padding:8px 12px; border-radius:7px; background:white; color:#1d4ed8; font-size:13px; font-weight:600; text-decoration:none; }
+
         /* =================================================
            SUMMARY
            ================================================= */
@@ -416,7 +431,8 @@
 
         }
 
-    </style>
+    .page-help-link{display:inline-block;padding:7px 10px;border:1px solid #dbe3ec;border-radius:8px;background:#fff;color:#2563eb;font-size:13px;font-weight:700;text-decoration:none}.page-help-link:hover{background:#eff6ff}.page-help-row{display:flex;justify-content:flex-end;margin-bottom:12px}
+</style>
 
 </head>
 
@@ -424,6 +440,7 @@
 <body>
 
 <div class="page">
+    <div class="page-help-row"><a class="page-help-link" href="{% url 'core:help_guide' slug='quote-requests' %}">? Help</a></div>
 
 
     {% if messages %}
@@ -464,6 +481,13 @@
 
     </div>
 
+
+
+    <div class="guide-card">
+        <h2>📩 Turn marketplace enquiries into work</h2>
+        <p>Review each request, contact the customer, then convert a suitable enquiry into a quotation. Urgency reflects what the customer requested; priority helps you decide what to handle first.</p>
+        <div class="guide-card-actions"><a class="guide-link" href="{% url 'core:public_profile_settings' %}">Manage Public Profile</a></div>
+    </div>
 
     <!-- =================================================
          SUMMARY

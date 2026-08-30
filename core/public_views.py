@@ -19,7 +19,6 @@ from .models import (
     Business,
     BusinessPublicProfile,
     BusinessReview,
-    BusinessSubscription,
     Job,
 )
 
@@ -74,22 +73,15 @@ def get_user_business(user):
 
 def business_has_marketplace_access(business):
     """
-    Return True only when the business currently has
-    TradeFlow Pro access.
+    Return True for any valid TradeFlow business.
 
-    Marketplace publication is a Pro feature.
-
-    BusinessSubscription.has_pro_access remains the single
-    source of truth for paid access, including billing-period
-    and subscription-status rules.
+    Marketplace publishing, public business profiles and
+    public quote requests are part of the Free TradeFlow
+    experience. TradeFlow Pro remains reserved for premium
+    productivity and growth features.
     """
 
-    try:
-        subscription = business.subscription
-    except BusinessSubscription.DoesNotExist:
-        return False
-
-    return subscription.has_pro_access
+    return bool(business)
 
 
 def make_review_token(job):
@@ -657,25 +649,6 @@ def public_profile_settings(request):
         )
 
 
-    if not business_has_marketplace_access(
-        business
-    ):
-
-        messages.info(
-            request,
-            (
-                "Marketplace publishing is available "
-                "with TradeFlow Pro. Upgrade to Pro "
-                "to publish and manage your public "
-                "business profile."
-            ),
-        )
-
-        return redirect(
-            "core:subscription"
-        )
-
-
     profile, created = (
         BusinessPublicProfile.objects
         .get_or_create(
@@ -695,15 +668,22 @@ def public_profile_settings(request):
 
         if form.is_valid():
 
+            was_published = profile.public_profile_enabled
             profile = form.save()
 
-            messages.success(
-                request,
-                (
-                    "Public business profile "
-                    "updated successfully."
-                ),
-            )
+            if profile.public_profile_enabled and not was_published:
+                messages.success(
+                    request,
+                    "🎉 Your business is now published on TradeFlow. Share your public profile and watch Quote Requests for new enquiries.",
+                )
+            else:
+                messages.success(
+                    request,
+                    (
+                        "Public business profile "
+                        "updated successfully."
+                    ),
+                )
 
             return redirect(
                 "core:public_profile_settings"

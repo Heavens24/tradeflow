@@ -316,6 +316,60 @@
 
 
         /* =====================================================
+           CONTEXTUAL GUIDE CARDS
+           ===================================================== */
+
+        .guide-card {
+            margin-bottom: 22px;
+            padding: 18px 20px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e3a8a;
+        }
+
+        .guide-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .guide-card h2 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 17px;
+        }
+
+        .guide-card p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .guide-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 14px;
+        }
+
+        .guide-card .guide-link {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 7px;
+            background: white;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .guide-card .guide-link:hover {
+            background: #dbeafe;
+        }
+
+        /* =====================================================
            DJANGO MESSAGES
            ===================================================== */
 
@@ -391,6 +445,9 @@
         {% block extra_css %}
         {% endblock %}
 
+
+        .page-help-link { display:inline-flex; align-items:center; gap:5px; padding:7px 10px; border:1px solid #dbe3ec; border-radius:8px; background:#fff; color:#2563eb; font-size:13px; font-weight:700; text-decoration:none; }
+        .page-help-link:hover { background:#eff6ff; border-color:#bfdbfe; }
 
     </style>
 
@@ -544,6 +601,18 @@
                 {% endif %}
             >
                 Verification
+            </a>
+
+
+            <!-- HELP & GUIDES -->
+
+            <a
+                href="{% url 'core:help_center' %}"
+                {% if request.resolver_match.url_name == 'help_center' or request.resolver_match.url_name == 'help_guide' %}
+                    class="active"
+                {% endif %}
+            >
+                Help &amp; Guides
             </a>
 
 

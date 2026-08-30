@@ -147,6 +147,8 @@ th {
 
 
 {% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='jobs' %}">? Help</a></div>
+
 
 
 <div class="topbar">
@@ -174,6 +176,13 @@ th {
 
 </div>
 
+
+
+<div class="guide-card">
+    <div class="guide-card-header"><h2>🔧 Keep customer work organised</h2></div>
+    <p>Use Jobs to track approved work from start to completion. A job can be created directly or from an accepted quotation, then turned into an invoice when the work is ready to bill.</p>
+    <div class="guide-card-actions"><a class="guide-link" href="{% url 'core:job_create' %}">+ Create a Job</a></div>
+</div>
 
 <div class="filter-card">
 

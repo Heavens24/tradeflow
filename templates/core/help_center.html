@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Help & Guides | TradeFlow{% endblock %}
+{% block content %}
+<style>
+.help-hero{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:28px;margin-bottom:22px}.help-hero h1{margin:0 0 8px}.help-hero p{margin:0;color:#6b7280;max-width:760px;line-height:1.6}.help-category{margin:26px 0}.help-category h2{margin:0 0 12px}.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:14px}.help-tile{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;text-decoration:none;color:#1f2937;transition:.15s ease}.help-tile:hover{border-color:#93c5fd;box-shadow:0 5px 16px rgba(15,23,42,.07);transform:translateY(-1px)}.help-tile strong{display:block;margin-bottom:7px}.help-tile span{display:block;color:#6b7280;font-size:14px;line-height:1.5}
+</style>
+<div class="help-hero"><h1>Help &amp; Guides</h1><p>Practical TradeFlow guides for setting up your business, getting discovered, managing customer work and keeping your account secure. On any main module, use the <strong>? Help</strong> link to jump directly to the relevant guide.</p></div>
+{% for category_name, guides in category_cards %}
+<section class="help-category"><h2>{{ category_name }}</h2><div class="help-grid">
+{% for slug, guide in guides %}<a class="help-tile" href="{% url 'core:help_guide' slug=slug %}"><strong>{{ guide.title }}</strong><span>{{ guide.summary }}</span></a>{% endfor %}
+</div></section>
+{% endfor %}
+{% endblock %}

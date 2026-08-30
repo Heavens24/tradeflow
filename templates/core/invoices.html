@@ -167,6 +167,8 @@ th {
 
 
 {% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='invoices' %}">? Help</a></div>
+
 
 
 <div class="topbar">
@@ -194,6 +196,13 @@ th {
 
 </div>
 
+
+
+<div class="guide-card">
+    <div class="guide-card-header"><h2>🧾 Turn completed work into an invoice</h2></div>
+    <p>Create professional invoices with your business, customer and payment details. Your customer pays your business directly; TradeFlow records the invoice and its payment status.</p>
+    <div class="guide-card-actions"><a class="guide-link" href="{% url 'core:invoice_create' %}">+ Create an Invoice</a></div>
+</div>
 
 <form
     method="GET"

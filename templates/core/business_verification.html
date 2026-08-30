@@ -240,6 +240,8 @@ textarea.form-control {
 
 
 {% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='verification' %}">? Help</a></div>
+
 
 
 <div class="verification-page">
@@ -261,7 +263,13 @@ textarea.form-control {
     </div>
 
 
-    <div class="status-card">
+    
+<div class="guide-card">
+    <div class="guide-card-header"><h2>✓ Build trust with business verification</h2></div>
+    <p>Submit your business details for review. Verification is separate from your Getting Started progress, so you can continue using TradeFlow while your information is being reviewed.</p>
+</div>
+
+<div class="status-card">
 
         <div class="status-label">
             Current verification status

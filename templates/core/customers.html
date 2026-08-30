@@ -157,6 +157,8 @@ tbody tr:hover {
 
 
 {% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='customers' %}">? Help</a></div>
+
 
 
 <div class="topbar">
@@ -184,6 +186,13 @@ tbody tr:hover {
 
 </div>
 
+
+
+<div class="guide-card">
+    <div class="guide-card-header"><h2>👥 Start with your customers</h2></div>
+    <p>Keep customer contact details and business history together. Once a customer is added, you can create quotes, jobs, invoices and statements for them.</p>
+    <div class="guide-card-actions"><a class="guide-link" href="{% url 'core:customer_create' %}">+ Add a Customer</a></div>
+</div>
 
 <div class="search-card">
 

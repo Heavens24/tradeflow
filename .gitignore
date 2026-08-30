@@ -87,3 +87,8 @@ htmlcov/
 .DS_Store
 Thumbs.db
 desktop.ini
+# ---------------------------------------------------------
+# LOCAL / THIRD-PARTY SESSION CACHE
+# ---------------------------------------------------------
+# Never commit exported dashboard/session tokens or account metadata.
+db.json

@@ -333,8 +333,24 @@ def dashboard(request):
 
     customer_count = 0
     quote_count = 0
+    invoice_count = 0
     new_quote_requests_count = 0
     active_job_count = 0
+
+    public_profile = None
+    onboarding_steps = []
+    onboarding_completed = 0
+    onboarding_total = 6
+    onboarding_percentage = 0
+    onboarding_complete = False
+    onboarding_next_url = reverse(
+        "core:business_setup"
+    )
+    marketplace_requires_pro = False
+    focus_title = "Keep your business moving"
+    focus_text = "TradeFlow will surface the next useful action here as your business activity grows."
+    focus_url = reverse("core:customer_list")
+    focus_label = "View Customers"
 
     overdue_invoice_count = 0
     overdue_amount = Decimal("0.00")
@@ -350,6 +366,18 @@ def dashboard(request):
         quote_count = Quote.objects.filter(
             business=business
         ).count()
+
+        invoice_count = Invoice.objects.filter(
+            business=business
+        ).count()
+
+        public_profile = (
+            BusinessPublicProfile.objects
+            .filter(
+                business=business
+            )
+            .first()
+        )
 
         new_quote_requests_count = QuoteRequest.objects.filter(
             business=business,
@@ -435,11 +463,178 @@ def dashboard(request):
             or Decimal("0.00")
         )
 
+
+    # -----------------------------------------------------
+    # GETTING STARTED / ONBOARDING PROGRESS
+    # -----------------------------------------------------
+
+    business_created = bool(business)
+
+    business_details_complete = bool(
+        business
+        and business.name.strip()
+        and business.phone.strip()
+        and business.email.strip()
+        and business.address.strip()
+        and business.city.strip()
+    )
+
+    marketplace_profile_published = bool(
+        public_profile
+        and public_profile.public_profile_enabled
+    )
+
+    has_customer = customer_count > 0
+    has_quote = quote_count > 0
+    has_invoice = invoice_count > 0
+
+    onboarding_steps = [
+        {
+            "label": "Create your business",
+            "complete": business_created,
+            "url": reverse(
+                "core:business_setup"
+            ),
+        },
+        {
+            "label": "Complete business details",
+            "complete": business_details_complete,
+            "url": reverse(
+                "core:business_setup"
+            ),
+        },
+        {
+            "label": "Publish marketplace profile",
+            "complete": marketplace_profile_published,
+            "url": reverse(
+                "core:public_profile_settings"
+            ),
+        },
+        {
+            "label": "Add first customer",
+            "complete": has_customer,
+            "url": reverse(
+                "core:customer_create"
+            ),
+        },
+        {
+            "label": "Create first quote",
+            "complete": has_quote,
+            "url": reverse(
+                "core:quote_create"
+            ),
+        },
+        {
+            "label": "Create first invoice",
+            "complete": has_invoice,
+            "url": reverse(
+                "core:invoice_create"
+            ),
+        },
+    ]
+
+    onboarding_completed = sum(
+        1
+        for step in onboarding_steps
+        if step["complete"]
+    )
+
+    onboarding_percentage = round(
+        (
+            onboarding_completed
+            / onboarding_total
+        )
+        * 100
+    )
+
+    onboarding_complete = (
+        onboarding_completed
+        == onboarding_total
+    )
+
+    for step in onboarding_steps:
+        if not step["complete"]:
+            onboarding_next_url = step["url"]
+            break
+
+    if onboarding_complete:
+        onboarding_next_url = reverse(
+            "core:dashboard"
+        )
+
+    # Once setup is complete, replace tutorial-style guidance with
+    # a lightweight operational next step based on live business data.
+    if new_quote_requests_count > 0:
+        focus_title = "New customer enquiries need your attention"
+        focus_text = (
+            f"You have {new_quote_requests_count} new quote request"
+            f"{'s' if new_quote_requests_count != 1 else ''}. "
+            "Reviewing new leads quickly can help you win the work."
+        )
+        focus_url = reverse("core:quote_request_list")
+        focus_label = "Review Quote Requests"
+    elif overdue_invoice_count > 0:
+        focus_title = "Follow up on overdue invoices"
+        focus_text = (
+            f"You have {overdue_invoice_count} overdue invoice"
+            f"{'s' if overdue_invoice_count != 1 else ''}. "
+            "Review outstanding balances and follow up where needed."
+        )
+        focus_url = reverse("core:invoice_list")
+        focus_label = "Review Invoices"
+    elif active_job_count > 0:
+        focus_title = "Keep active jobs moving"
+        focus_text = (
+            f"You have {active_job_count} active job"
+            f"{'s' if active_job_count != 1 else ''}. "
+            "Update progress as work moves toward completion and invoicing."
+        )
+        focus_url = reverse("core:job_list")
+        focus_label = "View Active Jobs"
+    elif outstanding_amount > Decimal("0.00"):
+        focus_title = "Keep an eye on money still due"
+        focus_text = (
+            "You have customer invoices with outstanding balances. "
+            "Record payments as soon as your business receives them."
+        )
+        focus_url = reverse("core:invoice_list")
+        focus_label = "View Outstanding Invoices"
+    elif onboarding_complete:
+        focus_title = "Your TradeFlow setup is ready"
+        focus_text = (
+            "Your core setup is complete. Keep adding real customer work, "
+            "respond to marketplace enquiries and move jobs through to payment."
+        )
+        focus_url = reverse("core:quote_request_list")
+        focus_label = "Check Quote Requests"
+
+    current_hour = timezone.localtime().hour
+
+    if current_hour < 12:
+        greeting = "Good morning"
+    elif current_hour < 18:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
     context = {
         "business": business,
         "customer_count": customer_count,
         "quote_count": quote_count,
+        "invoice_count": invoice_count,
         "new_quote_requests_count": new_quote_requests_count,
+        "greeting": greeting,
+        "onboarding_steps": onboarding_steps,
+        "onboarding_completed": onboarding_completed,
+        "onboarding_total": onboarding_total,
+        "onboarding_percentage": onboarding_percentage,
+        "onboarding_complete": onboarding_complete,
+        "onboarding_next_url": onboarding_next_url,
+        "marketplace_requires_pro": marketplace_requires_pro,
+        "focus_title": focus_title,
+        "focus_text": focus_text,
+        "focus_url": focus_url,
+        "focus_label": focus_label,
         "active_job_count": active_job_count,
         "overdue_invoice_count": overdue_invoice_count,
         "overdue_amount": overdue_amount,
@@ -581,6 +776,10 @@ def customer_create(request):
         )
 
         if form.is_valid():
+            is_first_customer = not Customer.objects.filter(
+                business=business
+            ).exists()
+
             customer = form.save(
                 commit=False
             )
@@ -588,10 +787,16 @@ def customer_create(request):
             customer.business = business
             customer.save()
 
-            messages.success(
-                request,
-                "Customer added successfully.",
-            )
+            if is_first_customer:
+                messages.success(
+                    request,
+                    "🎉 First customer added! You can now create a professional quote for them.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Customer added successfully.",
+                )
 
             return redirect(
                 "core:customer_list"
@@ -1444,6 +1649,10 @@ def quote_create(request):
             "core:customer_create"
         )
 
+    is_first_quote = not Quote.objects.filter(
+        business=business
+    ).exists()
+
     quote = Quote(
         business=business
     )
@@ -1504,13 +1713,19 @@ def quote_create(request):
 
             quote.refresh_from_db()
 
-            messages.success(
-                request,
-                (
-                    f"{quote.quote_number} "
-                    "created successfully."
-                ),
-            )
+            if is_first_quote:
+                messages.success(
+                    request,
+                    f"🎉 {quote.quote_number} is your first TradeFlow quote. Review it, then share it with your customer.",
+                )
+            else:
+                messages.success(
+                    request,
+                    (
+                        f"{quote.quote_number} "
+                        "created successfully."
+                    ),
+                )
 
             return redirect(
                 "core:quote_detail",
@@ -2673,6 +2888,10 @@ def invoice_create(request):
             "core:customer_create"
         )
 
+    is_first_invoice = not Invoice.objects.filter(
+        business=business
+    ).exists()
+
     invoice = Invoice(
         business=business
     )
@@ -2709,13 +2928,19 @@ def invoice_create(request):
 
             invoice.refresh_from_db()
 
-            messages.success(
-                request,
-                (
-                    f"{invoice.invoice_number} "
-                    "created successfully."
-                ),
-            )
+            if is_first_invoice:
+                messages.success(
+                    request,
+                    f"🎉 {invoice.invoice_number} is your first TradeFlow invoice. Your customer pays your business directly; record the payment in TradeFlow when received.",
+                )
+            else:
+                messages.success(
+                    request,
+                    (
+                        f"{invoice.invoice_number} "
+                        "created successfully."
+                    ),
+                )
 
             return redirect(
                 "core:invoice_detail",
@@ -3421,3 +3646,127 @@ def payment_delete(
         "core/payment_confirm_delete.html",
         context,
     )
+# =====================================================
+# HELP & GUIDES
+# =====================================================
+
+HELP_GUIDES = {
+    "getting-started": {
+        "title": "Getting Started",
+        "summary": "Set up TradeFlow and move from a new account to your first customer, quote and invoice.",
+        "learn": ["Complete your business setup", "Publish your marketplace profile", "Create your first customer, quote and invoice"],
+        "steps": [
+            ("Complete your business details", "Open Settings and add the business information that should appear on your TradeFlow documents."),
+            ("Publish your public profile", "Choose your trade category, services and public contact details, then publish your profile so customers can discover you."),
+            ("Add a customer", "Add an existing customer or respond to a marketplace quote request."),
+            ("Create a quote", "Select the customer, add chargeable labour, materials or services, review VAT and send the quotation."),
+            ("Manage the work", "When work is approved, manage it as a job and keep its status up to date."),
+            ("Invoice and record payment", "Create the invoice after the work is ready to bill. Your customer pays your business directly; record the payment in TradeFlow."),
+        ],
+        "tip": "Use the Getting Started card on your Dashboard. Continue Setup always takes you to the next unfinished milestone.",
+    },
+    "business-setup": {
+        "title": "Setting Up Your Business", "summary": "Configure the business information used across TradeFlow.",
+        "learn": ["Add business contact details", "Add registration and tax details where applicable", "Add private banking details for invoices"],
+        "steps": [("Open Settings", "Go to Settings from the main navigation."), ("Complete business information", "Review the business name, phone, email, address and other requested details."), ("Review tax information", "Only enter VAT or registration information that applies to your business."), ("Add banking details", "Use the account where your customers should pay invoice amounts directly."), ("Save your changes", "Review the information carefully before saving.")],
+        "tip": "Banking, customer, quote, invoice and payment records are not displayed on your public marketplace profile.",
+    },
+    "customers": {
+        "title": "Adding Customers", "summary": "Keep customer contact information and business history organised.",
+        "learn": ["Add a customer", "Maintain customer details", "Open a customer statement"],
+        "steps": [("Open Customers", "Select Customers from the navigation."), ("Choose Add Customer", "Enter the customer's name and the contact details you need for your records."), ("Save the customer", "The customer becomes available when creating quotes and other records."), ("Maintain the record", "Use Edit when details change. Use the Statement action to review the customer's account history.")],
+        "tip": "Check for an existing customer before creating another record for the same person or business.",
+    },
+    "quotes": {
+        "title": "Creating Quotes", "summary": "Turn customer enquiries into professional quotations.",
+        "learn": ["Create a quotation", "Add labour, materials and services", "Apply VAT and share the finished quote"],
+        "steps": [("Open Quotes", "Choose Quotes, then New Quote."), ("Select the customer", "Choose the customer the quotation belongs to."), ("Add chargeable items", "Enter each labour, material or service item with its quantity and unit price."), ("Review VAT and dates", "Set the issue and expiry dates and apply VAT only when appropriate."), ("Save and review", "Check every description, quantity, price and note before sending."), ("Share the quotation", "Use the available print/PDF or WhatsApp sharing options.")],
+        "tip": "Do not enter Total, Subtotal or VAT as quote items. TradeFlow calculates totals from the chargeable items.",
+    },
+    "jobs": {
+        "title": "Managing Jobs", "summary": "Keep approved customer work organised from start to completion.",
+        "learn": ["Create or convert work into a job", "Track job status", "Move completed work toward invoicing"],
+        "steps": [("Open Jobs", "Use Jobs to see work currently being managed."), ("Create or convert the job", "Create a job directly where appropriate, or continue from an accepted quotation."), ("Keep the status current", "Update the job as the work progresses so the Dashboard remains useful."), ("Review the job details", "Keep the customer and work information accurate."), ("Create the invoice", "When the work is ready to bill, continue from the job to invoicing.")],
+        "tip": "Keeping job statuses current makes your Active Jobs Dashboard figure meaningful.",
+    },
+    "invoices": {
+        "title": "Creating Invoices", "summary": "Create professional invoices for work your business has completed or is ready to bill.",
+        "learn": ["Create an invoice", "Review amounts and payment details", "Track outstanding invoices"],
+        "steps": [("Open Invoices", "Choose Invoices from the navigation."), ("Create the invoice", "Select the relevant customer or continue from a job where available."), ("Review invoice information", "Check items, dates, totals, VAT and your business payment details."), ("Send the invoice", "Share or print the finished invoice for your customer."), ("Record payment when received", "When the customer pays your business directly, record the payment in TradeFlow.")],
+        "tip": "Ask customers to use the invoice number as their payment reference when appropriate.",
+    },
+    "payments": {
+        "title": "Recording Payments", "summary": "Record customer money received against TradeFlow invoices.",
+        "learn": ["Record a customer payment", "Keep invoice balances accurate", "Understand what TradeFlow does not collect"],
+        "steps": [("Confirm payment outside TradeFlow", "Verify that the money has actually reached your business through EFT or your chosen payment method."), ("Open the invoice or Payments", "Find the invoice the customer paid."), ("Record the payment", "Enter the payment information against the correct invoice."), ("Review the balance", "Confirm the invoice and Dashboard now reflect the payment correctly.")],
+        "tip": "TradeFlow records customer invoice payments; it does not receive, hold or route that customer money. Paystack is used for TradeFlow Pro subscriptions, not your customer invoices.",
+    },
+    "customer-statements": {
+        "title": "Customer Statements", "summary": "Review a customer's TradeFlow account history in one place.",
+        "learn": ["Open a statement", "Review customer transactions", "Use statements when following up with customers"],
+        "steps": [("Open Customers", "Find the customer whose history you want to review."), ("Choose Statement", "Open the statement action on that customer's row."), ("Review the history", "Check the available invoices, payments and balances for accuracy."), ("Use it for follow-up", "Refer to the statement when discussing outstanding or historical account activity with the customer.")],
+        "tip": "Record payments promptly so customer statements remain accurate.",
+    },
+    "marketplace": {
+        "title": "Marketplace & Public Profiles", "summary": "Help potential customers discover your business and request work.",
+        "learn": ["Configure your public profile", "Publish to the marketplace", "Share your TradeFlow business page"],
+        "steps": [("Open Public Profile settings", "From Settings, open the public business profile controls."), ("Choose your category", "Select the trade category that best represents your main work."), ("Describe your services", "Add a clear headline, business description and services customers can understand."), ("Choose public contact details", "Decide which business phone, email or WhatsApp information customers may see."), ("Publish your profile", "Enable publishing so the business can appear in the TradeFlow Marketplace."), ("Share your page", "Use your public TradeFlow URL in WhatsApp, social profiles and customer outreach.")],
+        "tip": "Marketplace publishing and quote requests are available to Free businesses. Private operational and banking information stays off the public profile.",
+    },
+    "quote-requests": {
+        "title": "Quote Requests", "summary": "Review marketplace enquiries and turn suitable leads into work.",
+        "learn": ["Review new leads", "Understand urgency and priority", "Contact and convert a lead"],
+        "steps": [("Open Quote Requests", "New marketplace enquiries appear in your Quote Requests inbox."), ("Review the request", "Check the requested work, location, urgency and customer's preferred contact method."), ("Contact the customer", "Respond using the supplied contact details and mark the enquiry appropriately."), ("Convert suitable work", "When ready, convert the request into the next TradeFlow workflow step and prepare a quotation."), ("Close unsuitable enquiries", "Keep the inbox useful by updating requests you will not pursue.")],
+        "tip": "Urgency describes how quickly the customer needs help; priority helps you organise how the business should handle the lead.",
+    },
+    "verification": {
+        "title": "Business Verification", "summary": "Submit business information for TradeFlow verification and build marketplace trust.",
+        "learn": ["Understand verification", "Submit the requested information", "Track verification status"],
+        "steps": [("Open Verification", "Choose Verification from the navigation."), ("Review the requirements", "Prepare the business information requested on the verification screen."), ("Submit accurate information", "Make sure the details belong to the business being verified."), ("Track the status", "Return to Verification to see whether the submission is pending, verified or needs attention.")],
+        "tip": "Verification is separate from basic onboarding. A business can start using TradeFlow while its verification journey is still in progress.",
+    },
+    "pro": {
+        "title": "TradeFlow Pro", "summary": "Understand the optional TradeFlow Pro subscription and premium capabilities.",
+        "learn": ["See your subscription status", "Understand Free versus Pro", "Manage your subscription"],
+        "steps": [("Open your subscription", "Use the TradeFlow Pro/subscription area to review your current status."), ("Review the available plan", "Check the displayed features, price and subscription period before paying."), ("Choose a supported payment option", "Follow the checkout instructions shown by TradeFlow."), ("Confirm activation", "After successful processing, return to the subscription page and confirm the displayed Pro status.")],
+        "tip": "Marketplace publishing is not a Pro requirement. Pro is for premium productivity and growth capabilities.",
+    },
+    "password-reset": {
+        "title": "Forgot / Reset Password", "summary": "Recover access to your TradeFlow account securely.",
+        "learn": ["Request a password reset", "Use the reset email", "Choose a new password"],
+        "steps": [("Open Forgot password", "From the TradeFlow sign-in screen, choose Forgot password."), ("Enter your account email", "Submit the email address associated with the account."), ("Check your email", "Open the TradeFlow reset message and follow its reset link."), ("Choose a new password", "Use a strong password that meets the requirements shown on screen."), ("Sign in again", "Return to TradeFlow and sign in using the new password.")],
+        "tip": "Never share a password-reset link or your password with another person.",
+    },
+    "security": {
+        "title": "Account & Security", "summary": "Protect access to your business records and TradeFlow account.",
+        "learn": ["Use safer passwords", "Protect account access", "Recognise sensitive business information"],
+        "steps": [("Use a unique password", "Choose a password you do not reuse on unrelated services."), ("Protect your email account", "Your email may be used for account recovery, so secure it as carefully as TradeFlow."), ("Sign out on shared devices", "Do not leave your TradeFlow session open on computers or phones other people use."), ("Keep sensitive details private", "Do not send passwords, secret keys or unnecessary banking credentials through support messages."), ("Review unexpected activity", "If account information changes unexpectedly, secure your credentials and investigate promptly.")],
+        "tip": "TradeFlow public profiles are designed to expose business marketing information, not private customer, invoice, payment or banking records.",
+    },
+    "faq": {
+        "title": "Frequently Asked Questions", "summary": "Quick answers to common TradeFlow questions.",
+        "learn": ["Understand the core workflow", "Know how marketplace and payments work", "Find the right guide quickly"],
+        "steps": [("What is TradeFlow?", "A small-business operating system for managing customers, quote requests, quotations, jobs, invoices and recorded payments."), ("Does TradeFlow collect my customer's invoice payment?", "No. Your customer pays your business directly. You then record the payment in TradeFlow."), ("What is Paystack used for?", "Paystack is used for TradeFlow Pro subscription payments, not for settling your customer invoices."), ("Do I need Pro to publish in the marketplace?", "No. Marketplace publishing and quote requests are available to Free businesses."), ("Does verification block me from using TradeFlow?", "No. Verification is a separate trust process and is not required to complete the basic onboarding checklist."), ("Where should I start?", "Open the Dashboard and follow the Getting Started card. Continue Setup takes you to your next unfinished milestone.")],
+        "tip": "If your question is about a specific module, use the ? Help link on that TradeFlow page to open the matching guide.",
+    },
+}
+
+
+@login_required
+def help_center(request):
+    categories = [
+        ("Getting Started", ["getting-started", "business-setup", "marketplace", "verification"]),
+        ("Running Your Business", ["customers", "quote-requests", "quotes", "jobs", "invoices", "payments", "customer-statements"]),
+        ("Account & Support", ["pro", "password-reset", "security", "faq"]),
+    ]
+    category_cards = [(name, [(slug, HELP_GUIDES[slug]) for slug in slugs]) for name, slugs in categories]
+    return render(request, "core/help_center.html", {"category_cards": category_cards})
+
+
+@login_required
+def help_guide(request, slug):
+    from django.http import Http404
+    guide = HELP_GUIDES.get(slug)
+    if guide is None:
+        raise Http404("Help guide not found")
+    return render(request, "core/help_guide.html", {"guide": guide, "guide_slug": slug})

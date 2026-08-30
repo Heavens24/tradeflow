@@ -118,6 +118,8 @@ tbody tr:hover {
 
 
 {% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='payments' %}">? Help</a></div>
+
 
 
 <div class="topbar">
@@ -155,6 +157,13 @@ tbody tr:hover {
 
 </div>
 
+
+
+<div class="guide-card">
+    <div class="guide-card-header"><h2>💰 Record money received from customers</h2></div>
+    <p>TradeFlow does not collect your customer invoice payments. When a customer pays your business directly, record that payment against the correct invoice to keep balances and statements accurate.</p>
+    <div class="guide-card-actions"><a class="guide-link" href="{% url 'core:invoice_list' %}">View Invoices</a></div>
+</div>
 
 <div class="table-card">
 

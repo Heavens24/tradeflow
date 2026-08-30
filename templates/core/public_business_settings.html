@@ -202,6 +202,14 @@
             color: #065f46;
         }
 
+
+        .guide-card {
+            margin-bottom: 22px; padding: 18px 20px; border: 1px solid #dbeafe; border-radius: 12px;
+            background: #eff6ff; color: #1e3a8a; line-height: 1.6;
+        }
+        .guide-card h2 { margin: 0 0 8px; color: #1f2937; font-size: 17px; }
+        .guide-card p { margin: 0; }
+
         .marketplace-note {
             margin-bottom: 24px;
 
@@ -274,7 +282,8 @@
 
         }
 
-    </style>
+    .page-help-link{display:inline-block;padding:7px 10px;border:1px solid #dbe3ec;border-radius:8px;background:#fff;color:#2563eb;font-size:13px;font-weight:700;text-decoration:none}.page-help-link:hover{background:#eff6ff}.page-help-row{display:flex;justify-content:flex-end;margin-bottom:12px}
+</style>
 
 </head>
 
@@ -282,6 +291,7 @@
 <body>
 
 <div class="page">
+    <div class="page-help-row"><a class="page-help-link" href="{% url 'core:help_guide' slug='marketplace' %}">? Help</a></div>
 
 
     <div class="top">
@@ -321,6 +331,12 @@
 
     {% endif %}
 
+
+
+    <div class="guide-card">
+        <h2>🌍 Help customers discover your business</h2>
+        <p>Choose your trade category, explain your services and publish the profile when it is ready. Publishing is available to Free businesses, and potential customers can use the public page to send quote requests.</p>
+    </div>
 
     <div class="card">
 

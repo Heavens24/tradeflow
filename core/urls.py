@@ -12,6 +12,12 @@ app_name = "core"
 
 urlpatterns = [
     # =====================================================
+    # HELP & GUIDES
+    # =====================================================
+    path("help/", views.help_center, name="help_center"),
+    path("help/<slug:slug>/", views.help_guide, name="help_guide"),
+
+    # =====================================================
     # HOME / AUTHENTICATION
     # =====================================================
 
