@@ -119,6 +119,34 @@
     color: #1e40af;
 }
 
+
+.early-access-card {
+    margin-bottom: 22px;
+    border: 2px solid #111827;
+    background: #f9fafb;
+}
+
+.early-access-card h2 {
+    margin-top: 0;
+}
+
+.early-access-badge {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #166534;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.early-access-features {
+    margin: 16px 0 0;
+    padding-left: 20px;
+    line-height: 1.9;
+}
+
 .eft-box {
     margin-top: 18px;
 
@@ -269,605 +297,747 @@
 {% block content %}
 <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='pro' %}">? Help</a></div>
 
-
-
 <div class="subscription-wrap">
 
+    {% if early_access %}
 
-    <!-- =====================================================
-         SUBSCRIPTION HEADER
-         ===================================================== -->
+        <!-- =====================================================
+             TRADEFLOW EARLY ACCESS
+             ===================================================== -->
 
-    <section class="subscription-hero">
+        <section class="subscription-hero">
 
-        <a href="{% url 'core:dashboard' %}">
-            ← Dashboard
-        </a>
+            <a href="{% url 'core:dashboard' %}">
+                ← Dashboard
+            </a>
 
-
-        <h1 style="margin-top: 18px;">
-            TradeFlow Subscription
-        </h1>
-
-
-        <p>
-            Manage TradeFlow Pro access for {{ business.name }}.
-        </p>
-
-
-        <span class="subscription-state">
-
-            {{ subscription.get_plan_display }}
-
-            ·
-
-            {{ subscription.effective_status|title }}
-
-        </span>
-
-
-        {% if subscription.has_pro_access %}
+            <h1 style="margin-top: 18px;">
+                TradeFlow Early Access
+            </h1>
 
             <p>
-
-                <strong>
-                    Pro access is active.
-                </strong>
-
-                {% if subscription.current_period_end %}
-
-                    Current access runs until
-
-                    {{ subscription.current_period_end|date:"j M Y, H:i" }}.
-
-                {% endif %}
-
+                All TradeFlow features are currently available to
+                {{ business.name }} at no subscription cost during
+                Early Access.
             </p>
 
-        {% else %}
+            <span class="subscription-state">
+                Early Access · Free
+            </span>
 
-            <p>
-                Upgrade to TradeFlow Pro to publish your business
-                in the Marketplace and receive customer leads.
-            </p>
-
-        {% endif %}
+        </section>
 
 
-    </section>
+        <section class="plan-card early-access-card">
 
-
-    <!-- =====================================================
-         PLANS
-         ===================================================== -->
-
-    <section class="plan-grid">
-
-
-        <!-- =================================================
-             FREE
-             ================================================= -->
-
-        <article class="plan-card">
+            <span class="early-access-badge">
+                ✓ ALL FEATURES CURRENTLY FREE
+            </span>
 
             <h2>
-                Free
+                Full TradeFlow access
             </h2>
 
-
             <div class="price">
-
                 R0
-
                 <small>
-                    / month
+                    during Early Access
                 </small>
-
             </div>
 
+            <p>
+                Use the complete TradeFlow platform while we grow,
+                improve the product and prepare the next stage of
+                billing.
+            </p>
 
-            <ul class="features">
-
-                <li>
-                    Core TradeFlow business records
-                </li>
-
-                <li>
-                    Customers and customer statements
-                </li>
-
-                <li>
-                    Quotes and quotations
-                </li>
-
-                <li>
-                    Jobs and job tracking
-                </li>
-
-                <li>
-                    Invoices and payments
-                </li>
-
-                <li>
-                    Business profile management
-                </li>
-
-                <li>
-                    Marketplace listing not included
-                </li>
-
-                <li>
-                    Public marketplace profile not included
-                </li>
-
-                <li>
-                    AI assistant not included
-                </li>
-
+            <ul class="early-access-features">
+                <li>Customers and customer statements</li>
+                <li>Quotes and quotations</li>
+                <li>Jobs and job tracking</li>
+                <li>Invoices and payments</li>
+                <li>Business profile management</li>
+                <li>Marketplace business listing</li>
+                <li>Public TradeFlow business profile</li>
+                <li>Customer quote requests and leads</li>
+                <li>Marketplace reviews and reputation</li>
+                <li>Business verification visibility</li>
+                <li>AI assistant access, subject to usage limits</li>
             </ul>
 
+            <div class="notice success-note">
+                No TradeFlow subscription payment is required during
+                Early Access. Paystack and manual EFT checkout are
+                temporarily paused.
+            </div>
 
-            {% if subscription.is_free_plan %}
+            <div class="notice info-note">
+                Your existing subscription status, Paystack payment
+                history and EFT payment history are preserved. When
+                Early Access ends, TradeFlow can return to the existing
+                Free / Pro subscription system without rebuilding your
+                billing records.
+            </div>
 
-                <strong>
-                    Current plan
-                </strong>
-
-            {% endif %}
+        </section>
 
 
-        </article>
+        <!-- =====================================================
+             EXISTING EFT HISTORY — PRESERVED
+             ===================================================== -->
 
-
-        <!-- =================================================
-             PRO
-             ================================================= -->
-
-        <article class="plan-card pro">
+        <section class="history-card">
 
             <h2>
-                Pro
+                EFT payment history
             </h2>
 
+            {% if recent_eft_requests %}
 
-            <div class="price">
+                {% for eft in recent_eft_requests %}
 
-                {% if pro_price %}
+                    <div class="payment-row">
 
-                    R{{ pro_price|floatformat:2 }}
+                        <span>
 
-                {% else %}
+                            <strong>
+                                {{ eft.reference }}
+                            </strong>
 
-                    Price configured at checkout
+                            {% if eft.customer_payment_reference %}
 
-                {% endif %}
+                                <br>
 
-                <small>
-                    / month
-                </small>
+                                <small>
+                                    Bank reference:
+                                    {{ eft.customer_payment_reference }}
+                                </small>
 
-            </div>
+                            {% endif %}
 
-
-            <ul class="features">
-
-                <li>
-                    Everything in TradeFlow Free
-                </li>
-
-                <li>
-                    Marketplace business listing
-                </li>
-
-                <li>
-                    Public TradeFlow business profile
-                </li>
-
-                <li>
-                    Receive customer quote requests and leads
-                </li>
-
-                <li>
-                    Marketplace reviews and reputation
-                </li>
-
-                <li>
-                    Business verification visibility
-                </li>
-
-                <li>
-                    AI assistant access subject to usage limits
-                </li>
-
-                <li>
-                    Monthly TradeFlow Pro access
-                </li>
-
-            </ul>
-
-
-            <!-- =============================================
-                 ALREADY ACTIVE
-                 ============================================= -->
-
-            {% if subscription.has_pro_access %}
-
-                <div class="notice success-note">
-
-                    ✓ Your Pro subscription is active.
-
-                    <br><br>
-
-                    Your business can use TradeFlow Marketplace
-                    features while this subscription remains active.
-
-                    {% if subscription.current_period_end %}
-
-                        <br><br>
+                        </span>
 
                         <strong>
-                            Access valid until:
+                            R{{ eft.amount|floatformat:2 }}
                         </strong>
 
-                        {{ subscription.current_period_end|date:"j M Y, H:i" }}
+                        <span>
 
-                    {% endif %}
+                            {% if eft.status == "approved" %}
 
-                </div>
+                                <span class="status-approved">
+                                    {{ eft.get_status_display }}
+                                </span>
 
+                            {% elif eft.status == "pending_review" %}
+
+                                <span class="status-pending">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% elif eft.status == "rejected" %}
+
+                                <span class="status-rejected">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-awaiting">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                            <br>
+
+                            <small>
+                                {{ eft.created_at|date:"j M Y, H:i" }}
+                            </small>
+
+                        </span>
+
+                    </div>
+
+                {% endfor %}
 
             {% else %}
 
+                <p>
+                    No EFT subscription payments have been recorded.
+                </p>
 
-                <!-- =========================================
-                     PAYSTACK ONLINE CHECKOUT
-                     ========================================= -->
+            {% endif %}
 
-                {% if paystack_ready %}
-
-                    {% if payment_email %}
-
-                        <form
-                            method="POST"
-                            action="{% url 'core:subscription_checkout' %}"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="button"
-                            >
-                                Pay online with Paystack —
-                                {% if pro_price %}
-                                    R{{ pro_price|floatformat:2 }}
-                                {% else %}
-                                    Upgrade to Pro
-                                {% endif %}
-                            </button>
-
-                        </form>
+        </section>
 
 
-                        <p
-                            style="
-                                color: #6b7280;
-                                font-size: 13px;
-                            "
-                        >
-                            Secure online checkout using:
-                            {{ payment_email }}
-                        </p>
+        <!-- =====================================================
+             EXISTING PAYSTACK HISTORY — PRESERVED
+             ===================================================== -->
 
+        <section class="history-card">
+
+            <h2>
+                Paystack subscription payment history
+            </h2>
+
+            {% if recent_payments %}
+
+                {% for payment in recent_payments %}
+
+                    <div class="payment-row">
+
+                        <span>
+                            {{ payment.reference }}
+                        </span>
+
+                        <strong>
+                            R{{ payment.amount|floatformat:2 }}
+                        </strong>
+
+                        <span>
+                            {{ payment.get_status_display }}
+                            ·
+                            {{ payment.created_at|date:"j M Y" }}
+                        </span>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>
+                    No Paystack subscription payments have been
+                    recorded yet.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
+    {% else %}
+
+        <!-- =====================================================
+             NORMAL FREE / PRO SUBSCRIPTION MODE
+             ===================================================== -->
+
+        <section class="subscription-hero">
+
+            <a href="{% url 'core:dashboard' %}">
+                ← Dashboard
+            </a>
+
+            <h1 style="margin-top: 18px;">
+                TradeFlow Subscription
+            </h1>
+
+            <p>
+                Manage TradeFlow Pro access for {{ business.name }}.
+            </p>
+
+            <span class="subscription-state">
+
+                {{ subscription.get_plan_display }}
+
+                ·
+
+                {{ subscription.effective_status|title }}
+
+            </span>
+
+            {% if subscription.has_pro_access %}
+
+                <p>
+
+                    <strong>
+                        Pro access is active.
+                    </strong>
+
+                    {% if subscription.current_period_end %}
+
+                        Current access runs until
+
+                        {{ subscription.current_period_end|date:"j M Y, H:i" }}.
+
+                    {% endif %}
+
+                </p>
+
+            {% else %}
+
+                <p>
+                    Upgrade to TradeFlow Pro to publish your business
+                    in the Marketplace and receive customer leads.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <section class="plan-grid">
+
+            <article class="plan-card">
+
+                <h2>
+                    Free
+                </h2>
+
+                <div class="price">
+
+                    R0
+
+                    <small>
+                        / month
+                    </small>
+
+                </div>
+
+                <ul class="features">
+
+                    <li>
+                        Core TradeFlow business records
+                    </li>
+
+                    <li>
+                        Customers and customer statements
+                    </li>
+
+                    <li>
+                        Quotes and quotations
+                    </li>
+
+                    <li>
+                        Jobs and job tracking
+                    </li>
+
+                    <li>
+                        Invoices and payments
+                    </li>
+
+                    <li>
+                        Business profile management
+                    </li>
+
+                    <li>
+                        Marketplace listing not included
+                    </li>
+
+                    <li>
+                        Public marketplace profile not included
+                    </li>
+
+                    <li>
+                        AI assistant not included
+                    </li>
+
+                </ul>
+
+                {% if subscription.is_free_plan %}
+
+                    <strong>
+                        Current plan
+                    </strong>
+
+                {% endif %}
+
+            </article>
+
+
+            <article class="plan-card pro">
+
+                <h2>
+                    Pro
+                </h2>
+
+                <div class="price">
+
+                    {% if pro_price %}
+
+                        R{{ pro_price|floatformat:2 }}
 
                     {% else %}
 
-                        <div class="notice">
+                        Price configured at checkout
 
-                            Add a business email address before
-                            starting online Paystack checkout.
+                    {% endif %}
+
+                    <small>
+                        / month
+                    </small>
+
+                </div>
+
+                <ul class="features">
+
+                    <li>
+                        Everything in TradeFlow Free
+                    </li>
+
+                    <li>
+                        Marketplace business listing
+                    </li>
+
+                    <li>
+                        Public TradeFlow business profile
+                    </li>
+
+                    <li>
+                        Receive customer quote requests and leads
+                    </li>
+
+                    <li>
+                        Marketplace reviews and reputation
+                    </li>
+
+                    <li>
+                        Business verification visibility
+                    </li>
+
+                    <li>
+                        AI assistant access subject to usage limits
+                    </li>
+
+                    <li>
+                        Monthly TradeFlow Pro access
+                    </li>
+
+                </ul>
+
+                {% if subscription.has_pro_access %}
+
+                    <div class="notice success-note">
+
+                        ✓ Your Pro subscription is active.
+
+                        <br><br>
+
+                        Your business can use TradeFlow Marketplace
+                        features while this subscription remains active.
+
+                        {% if subscription.current_period_end %}
+
+                            <br><br>
+
+                            <strong>
+                                Access valid until:
+                            </strong>
+
+                            {{ subscription.current_period_end|date:"j M Y, H:i" }}
+
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    {% if paystack_ready %}
+
+                        {% if payment_email %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'core:subscription_checkout' %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="button"
+                                >
+                                    Pay online with Paystack —
+                                    {% if pro_price %}
+                                        R{{ pro_price|floatformat:2 }}
+                                    {% else %}
+                                        Upgrade to Pro
+                                    {% endif %}
+                                </button>
+
+                            </form>
+
+                            <p
+                                style="
+                                    color: #6b7280;
+                                    font-size: 13px;
+                                "
+                            >
+                                Secure online checkout using:
+                                {{ payment_email }}
+                            </p>
+
+                        {% else %}
+
+                            <div class="notice">
+
+                                Add a business email address before
+                                starting online Paystack checkout.
+
+                            </div>
+
+                        {% endif %}
+
+                    {% else %}
+
+                        <div class="notice info-note">
+
+                            Online Paystack checkout is currently
+                            unavailable.
+
+                            {% if eft_ready %}
+
+                                <br><br>
+
+                                You can still activate TradeFlow Pro
+                                using the temporary EFT payment option
+                                below.
+
+                            {% endif %}
 
                         </div>
 
                     {% endif %}
 
 
-                {% else %}
+                    {% if paystack_ready and eft_ready %}
 
-                    <div class="notice info-note">
+                        <div class="payment-option-divider">
+                            OR
+                        </div>
 
-                        Online Paystack checkout is currently
-                        unavailable.
+                    {% endif %}
 
-                        {% if eft_ready %}
 
-                            <br><br>
+                    {% if eft_ready %}
 
-                            You can still activate TradeFlow Pro
-                            using the temporary EFT payment option
-                            below.
+                        <div class="eft-box">
 
-                        {% endif %}
+                            <h3>
+                                Pay by EFT
+                            </h3>
 
-                    </div>
+                            <p>
+
+                                Pay
+
+                                {% if pro_price %}
+
+                                    <strong>
+                                        R{{ pro_price|floatformat:2 }}
+                                    </strong>
+
+                                {% else %}
+
+                                    the TradeFlow Pro monthly fee
+
+                                {% endif %}
+
+                                by EFT and submit your payment
+                                reference for verification.
+
+                            </p>
+
+                            <p
+                                style="
+                                    color: #6b7280;
+                                    font-size: 13px;
+                                "
+                            >
+                                EFT payments are verified manually.
+
+                                Pro access is activated only after
+                                TradeFlow confirms that your payment
+                                has been received.
+                            </p>
+
+                            <form
+                                method="POST"
+                                action="{% url 'core:eft_checkout' %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="button-secondary"
+                                >
+                                    Continue with EFT
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    {% elif not paystack_ready %}
+
+                        <div class="notice">
+
+                            Subscription checkout is temporarily
+                            unavailable.
+
+                            Please try again later or contact
+                            TradeFlow support.
+
+                        </div>
+
+                    {% endif %}
 
                 {% endif %}
 
+            </article>
 
-                <!-- =========================================
-                     PAYMENT METHOD DIVIDER
-                     ========================================= -->
-
-                {% if paystack_ready and eft_ready %}
-
-                    <div class="payment-option-divider">
-                        OR
-                    </div>
-
-                {% endif %}
+        </section>
 
 
-                <!-- =========================================
-                     MANUAL EFT
-                     ========================================= -->
+        <section class="history-card">
 
-                {% if eft_ready %}
+            <h2>
+                EFT payment requests
+            </h2>
 
-                    <div class="eft-box">
+            {% if recent_eft_requests %}
 
-                        <h3>
-                            Pay by EFT
-                        </h3>
+                {% for eft in recent_eft_requests %}
 
+                    <div class="payment-row">
 
-                        <p>
+                        <span>
 
-                            Pay
+                            <strong>
+                                {{ eft.reference }}
+                            </strong>
 
-                            {% if pro_price %}
+                            {% if eft.customer_payment_reference %}
 
-                                <strong>
-                                    R{{ pro_price|floatformat:2 }}
-                                </strong>
+                                <br>
 
-                            {% else %}
-
-                                the TradeFlow Pro monthly fee
+                                <small>
+                                    Bank reference:
+                                    {{ eft.customer_payment_reference }}
+                                </small>
 
                             {% endif %}
 
-                            by EFT and submit your payment
-                            reference for verification.
-
-                        </p>
-
-
-                        <p
-                            style="
-                                color: #6b7280;
-                                font-size: 13px;
-                            "
-                        >
-                            EFT payments are verified manually.
-
-                            Pro access is activated only after
-                            TradeFlow confirms that your payment
-                            has been received.
-                        </p>
-
-
-                        <form
-                            method="POST"
-                            action="{% url 'core:eft_checkout' %}"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="button-secondary"
-                            >
-                                Continue with EFT
-                            </button>
-
-                        </form>
-
-                    </div>
-
-
-                {% elif not paystack_ready %}
-
-                    <div class="notice">
-
-                        Subscription checkout is temporarily
-                        unavailable.
-
-                        Please try again later or contact
-                        TradeFlow support.
-
-                    </div>
-
-                {% endif %}
-
-
-            {% endif %}
-
-
-        </article>
-
-
-    </section>
-
-
-    <!-- =====================================================
-         EFT PAYMENT REQUEST HISTORY
-         ===================================================== -->
-
-    <section class="history-card">
-
-        <h2>
-            EFT payment requests
-        </h2>
-
-
-        {% if recent_eft_requests %}
-
-
-            {% for eft in recent_eft_requests %}
-
-                <div class="payment-row">
-
-                    <span>
+                        </span>
 
                         <strong>
-                            {{ eft.reference }}
+                            R{{ eft.amount|floatformat:2 }}
                         </strong>
 
-                        {% if eft.customer_payment_reference %}
+                        <span>
+
+                            {% if eft.status == "approved" %}
+
+                                <span class="status-approved">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% elif eft.status == "pending_review" %}
+
+                                <span class="status-pending">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% elif eft.status == "rejected" %}
+
+                                <span class="status-rejected">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-awaiting">
+                                    {{ eft.get_status_display }}
+                                </span>
+
+                            {% endif %}
 
                             <br>
 
                             <small>
-                                Bank reference:
-                                {{ eft.customer_payment_reference }}
+                                {{ eft.created_at|date:"j M Y, H:i" }}
                             </small>
 
-                        {% endif %}
+                            {% if eft.status == "awaiting_payment" %}
 
-                    </span>
+                                <br>
 
+                                <a
+                                    href="{% url 'core:eft_payment' eft.reference %}"
+                                >
+                                    Continue payment
+                                </a>
 
-                    <strong>
-                        R{{ eft.amount|floatformat:2 }}
-                    </strong>
+                            {% endif %}
 
+                        </span>
 
-                    <span>
+                    </div>
 
-                        {% if eft.status == "approved" %}
+                {% endfor %}
 
-                            <span class="status-approved">
-                                {{ eft.get_status_display }}
-                            </span>
+            {% else %}
 
-                        {% elif eft.status == "pending_review" %}
+                <p>
+                    No EFT subscription requests have been
+                    recorded yet.
+                </p>
 
-                            <span class="status-pending">
-                                {{ eft.get_status_display }}
-                            </span>
+            {% endif %}
 
-                        {% elif eft.status == "rejected" %}
-
-                            <span class="status-rejected">
-                                {{ eft.get_status_display }}
-                            </span>
-
-                        {% else %}
-
-                            <span class="status-awaiting">
-                                {{ eft.get_status_display }}
-                            </span>
-
-                        {% endif %}
+        </section>
 
 
-                        <br>
+        <section class="history-card">
 
+            <h2>
+                Paystack subscription payment history
+            </h2>
 
-                        <small>
-                            {{ eft.created_at|date:"j M Y, H:i" }}
-                        </small>
+            {% if recent_payments %}
 
+                {% for payment in recent_payments %}
 
-                        {% if eft.status == "awaiting_payment" %}
+                    <div class="payment-row">
 
-                            <br>
+                        <span>
+                            {{ payment.reference }}
+                        </span>
 
-                            <a
-                                href="{% url 'core:eft_payment' eft.reference %}"
-                            >
-                                Continue payment
-                            </a>
+                        <strong>
+                            R{{ payment.amount|floatformat:2 }}
+                        </strong>
 
-                        {% endif %}
+                        <span>
 
-                    </span>
+                            {{ payment.get_status_display }}
 
-                </div>
+                            ·
 
-            {% endfor %}
+                            {{ payment.created_at|date:"j M Y" }}
 
+                        </span>
 
-        {% else %}
+                    </div>
 
-            <p>
-                No EFT subscription requests have been
-                recorded yet.
-            </p>
+                {% endfor %}
 
-        {% endif %}
+            {% else %}
 
+                <p>
+                    No Paystack subscription payments have been
+                    recorded yet.
+                </p>
 
-    </section>
+            {% endif %}
 
+        </section>
 
-    <!-- =====================================================
-         PAYSTACK PAYMENT HISTORY
-         ===================================================== -->
-
-    <section class="history-card">
-
-        <h2>
-            Paystack subscription payment history
-        </h2>
-
-
-        {% if recent_payments %}
-
-
-            {% for payment in recent_payments %}
-
-                <div class="payment-row">
-
-                    <span>
-                        {{ payment.reference }}
-                    </span>
-
-
-                    <strong>
-                        R{{ payment.amount|floatformat:2 }}
-                    </strong>
-
-
-                    <span>
-
-                        {{ payment.get_status_display }}
-
-                        ·
-
-                        {{ payment.created_at|date:"j M Y" }}
-
-                    </span>
-
-                </div>
-
-            {% endfor %}
-
-
-        {% else %}
-
-            <p>
-                No Paystack subscription payments have been
-                recorded yet.
-            </p>
-
-        {% endif %}
-
-
-    </section>
-
+    {% endif %}
 
 </div>
-
 
 {% endblock %}

@@ -916,13 +916,22 @@ def subscription_overview(request):
         or ""
     ).strip()
 
+    early_access = settings.TRADEFLOW_EARLY_ACCESS
+
     context = {
         "business": business,
         "subscription": subscription,
         "recent_payments": recent_payments,
         "recent_eft_requests": recent_eft_requests,
-        "paystack_ready": paystack_is_ready(),
-        "eft_ready": eft_is_ready(),
+        "early_access": early_access,
+        "paystack_ready": (
+            paystack_is_ready()
+            and not early_access
+        ),
+        "eft_ready": (
+            eft_is_ready()
+            and not early_access
+        ),
         "payment_email": email,
         "pro_price": (
             settings.TRADEFLOW_PRO_PRICE_ZAR
@@ -951,6 +960,19 @@ def eft_checkout(request):
     if not business:
         return redirect(
             "core:business_setup"
+        )
+
+    if settings.TRADEFLOW_EARLY_ACCESS:
+        messages.info(
+            request,
+            (
+                "TradeFlow Early Access is active. "
+                "All product features are currently free, "
+                "so no EFT subscription payment is required."
+            ),
+        )
+        return redirect(
+            "core:subscription"
         )
 
     subscription = (
@@ -1044,6 +1066,19 @@ def eft_payment(request, reference):
         )
 
     if request.method == "POST":
+        if settings.TRADEFLOW_EARLY_ACCESS:
+            messages.info(
+                request,
+                (
+                    "TradeFlow Early Access is active. "
+                    "All product features are currently free, "
+                    "so no EFT subscription payment is required."
+                ),
+            )
+            return redirect(
+                "core:subscription"
+            )
+
         if (
             eft_request.status
             != EFTSubscriptionRequest.STATUS_AWAITING_PAYMENT
@@ -1304,6 +1339,19 @@ def subscription_checkout(request):
     if not business:
         return redirect(
             "core:business_setup"
+        )
+
+    if settings.TRADEFLOW_EARLY_ACCESS:
+        messages.info(
+            request,
+            (
+                "TradeFlow Early Access is active. "
+                "All product features are currently free, "
+                "so no subscription payment is required."
+            ),
+        )
+        return redirect(
+            "core:subscription"
         )
 
     subscription = (

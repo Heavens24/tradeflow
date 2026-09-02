@@ -623,6 +623,25 @@ SERVER_EMAIL = os.getenv(
 
 
 # =========================================================
+# TRADEFLOW EARLY ACCESS
+# =========================================================
+
+# Temporary launch policy switch.
+#
+# When True, TradeFlow product features that would normally
+# require Pro can be made available during Early Access.
+# Billing models, Paystack/EFT infrastructure, subscriptions,
+# payment history and existing Pro records remain untouched.
+#
+# Set TRADEFLOW_EARLY_ACCESS=false later to return feature
+# authorization to the normal Free / Pro rules.
+TRADEFLOW_EARLY_ACCESS = env_bool(
+    "TRADEFLOW_EARLY_ACCESS",
+    default=False,
+)
+
+
+# =========================================================
 # PAYSTACK / TRADEFLOW PRO BILLING
 # =========================================================
 

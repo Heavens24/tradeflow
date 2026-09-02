@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 from urllib.parse import quote as urlquote
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -1232,9 +1233,11 @@ def ai_document_assistant(request):
     """
     Generate review-first quote or invoice suggestions.
 
-    AI access is subscription-gated and every outbound OpenAI
-    attempt is reserved against a hard per-period allowance before
-    the external API call is made.
+    During TradeFlow Early Access, every business may use the AI
+    assistant within a hard calendar-month allowance. When Early
+    Access is disabled, the existing Pro subscription gate and
+    subscription-period allowance resume automatically. Every
+    outbound OpenAI attempt is reserved before the external API call.
     """
 
     AI_PRO_REQUEST_LIMIT = 100
@@ -1300,38 +1303,62 @@ def ai_document_assistant(request):
             business=business
         )
 
-        if not subscription.has_ai_access:
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": (
-                        "AI Assistant is available on an active TradeFlow Pro plan. "
-                        "Your current subscription does not have AI access."
-                    ),
-                    "code": "ai_subscription_required",
-                },
-                status=403,
+        if settings.TRADEFLOW_EARLY_ACCESS:
+            # Early Access gives every TradeFlow business AI access
+            # without changing its stored Free/Pro subscription state.
+            # Usage is measured per calendar month in the configured
+            # TradeFlow timezone.
+            now = timezone.localtime()
+            period_start = now.replace(
+                day=1,
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
             )
 
-        if subscription.status == BusinessSubscription.STATUS_TRIALING:
-            period_start = subscription.started_at or subscription.created_at
-            period_end = subscription.trial_ends_at
+            if period_start.month == 12:
+                period_end = period_start.replace(
+                    year=period_start.year + 1,
+                    month=1,
+                )
+            else:
+                period_end = period_start.replace(
+                    month=period_start.month + 1
+                )
         else:
-            period_start = subscription.current_period_start
-            period_end = subscription.current_period_end
+            if not subscription.has_ai_access:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": (
+                            "AI Assistant is available on an active TradeFlow Pro plan. "
+                            "Your current subscription does not have AI access."
+                        ),
+                        "code": "ai_subscription_required",
+                    },
+                    status=403,
+                )
 
-        if not period_start or not period_end:
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": (
-                        "Your subscription billing period is incomplete. "
-                        "Please contact TradeFlow support before using AI."
-                    ),
-                    "code": "ai_period_unavailable",
-                },
-                status=403,
-            )
+            if subscription.status == BusinessSubscription.STATUS_TRIALING:
+                period_start = subscription.started_at or subscription.created_at
+                period_end = subscription.trial_ends_at
+            else:
+                period_start = subscription.current_period_start
+                period_end = subscription.current_period_end
+
+            if not period_start or not period_end:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": (
+                            "Your subscription billing period is incomplete. "
+                            "Please contact TradeFlow support before using AI."
+                        ),
+                        "code": "ai_period_unavailable",
+                    },
+                    status=403,
+                )
 
         used_requests = AIUsage.objects.filter(
             business=business,
@@ -1340,12 +1367,18 @@ def ai_document_assistant(request):
         ).count()
 
         if used_requests >= AI_PRO_REQUEST_LIMIT:
+            period_label = (
+                "calendar month"
+                if settings.TRADEFLOW_EARLY_ACCESS
+                else "subscription period"
+            )
+
             return JsonResponse(
                 {
                     "success": False,
                     "error": (
                         "You have reached the AI request limit for this "
-                        "subscription period."
+                        f"{period_label}."
                     ),
                     "code": "ai_limit_reached",
                     "limit": AI_PRO_REQUEST_LIMIT,
