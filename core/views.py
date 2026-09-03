@@ -3767,13 +3767,13 @@ HELP_GUIDES = {
     "password-reset": {
         "title": "Forgot / Reset Password", "summary": "Recover access to your TradeFlow account securely.",
         "learn": ["Request a password reset", "Use the reset email", "Choose a new password"],
-        "steps": [("Open Forgot password", "From the TradeFlow sign-in screen, choose Forgot password."), ("Enter your account email", "Submit the email address associated with the account."), ("Check your email", "Open the TradeFlow reset message and follow its reset link."), ("Choose a new password", "Use a strong password that meets the requirements shown on screen."), ("Sign in again", "Return to TradeFlow and sign in using the new password.")],
+        "steps": [("Open Forgot password", "From the TradeFlow Clock In screen, choose Forgot password."), ("Enter your account email", "Submit the email address associated with the account."), ("Check your email", "Open the TradeFlow reset message and follow its reset link."), ("Choose a new password", "Use a strong password that meets the requirements shown on screen."), ("Clock in again", "Return to TradeFlow and clock in using the new password.")],
         "tip": "Never share a password-reset link or your password with another person.",
     },
     "security": {
         "title": "Account & Security", "summary": "Protect access to your business records and TradeFlow account.",
         "learn": ["Use safer passwords", "Protect account access", "Recognise sensitive business information"],
-        "steps": [("Use a unique password", "Choose a password you do not reuse on unrelated services."), ("Protect your email account", "Your email may be used for account recovery, so secure it as carefully as TradeFlow."), ("Sign out on shared devices", "Do not leave your TradeFlow session open on computers or phones other people use."), ("Keep sensitive details private", "Do not send passwords, secret keys or unnecessary banking credentials through support messages."), ("Review unexpected activity", "If account information changes unexpectedly, secure your credentials and investigate promptly.")],
+        "steps": [("Use a unique password", "Choose a password you do not reuse on unrelated services."), ("Protect your email account", "Your email may be used for account recovery, so secure it as carefully as TradeFlow."), ("Clock out on shared devices", "Do not leave your TradeFlow session open on computers or phones other people use."), ("Keep sensitive details private", "Do not send passwords, secret keys or unnecessary banking credentials through support messages."), ("Review unexpected activity", "If account information changes unexpectedly, secure your credentials and investigate promptly.")],
         "tip": "TradeFlow public profiles are designed to expose business marketing information, not private customer, invoice, payment or banking records.",
     },
     "faq": {

@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Sign Out | TradeFlow</title>
+    <title>Clock Out | TradeFlow</title>
 
     <style>
         * {
@@ -139,11 +139,11 @@
         </div>
 
         <h1>
-            Sign out?
+            Clock out?
         </h1>
 
         <p class="message">
-            Are you sure you want to sign out of TradeFlow?
+            Are you sure you want to clock out of TradeFlow?
             Your customers, quotations, jobs, invoices and
             payments will remain safely stored.
         </p>
@@ -151,7 +151,7 @@
         {% if user.is_authenticated %}
             <div class="user-box">
                 <span class="user-label">
-                    Signed in as
+                    Clocked in as
                 </span>
 
                 <span class="username">
@@ -176,7 +176,7 @@
                     type="submit"
                     class="button button-danger"
                 >
-                    Sign Out
+                    Clock Out
                 </button>
 
             </div>
