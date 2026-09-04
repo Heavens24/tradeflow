@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -15,7 +16,6 @@
     </title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -90,14 +90,89 @@
 
         h1 {
             margin: 0 0 8px;
+
             font-size: 25px;
         }
 
         .description {
-            margin: 0 0 28px;
+            margin: 0 0 16px;
 
             color: #6b7280;
+
             line-height: 1.6;
+        }
+
+        .early-access {
+            margin-bottom: 24px;
+
+            padding: 13px 14px;
+
+            border-radius: 9px;
+
+            background: #ecfdf5;
+            color: #065f46;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            line-height: 1.5;
+        }
+
+        .register-cta {
+            margin-bottom: 28px;
+
+            padding-bottom: 28px;
+
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .register-heading {
+            margin-bottom: 8px;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            color: #111827;
+        }
+
+        .register-copy {
+            margin: 0 0 14px;
+
+            color: #6b7280;
+
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .register-button {
+            display: block;
+            width: 100%;
+
+            padding: 14px 18px;
+
+            border-radius: 9px;
+
+            background: #16a34a;
+            color: white;
+
+            text-align: center;
+            text-decoration: none;
+
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .register-button:hover {
+            opacity: 0.92;
+        }
+
+        .signin-heading {
+            margin-bottom: 20px;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            color: #374151;
         }
 
         .messages {
@@ -106,6 +181,7 @@
 
         .message {
             padding: 12px 14px;
+
             margin-bottom: 10px;
 
             border-radius: 8px;
@@ -222,28 +298,6 @@
             opacity: 0.92;
         }
 
-        .register-link {
-            margin-top: 24px;
-
-            text-align: center;
-
-            color: #6b7280;
-
-            font-size: 14px;
-        }
-
-        .register-link a {
-            color: #2563eb;
-
-            text-decoration: none;
-
-            font-weight: 600;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
         .footer {
             margin-top: 22px;
 
@@ -256,7 +310,6 @@
         }
 
         @media (max-width: 600px) {
-
             .page {
                 padding: 25px 14px;
             }
@@ -264,13 +317,10 @@
             .card {
                 padding: 25px 20px;
             }
-
         }
-
     </style>
 
 </head>
-
 
 <body>
 
@@ -290,20 +340,44 @@
 
         </div>
 
-
         <div class="card">
 
             <h1>
-                Welcome to TradeFlow
+                Run your business with TradeFlow
             </h1>
 
-
             <p class="description">
-                Clock in, or sign up if you're a new user,
-                to manage your customers, quotations,
-                jobs, invoices and payments.
+                Manage customers, quotations, jobs,
+                invoices and payments from one place.
             </p>
 
+            <div class="early-access">
+                Full TradeFlow access is currently free during Early Access.
+            </div>
+
+            <div class="register-cta">
+
+                <div class="register-heading">
+                    New to TradeFlow?
+                </div>
+
+                <p class="register-copy">
+                    Create your business account and start
+                    organising your business today.
+                </p>
+
+                <a
+                    href="{% url 'core:register' %}"
+                    class="register-button"
+                >
+                    Create Free Account
+                </a>
+
+            </div>
+
+            <div class="signin-heading">
+                Already have an account? Sign in
+            </div>
 
             {% if messages %}
 
@@ -321,7 +395,6 @@
 
             {% endif %}
 
-
             {% if form.non_field_errors %}
 
                 <div class="error-box">
@@ -338,14 +411,12 @@
 
             {% endif %}
 
-
             <form
                 method="POST"
                 action="{% url 'core:login' %}"
             >
 
                 {% csrf_token %}
-
 
                 {% if next %}
 
@@ -356,7 +427,6 @@
                     >
 
                 {% endif %}
-
 
                 <div class="field">
 
@@ -388,7 +458,6 @@
 
                 </div>
 
-
                 <div class="field">
 
                     <label
@@ -417,7 +486,6 @@
 
                 </div>
 
-
                 <div class="forgot-row">
 
                     <a
@@ -429,7 +497,6 @@
 
                 </div>
 
-
                 <button
                     type="submit"
                     class="button"
@@ -439,19 +506,7 @@
 
             </form>
 
-
-            <div class="register-link">
-
-                New to TradeFlow?
-
-                <a href="{% url 'core:register' %}">
-                    Create account
-                </a>
-
-            </div>
-
         </div>
-
 
         <div class="footer">
             TradeFlow · Small business operating system
