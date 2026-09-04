@@ -967,8 +967,8 @@ def eft_checkout(request):
             request,
             (
                 "TradeFlow Early Access is active. "
-                "All product features are currently free, "
-                "so no EFT subscription payment is required."
+                "No TradeFlow Pro subscription payment is "
+                "currently required."
             ),
         )
         return redirect(
@@ -1346,8 +1346,8 @@ def subscription_checkout(request):
             request,
             (
                 "TradeFlow Early Access is active. "
-                "All product features are currently free, "
-                "so no subscription payment is required."
+                "No TradeFlow Pro subscription payment is "
+                "currently required."
             ),
         )
         return redirect(

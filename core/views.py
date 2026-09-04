@@ -348,6 +348,7 @@ def dashboard(request):
         "core:business_setup"
     )
     marketplace_requires_pro = False
+    early_access = settings.TRADEFLOW_EARLY_ACCESS
     focus_title = "Keep your business moving"
     focus_text = "TradeFlow will surface the next useful action here as your business activity grows."
     focus_url = reverse("core:customer_list")
@@ -631,6 +632,7 @@ def dashboard(request):
         "onboarding_percentage": onboarding_percentage,
         "onboarding_complete": onboarding_complete,
         "onboarding_next_url": onboarding_next_url,
+        "early_access": early_access,
         "marketplace_requires_pro": marketplace_requires_pro,
         "focus_title": focus_title,
         "focus_text": focus_text,
