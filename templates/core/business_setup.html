@@ -229,6 +229,16 @@
 
     <div class="container">
 
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+                {% for message in messages %}
+                    <div style="margin-bottom: 10px; padding: 14px 16px; border: 1px solid #86efac; border-radius: 8px; background: #f0fdf4; color: #166534;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <a
             href="{% url 'core:dashboard' %}"
             class="back-link"
