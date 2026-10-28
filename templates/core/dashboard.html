@@ -167,7 +167,6 @@
 }
 
 
-
 /* =========================================================
    GETTING STARTED
    ========================================================= */
@@ -301,9 +300,26 @@
     border-radius: 12px;
     background: #f8fbff;
 }
-.focus-panel h2 { margin: 0 0 6px; font-size: 18px; }
-.focus-panel p { margin: 0; color: #4b5563; line-height: 1.5; max-width: 720px; }
-@media (max-width: 750px) { .focus-panel .button { width: 100%; text-align: center; } }
+
+.focus-panel h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.focus-panel p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.5;
+    max-width: 720px;
+}
+
+@media (max-width: 750px) {
+    .focus-panel .button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 
 /* =========================================================
    SUBSCRIPTION
@@ -379,7 +395,6 @@
         text-align: center;
     }
 
-
     .onboarding-steps {
         grid-template-columns: 1fr;
     }
@@ -405,8 +420,15 @@
 
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><a class="page-help-link" href="{% url 'core:help_guide' slug='getting-started' %}">? Help</a></div>
 
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <a
+        class="page-help-link"
+        href="{% url 'core:help_guide' slug='getting-started' %}"
+    >
+        ? Help
+    </a>
+</div>
 
 
 <div class="topbar">
@@ -526,22 +548,28 @@
         <div class="onboarding-header">
 
             <div>
+
                 <h2 id="getting-started-title">
                     {{ greeting }}, {{ business.name }} 👋
                 </h2>
 
                 {% if onboarding_complete %}
+
                     <p>
                         Your business setup is complete. Keep using TradeFlow
                         to manage enquiries, customers, quotes, jobs, invoices
                         and payments.
                     </p>
+
                 {% else %}
+
                     <p>
                         Here's what's happening with your business today.
                         Finish these steps to get the most from TradeFlow.
                     </p>
+
                 {% endif %}
+
             </div>
 
             <div class="onboarding-progress-label">
@@ -550,6 +578,7 @@
             </div>
 
         </div>
+
 
         <div
             class="onboarding-progress"
@@ -565,9 +594,13 @@
             ></div>
         </div>
 
+
         <ul class="onboarding-steps">
+
             {% for step in onboarding_steps %}
+
                 <li class="onboarding-step{% if step.complete %} complete{% endif %}">
+
                     <span
                         class="onboarding-marker"
                         aria-hidden="true"
@@ -578,24 +611,32 @@
                     <a href="{{ step.url }}">
                         {{ step.label }}
                     </a>
+
                 </li>
+
             {% endfor %}
+
         </ul>
 
+
         {% if onboarding_complete %}
+
             <a
                 href="{% url 'core:dashboard' %}"
                 class="button secondary"
             >
                 100% Complete
             </a>
+
         {% else %}
+
             <a
                 href="{{ onboarding_next_url }}"
                 class="button"
             >
                 Continue Setup →
             </a>
+
         {% endif %}
 
     </section>
@@ -604,14 +645,37 @@
 
 
 {% if business and onboarding_complete %}
-<section class="focus-panel" aria-label="Recommended next action">
-    <div>
-        <h2>Next best action</h2>
-        <p><strong>{{ focus_title }}</strong><br>{{ focus_text }}</p>
-    </div>
-    <a class="button" href="{{ focus_url }}">{{ focus_label }} →</a>
-</section>
+
+    <section
+        class="focus-panel"
+        aria-label="Recommended next action"
+    >
+
+        <div>
+
+            <h2>
+                Next best action
+            </h2>
+
+            <p>
+                <strong>{{ focus_title }}</strong>
+                <br>
+                {{ focus_text }}
+            </p>
+
+        </div>
+
+        <a
+            class="button"
+            href="{{ focus_url }}"
+        >
+            {{ focus_label }} →
+        </a>
+
+    </section>
+
 {% endif %}
+
 
 <!-- =========================================================
      SUBSCRIPTION
